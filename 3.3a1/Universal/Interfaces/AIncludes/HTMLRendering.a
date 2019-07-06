@@ -1,0 +1,375 @@
+;
+;	File:		HTMLRendering.a
+;
+;	Contains:	HTML Rendering Library Interfaces.
+;
+;	Version:	Technology:	1.0
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__HTMLRENDERING__') = 'UNDEFINED' THEN
+__HTMLRENDERING__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+	include 'Events.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+	IF &TYPE('__CODEFRAGMENTS__') = 'UNDEFINED' THEN
+	include 'CodeFragments.a'
+	ENDIF
+
+
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal OSStatus HRGetHTMLRenderingLibVersion(NumVersion *returnVers)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGetHTMLRenderingLibVersion
+	ENDIF
+
+;
+; pascal Boolean HRHTMLRenderingLibAvailable(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRHTMLRenderingLibAvailable
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF TARGET_RT_MAC_CFM THEN
+	ENDIF	; TARGET_RT_MAC_CFM
+
+kHRRendererHTML32Type			EQU		'ht32'				; HTML 3.2 
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal OSStatus HRNewReference(HRReference *hrRef, OSType rendererType, GrafPtr grafPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRNewReference
+	ENDIF
+
+;
+; pascal OSStatus HRDisposeReference(HRReference hrRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRDisposeReference
+	ENDIF
+
+
+;
+; pascal SInt32 HRFreeMemory(Size inBytesNeeded)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRFreeMemory
+	ENDIF
+
+
+;  System level notifications 
+;
+; pascal void HRScreenConfigurationChanged(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRScreenConfigurationChanged
+	ENDIF
+
+;
+; pascal Boolean HRIsHREvent(const EventRecord *eventRecord)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRIsHREvent
+	ENDIF
+
+
+;  Drawing 
+;
+; pascal OSStatus HRSetGrafPtr(HRReference hrRef, GrafPtr grafPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRSetGrafPtr
+	ENDIF
+
+;
+; pascal OSStatus HRActivate(HRReference hrRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRActivate
+	ENDIF
+
+;
+; pascal OSStatus HRDeactivate(HRReference hrRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRDeactivate
+	ENDIF
+
+;
+; pascal OSStatus HRDraw(HRReference hrRef, RgnHandle updateRgnH)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRDraw
+	ENDIF
+
+;
+; pascal OSStatus HRSetRenderingRect(HRReference hrRef, const Rect *renderingRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRSetRenderingRect
+	ENDIF
+
+;
+; pascal OSStatus HRGetRenderedImageSize(HRReference hrRef, Point *renderingSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGetRenderedImageSize
+	ENDIF
+
+;
+; pascal OSStatus HRScrollToLocation(HRReference hrRef, Point *location)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRScrollToLocation
+	ENDIF
+
+;
+; pascal OSStatus HRForceQuickdraw(HRReference hrRef, Boolean forceQuickdraw)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRForceQuickdraw
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+
+; typedef SInt16						HRScrollbarState
+eHRScrollbarOn					EQU		0
+eHRScrollbarOff					EQU		1
+eHRScrollbarAuto				EQU		2
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal OSStatus HRSetScrollbarState(HRReference hrRef, HRScrollbarState hScrollbarState, HRScrollbarState vScrollbarState)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRSetScrollbarState
+	ENDIF
+
+;
+; pascal OSStatus HRSetDrawBorder(HRReference hrRef, Boolean drawBorder)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRSetDrawBorder
+	ENDIF
+
+;
+; pascal OSStatus HRSetGrowboxCutout(HRReference hrRef, Boolean allowCutout)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRSetGrowboxCutout
+	ENDIF
+
+;  Navigation 
+;
+; pascal OSStatus HRGoToFile(HRReference hrRef, const FSSpec *fsspec, Boolean addToHistory, Boolean forceRefresh)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGoToFile
+	ENDIF
+
+;
+; pascal OSStatus HRGoToURL(HRReference hrRef, const char *url, Boolean addToHistory, Boolean forceRefresh)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGoToURL
+	ENDIF
+
+;
+; pascal OSStatus HRGoToAnchor(HRReference hrRef, const char *anchorName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGoToAnchor
+	ENDIF
+
+;
+; pascal OSStatus HRGoToPtr(HRReference hrRef, char *buffer, UInt32 bufferSize, Boolean addToHistory, Boolean forceRefresh)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGoToPtr
+	ENDIF
+
+;  Accessors 
+;  either file url or url of <base> tag 
+;
+; pascal OSStatus HRGetRootURL(HRReference hrRef, Handle rootURLH)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGetRootURL
+	ENDIF
+
+;  url of <base> tag 
+;
+; pascal OSStatus HRGetBaseURL(HRReference hrRef, Handle baseURLH)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGetBaseURL
+	ENDIF
+
+;  file url 
+;
+; pascal OSStatus HRGetHTMLURL(HRReference hrRef, Handle HTMLURLH)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGetHTMLURL
+	ENDIF
+
+;
+; pascal OSStatus HRGetTitle(HRReference hrRef, StringPtr title)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGetTitle
+	ENDIF
+
+;
+; pascal OSStatus HRGetHTMLFile(HRReference hrRef, FSSpec *fsspec)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRGetHTMLFile
+	ENDIF
+
+
+;  Utilities 
+;
+; pascal OSStatus HRUtilCreateFullURL(const char *rootURL, const char *linkURL, Handle fullURLH)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRUtilCreateFullURL
+	ENDIF
+
+;
+; pascal OSStatus HRUtilGetFSSpecFromURL(const char *rootURL, const char *linkURL, FSSpec *destSpec)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRUtilGetFSSpecFromURL
+	ENDIF
+
+;  urlHandle should be valid on input 
+;
+; pascal OSStatus HRUtilGetURLFromFSSpec(const FSSpec *fsspec, Handle urlHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRUtilGetURLFromFSSpec
+	ENDIF
+
+; 
+;	Visited links
+;
+;	If you register a function here, it will be called to determine
+;	whether or not the given URL has been visited. It should return
+;	true if the URL has been visited.
+;	
+;	In addition to the URLs that the application may add to the list
+;	of visited links, it should also add URLs that the user clicks
+;	on. These URLs can be caught by the "add URL to history" callback
+;	below.
+; 
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal void HRRegisterWasURLVisitedUPP(HRWasURLVisitedUPP inWasURLVisitedUPP, HRReference hrRef, void *inRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRRegisterWasURLVisitedUPP
+	ENDIF
+
+;
+; pascal void HRUnregisterWasURLVisitedUPP(HRReference hrRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRUnregisterWasURLVisitedUPP
+	ENDIF
+
+
+
+; 
+;	New URL
+;
+;	If you register a function here, it will be called every time
+;	the renderer is going to display a new URL. A few examples of how
+;	you might use this include...
+;	
+;		(a) maintaining a history of URLs
+;		(b) maintainging a list of visited links
+;		(c) setting a window title based on the new URL
+;
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal void HRRegisterNewURLUPP(HRNewURLUPP inNewURLUPP, HRReference hrRef, void *inRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRRegisterNewURLUPP
+	ENDIF
+
+;
+; pascal void HRUnregisterNewURLUPP(HRReference hrRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRUnregisterNewURLUPP
+	ENDIF
+
+
+
+
+; 
+;	URL to FSSpec function
+;
+;	If you register a function here, it will be called every time
+;	the renderer is going to locate a file. The function will be
+;	passed an enum indicating the type of file being asked for.
+; 
+
+	ENDIF	; CALL_NOT_IN_CARBON
+
+; typedef UInt16						URLSourceType
+kHRLookingForHTMLSource			EQU		1
+kHRLookingForImage				EQU		2
+kHRLookingForEmbedded			EQU		3
+kHRLookingForImageMap			EQU		4
+kHRLookingForFrame				EQU		5
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal void HRRegisterURLToFSSpecUPP(HRURLToFSSpecUPP inURLToFSSpecUPP, HRReference hrRef, void *inRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRRegisterURLToFSSpecUPP
+	ENDIF
+
+;
+; pascal void HRUnregisterURLToFSSpecUPP(HRReference hrRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HRUnregisterURLToFSSpecUPP
+	ENDIF
+
+
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF ; __HTMLRENDERING__ 
+

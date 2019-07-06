@@ -1,0 +1,1174 @@
+;
+;	File:		QuickTimeVR.a
+;
+;	Contains:	QuickTime VR interfaces
+;
+;	Version:	Technology:	QuickTime VR 2.1
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1997-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__QUICKTIMEVR__') = 'UNDEFINED' THEN
+__QUICKTIMEVR__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+	IF &TYPE('__DIALOGS__') = 'UNDEFINED' THEN
+	include 'Dialogs.a'
+	ENDIF
+	IF &TYPE('__MOVIES__') = 'UNDEFINED' THEN
+	include 'Movies.a'
+	ENDIF
+
+; ******************************************************************************
+; *                                                                           **
+; * ABOUT QTVR_OLD_CALLS:                                                     **
+; *                                                                           **
+; * NOTE: Define QTVR_OLD_CALLS to 1 for your application makefile/project    **
+; *       only if you are sure that you need to use the older calls for       **
+; *       compatibility with VR 2.0 and 2.0.1 on the Macintosh                ** 
+; *                                                                           **
+; ****************************************************************************
+
+	IF ¬ (&TYPE('QTVR_OLD_CALLS') <> 'UNDEFINED') THEN
+	QTVR_OLD_CALLS: SET 0
+	ENDIF
+
+
+
+
+kQTVRControllerSubType			EQU		'ctyp'
+kQTVRQTVRType					EQU		'qtvr'
+kQTVRPanoramaType				EQU		'pano'
+kQTVRObjectType					EQU		'obje'
+kQTVROldPanoType				EQU		'STpn'				; Used in QTVR 1.0 release
+kQTVROldObjectType				EQU		'stna'				; Used in QTVR 1.0 release
+	IF TARGET_OS_MAC THEN
+	ELSE
+	ENDIF	; TARGET_OS_MAC
+;  QTVR hot spot types
+
+kQTVRHotSpotLinkType			EQU		'link'
+kQTVRHotSpotURLType				EQU		'url '
+kQTVRHotSpotUndefinedType		EQU		'undf'
+;  Special Values for nodeID in QTVRGoToNodeID
+
+kQTVRCurrentNode				EQU		0
+kQTVRPreviousNode				EQU		$80000000
+kQTVRDefaultNode				EQU		$80000001
+;  Panorama correction modes used for the kQTVRImagingCorrection imaging property
+
+kQTVRNoCorrection				EQU		0
+kQTVRPartialCorrection			EQU		1
+kQTVRFullCorrection				EQU		2
+;  Imaging Modes used by QTVRSetImagingProperty, QTVRGetImagingProperty, QTVRUpdate, QTVRBeginUpdate
+
+kQTVRStatic						EQU		1
+kQTVRMotion						EQU		2
+kQTVRCurrentMode				EQU		0					; Special Value for QTVRUpdate
+kQTVRAllModes					EQU		100					; Special value for QTVRSetProperty
+; typedef UInt32 						QTVRImagingMode
+
+;  Imaging Properties used by QTVRSetImagingProperty, QTVRGetImagingProperty
+
+kQTVRImagingCorrection			EQU		1
+kQTVRImagingQuality				EQU		2
+kQTVRImagingDirectDraw			EQU		3
+kQTVRImagingCurrentMode			EQU		100					; Get Only
+;  OR the above with kImagingDefaultValue to get/set the default value
+
+kImagingDefaultValue			EQU		$80000000
+;  Transition Types used by QTVRSetTransitionProperty, QTVREnableTransition
+
+kQTVRTransitionSwing			EQU		1
+;  Transition Properties QTVRSetTransitionProperty
+
+kQTVRTransitionSpeed			EQU		1
+kQTVRTransitionDirection		EQU		2
+;  Constraint values used to construct value returned by GetConstraintStatus
+
+kQTVRUnconstrained				EQU		0
+kQTVRCantPanLeft				EQU		$00000001
+kQTVRCantPanRight				EQU		$00000002
+kQTVRCantPanUp					EQU		$00000004
+kQTVRCantPanDown				EQU		$00000008
+kQTVRCantZoomIn					EQU		$00000010
+kQTVRCantZoomOut				EQU		$00000020
+kQTVRCantTranslateLeft			EQU		$00000040
+kQTVRCantTranslateRight			EQU		$00000080
+kQTVRCantTranslateUp			EQU		$00000100
+kQTVRCantTranslateDown			EQU		$00000200
+;  Object-only mouse mode values used to construct value returned by QTVRGetCurrentMouseMode
+
+kQTVRPanning					EQU		$00000001			; standard objects, "object only" controllers
+kQTVRTranslating				EQU		$00000002			; all objects
+kQTVRZooming					EQU		$00000004			; all objects
+kQTVRScrolling					EQU		$00000008			; standard object arrow scrollers and joystick object
+kQTVRSelecting					EQU		$00000010			; object absolute controller
+;  Properties for use with QTVRSetInteractionProperty/GetInteractionProperty
+
+kQTVRInteractionMouseClickHysteresis EQU 1					; pixels within which the mouse is considered not to have moved (UInt16)
+kQTVRInteractionMouseClickTimeout EQU	2					; ticks after which a mouse click times out and turns into panning (UInt32)
+kQTVRInteractionPanTiltSpeed	EQU		3					; control the relative pan/tilt speed from 1 (slowest) to 10 (fastest). (UInt32) Default is 5;
+kQTVRInteractionZoomSpeed		EQU		4					; control the relative zooming speed from 1 (slowest) to 10 (fastest). (UInt32) Default is 5;
+kQTVRInteractionTranslateOnMouseDown EQU 101				; Holding MouseDown with this setting translates zoomed object movies (Boolean)
+kQTVRInteractionMouseMotionScale EQU	102					; The maximum angle of rotation caused by dragging across the display window. (* float)
+kQTVRInteractionNudgeMode		EQU		103					; A QTVRNudgeMode: rotate, translate, or the same as the current mouse mode. Requires QTVR 2.1
+;  OR the above with kQTVRInteractionDefaultValue to get/set the default value
+
+kQTVRInteractionDefaultValue	EQU		$80000000
+
+;  Geometry constants used in QTVRSetBackBufferPrefs, QTVRGetBackBufferSettings, QTVRGetBackBufferMemInfo
+
+kQTVRUseMovieGeometry			EQU		0
+kQTVRVerticalCylinder			EQU		'vcyl'
+;  Resolution constants used in QTVRSetBackBufferPrefs, QTVRGetBackBufferSettings, QTVRGetBackBufferMemInfo
+
+kQTVRDefaultRes					EQU		0
+kQTVRFullRes					EQU		$00000001
+kQTVRHalfRes					EQU		$00000002
+kQTVRQuarterRes					EQU		$00000004
+;  QTVR-specific pixelFormat constants used in QTVRSetBackBufferPrefs, QTVRGetBackBufferSettings, QTVRGetBackBufferMemInfo
+
+kQTVRUseMovieDepth				EQU		0
+;  Cache Size Pref constants used in QTVRSetBackBufferPrefs, QTVRGetBackBufferSettings
+
+kQTVRMinimumCache				EQU		-1
+kQTVRSuggestedCache				EQU		0
+kQTVRFullCache					EQU		1
+;  Angular units used by QTVRSetAngularUnits
+
+kQTVRDegrees					EQU		0
+kQTVRRadians					EQU		1
+; typedef UInt32 						QTVRAngularUnits
+
+;  Values for enableFlag parameter in QTVREnableHotSpot
+
+kQTVRHotSpotID					EQU		0
+kQTVRHotSpotType				EQU		1
+kQTVRAllHotSpots				EQU		2
+;  Values for kind parameter in QTVRGet/SetConstraints, QTVRGetViewingLimits
+
+kQTVRPan						EQU		0
+kQTVRTilt						EQU		1
+kQTVRFieldOfView				EQU		2
+kQTVRViewCenterH				EQU		4					; WrapAndConstrain only
+kQTVRViewCenterV				EQU		5					; WrapAndConstrain only
+;  Values for setting parameter in QTVRSetAnimationSetting, QTVRGetAnimationSetting
+
+															; View Frame Animation Settings
+kQTVRPalindromeViewFrames		EQU		1
+kQTVRStartFirstViewFrame		EQU		2
+kQTVRDontLoopViewFrames			EQU		3
+kQTVRPlayEveryViewFrame			EQU		4					; Requires QTVR 2.1 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion10)
+															; View Animation Settings
+kQTVRSyncViewToFrameRate		EQU		16
+kQTVRPalindromeViews			EQU		17
+kQTVRPlayStreamingViews			EQU		18					; Requires QTVR 2.1 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion10)
+; typedef UInt32 						QTVRObjectAnimationSetting
+
+
+kQTVRWrapPan					EQU		1
+kQTVRWrapTilt					EQU		2
+kQTVRCanZoom					EQU		3
+kQTVRReverseHControl			EQU		4
+kQTVRReverseVControl			EQU		5
+kQTVRSwapHVControl				EQU		6
+kQTVRTranslation				EQU		7
+; typedef UInt32 						QTVRControlSetting
+
+
+kQTVRDefault					EQU		0
+kQTVRCurrent					EQU		2
+kQTVRMouseDown					EQU		3
+; typedef UInt32 						QTVRViewStateType
+
+
+kQTVRRight						EQU		0
+kQTVRUpRight					EQU		45
+kQTVRUp							EQU		90
+kQTVRUpLeft						EQU		135
+kQTVRLeft						EQU		180
+kQTVRDownLeft					EQU		225
+kQTVRDown						EQU		270
+kQTVRDownRight					EQU		315
+; typedef UInt32 						QTVRNudgeControl
+
+
+kQTVRNudgeRotate				EQU		0
+kQTVRNudgeTranslate				EQU		1
+kQTVRNudgeSameAsMouse			EQU		2
+; typedef UInt32 						QTVRNudgeMode
+
+;  Flags to control elements of the QTVR control bar (set via mcActionSetFlags) 
+
+mcFlagQTVRSuppressBackBtn		EQU		$00010000
+mcFlagQTVRSuppressZoomBtns		EQU		$00020000
+mcFlagQTVRSuppressHotSpotBtn	EQU		$00040000
+mcFlagQTVRSuppressTranslateBtn	EQU		$00080000
+mcFlagQTVRSuppressHelpText		EQU		$00100000
+mcFlagQTVRSuppressHotSpotNames	EQU		$00200000
+mcFlagQTVRExplicitFlagSet		EQU		$80000000			; bits 0->30 should be interpreted as "explicit on" for the corresponding suppression bits
+;  Cursor types used in type field of QTVRCursorRecord
+
+kQTVRUseDefaultCursor			EQU		0
+kQTVRStdCursorType				EQU		1
+kQTVRColorCursorType			EQU		2
+;  Values for flags parameter in QTVRMouseOverHotSpot callback
+
+kQTVRHotSpotEnter				EQU		0
+kQTVRHotSpotWithin				EQU		1
+kQTVRHotSpotLeave				EQU		2
+;  Values for flags parameter in QTVRSetPrescreenImagingCompleteProc
+
+kQTVRPreScreenEveryIdle			EQU		$00000001			; Requires QTVR 2.1 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion10)
+;  Values for flags field of areasOfInterest in QTVRSetBackBufferImagingProc
+
+kQTVRBackBufferEveryUpdate		EQU		$00000001
+kQTVRBackBufferEveryIdle		EQU		$00000002
+kQTVRBackBufferAlwaysRefresh	EQU		$00000004
+;  Values for flagsIn parameter in QTVRBackBufferImaging callback
+
+kQTVRBackBufferRectVisible		EQU		$00000001
+kQTVRBackBufferWasRefreshed		EQU		$00000002
+;  Values for flagsOut parameter in QTVRBackBufferImaging callback
+
+kQTVRBackBufferFlagDidDraw		EQU		$00000001
+kQTVRBackBufferFlagLastFlag		EQU		$80000000
+;  QTVRCursorRecord used in QTVRReplaceCursor
+QTVRCursorRecord		RECORD 0
+theType					 ds.w	1				; offset: $0 (0)		;  field was previously named "type"
+rsrcID					 ds.w	1				; offset: $2 (2)
+handle					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+QTVRFloatPoint			RECORD 0
+x						 ds		Float32			; offset: $0 (0)
+y						 ds		Float32			; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+;  Struct used for areasOfInterest parameter in QTVRSetBackBufferImagingProc
+QTVRAreaOfInterest		RECORD 0
+panAngle				 ds		Float32			; offset: $0 (0)
+tiltAngle				 ds		Float32			; offset: $4 (4)
+width					 ds		Float32			; offset: $8 (8)
+height					 ds		Float32			; offset: $C (12)
+flags					 ds.l	1				; offset: $10 (16)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+
+;  =================================================================================================
+;   Callback routines 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+
+;  =================================================================================================
+;    QTVR Intercept Struct, Callback, Routine Descriptors 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+
+kQTVRSetPanAngleSelector		EQU		$2000
+kQTVRSetTiltAngleSelector		EQU		$2001
+kQTVRSetFieldOfViewSelector		EQU		$2002
+kQTVRSetViewCenterSelector		EQU		$2003
+kQTVRMouseEnterSelector			EQU		$2004
+kQTVRMouseWithinSelector		EQU		$2005
+kQTVRMouseLeaveSelector			EQU		$2006
+kQTVRMouseDownSelector			EQU		$2007
+kQTVRMouseStillDownSelector		EQU		$2008
+kQTVRMouseUpSelector			EQU		$2009
+kQTVRTriggerHotSpotSelector		EQU		$200A
+kQTVRGetHotSpotTypeSelector		EQU		$200B				; Requires QTVR 2.1 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion10)
+; typedef UInt32 						QTVRProcSelector
+
+QTVRInterceptRecord		RECORD 0
+reserved1				 ds.l	1				; offset: $0 (0)
+selector				 ds.l	1				; offset: $4 (4)
+reserved2				 ds.l	1				; offset: $8 (8)
+reserved3				 ds.l	1				; offset: $C (12)
+paramCount				 ds.l	1				; offset: $10 (16)
+parameter				 ds.l	6				; offset: $14 (20)
+sizeof					 EQU *					; size:   $2C (44)
+						ENDR
+; typedef struct QTVRInterceptRecord *	QTVRInterceptPtr
+
+;  Prototype for Intercept Proc callback
+
+;  =================================================================================================
+;    Initialization QTVR calls 
+;  -------------------------------------------------------------------------------------------------
+;   Requires QTVR 2.1 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion10) and only work on Non-Macintosh platforms
+
+
+	IF ¬ TARGET_OS_MAC THEN
+;
+; extern OSErr InitializeQTVR(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitializeQTVR
+	ENDIF
+
+;
+; extern OSErr TerminateQTVR(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TerminateQTVR
+	ENDIF
+
+	ENDIF
+
+;  =================================================================================================
+;    General QTVR calls 
+;  -------------------------------------------------------------------------------------------------
+
+
+;
+; extern Track QTVRGetQTVRTrack(Movie theMovie, SInt32 index)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetQTVRTrack
+	ENDIF
+
+;
+; extern OSErr QTVRGetQTVRInstance(QTVRInstance *qtvr, Track qtvrTrack, MovieController mc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetQTVRInstance
+	ENDIF
+
+
+;  =================================================================================================
+;    Viewing Angles and Zooming 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRSetPanAngle(QTVRInstance qtvr, float panAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetPanAngle
+	ENDIF
+
+;
+; extern float QTVRGetPanAngle(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetPanAngle
+	ENDIF
+
+;
+; extern OSErr QTVRSetTiltAngle(QTVRInstance qtvr, float tiltAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetTiltAngle
+	ENDIF
+
+;
+; extern float QTVRGetTiltAngle(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetTiltAngle
+	ENDIF
+
+;
+; extern OSErr QTVRSetFieldOfView(QTVRInstance qtvr, float fieldOfView)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetFieldOfView
+	ENDIF
+
+;
+; extern float QTVRGetFieldOfView(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetFieldOfView
+	ENDIF
+
+;
+; extern OSErr QTVRShowDefaultView(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRShowDefaultView
+	ENDIF
+
+;  Object Specific
+;
+; extern OSErr QTVRSetViewCenter(QTVRInstance qtvr, const QTVRFloatPoint *viewCenter)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetViewCenter
+	ENDIF
+
+;
+; extern OSErr QTVRGetViewCenter(QTVRInstance qtvr, QTVRFloatPoint *viewCenter)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetViewCenter
+	ENDIF
+
+;
+; extern OSErr QTVRNudge(QTVRInstance qtvr, QTVRNudgeControl direction)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRNudge
+	ENDIF
+
+;  QTVRInteractionNudge requires QTVR 2.1 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion10)
+;
+; extern OSErr QTVRInteractionNudge(QTVRInstance qtvr, QTVRNudgeControl direction)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRInteractionNudge
+	ENDIF
+
+
+;  =================================================================================================
+;    Scene and Node Location Information 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRGetVRWorld(QTVRInstance qtvr, QTAtomContainer *VRWorld)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetVRWorld
+	ENDIF
+
+;
+; extern OSErr QTVRGetNodeInfo(QTVRInstance qtvr, UInt32 nodeID, QTAtomContainer *nodeInfo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetNodeInfo
+	ENDIF
+
+;
+; extern OSErr QTVRGoToNodeID(QTVRInstance qtvr, UInt32 nodeID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGoToNodeID
+	ENDIF
+
+;
+; extern UInt32 QTVRGetCurrentNodeID(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetCurrentNodeID
+	ENDIF
+
+;
+; extern OSType QTVRGetNodeType(QTVRInstance qtvr, UInt32 nodeID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetNodeType
+	ENDIF
+
+
+;  =================================================================================================
+;    Hot Spot related calls 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRPtToHotSpotID(QTVRInstance qtvr, Point pt, UInt32 *hotSpotID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRPtToHotSpotID
+	ENDIF
+
+;  QTVRGetHotSpotType requires QTVR 2.1 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion10)
+;
+; extern OSErr QTVRGetHotSpotType(QTVRInstance qtvr, UInt32 hotSpotID, OSType *hotSpotType)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetHotSpotType
+	ENDIF
+
+;
+; extern OSErr QTVRTriggerHotSpot(QTVRInstance qtvr, UInt32 hotSpotID, QTAtomContainer nodeInfo, QTAtom selectedAtom)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRTriggerHotSpot
+	ENDIF
+
+;
+; extern OSErr QTVRSetMouseOverHotSpotProc(QTVRInstance qtvr, QTVRMouseOverHotSpotUPP mouseOverHotSpotProc, SInt32 refCon, UInt32 flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetMouseOverHotSpotProc
+	ENDIF
+
+;
+; extern OSErr QTVREnableHotSpot(QTVRInstance qtvr, UInt32 enableFlag, UInt32 hotSpotValue, Boolean enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVREnableHotSpot
+	ENDIF
+
+;
+; extern UInt32 QTVRGetVisibleHotSpots(QTVRInstance qtvr, Handle hotSpots)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetVisibleHotSpots
+	ENDIF
+
+;
+; extern OSErr QTVRGetHotSpotRegion(QTVRInstance qtvr, UInt32 hotSpotID, RgnHandle hotSpotRegion)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetHotSpotRegion
+	ENDIF
+
+
+;  =================================================================================================
+;    Event & Cursor Handling Calls 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRSetMouseOverTracking(QTVRInstance qtvr, Boolean enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetMouseOverTracking
+	ENDIF
+
+;
+; extern Boolean QTVRGetMouseOverTracking(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetMouseOverTracking
+	ENDIF
+
+;
+; extern OSErr QTVRSetMouseDownTracking(QTVRInstance qtvr, Boolean enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetMouseDownTracking
+	ENDIF
+
+;
+; extern Boolean QTVRGetMouseDownTracking(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetMouseDownTracking
+	ENDIF
+
+;
+; extern OSErr QTVRMouseEnter(QTVRInstance qtvr, Point pt, UInt32 *hotSpotID, WindowPtr w)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRMouseEnter
+	ENDIF
+
+;
+; extern OSErr QTVRMouseWithin(QTVRInstance qtvr, Point pt, UInt32 *hotSpotID, WindowPtr w)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRMouseWithin
+	ENDIF
+
+;
+; extern OSErr QTVRMouseLeave(QTVRInstance qtvr, Point pt, WindowPtr w)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRMouseLeave
+	ENDIF
+
+;
+; extern OSErr QTVRMouseDown(QTVRInstance qtvr, Point pt, UInt32 when, UInt16 modifiers, UInt32 *hotSpotID, WindowPtr w)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRMouseDown
+	ENDIF
+
+;
+; extern OSErr QTVRMouseStillDown(QTVRInstance qtvr, Point pt, UInt32 *hotSpotID, WindowPtr w)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRMouseStillDown
+	ENDIF
+
+;
+; extern OSErr QTVRMouseUp(QTVRInstance qtvr, Point pt, UInt32 *hotSpotID, WindowPtr w)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRMouseUp
+	ENDIF
+
+;  These require QTVR 2.01 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion01)
+;
+; extern OSErr QTVRMouseStillDownExtended(QTVRInstance qtvr, Point pt, UInt32 *hotSpotID, WindowPtr w, UInt32 when, UInt16 modifiers)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRMouseStillDownExtended
+	ENDIF
+
+;
+; extern OSErr QTVRMouseUpExtended(QTVRInstance qtvr, Point pt, UInt32 *hotSpotID, WindowPtr w, UInt32 when, UInt16 modifiers)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRMouseUpExtended
+	ENDIF
+
+
+;  =================================================================================================
+;    Intercept Routines 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRInstallInterceptProc(QTVRInstance qtvr, QTVRProcSelector selector, QTVRInterceptUPP interceptProc, SInt32 refCon, UInt32 flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRInstallInterceptProc
+	ENDIF
+
+;
+; extern OSErr QTVRCallInterceptedProc(QTVRInstance qtvr, QTVRInterceptRecord *qtvrMsg)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRCallInterceptedProc
+	ENDIF
+
+
+;  =================================================================================================
+;    Object Movie Specific Calls 
+;  -------------------------------------------------------------------------------------------------
+;   QTVRGetCurrentMouseMode requires QTRVR 2.1 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion10)
+
+
+;
+; extern UInt32 QTVRGetCurrentMouseMode(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetCurrentMouseMode
+	ENDIF
+
+;
+; extern OSErr QTVRSetFrameRate(QTVRInstance qtvr, float rate)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetFrameRate
+	ENDIF
+
+;
+; extern float QTVRGetFrameRate(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetFrameRate
+	ENDIF
+
+;
+; extern OSErr QTVRSetViewRate(QTVRInstance qtvr, float rate)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetViewRate
+	ENDIF
+
+;
+; extern float QTVRGetViewRate(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetViewRate
+	ENDIF
+
+;
+; extern OSErr QTVRSetViewCurrentTime(QTVRInstance qtvr, TimeValue time)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetViewCurrentTime
+	ENDIF
+
+;
+; extern TimeValue QTVRGetViewCurrentTime(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetViewCurrentTime
+	ENDIF
+
+;
+; extern TimeValue QTVRGetCurrentViewDuration(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetCurrentViewDuration
+	ENDIF
+
+
+;  =================================================================================================
+;   View State Calls - QTVR Object Only
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRSetViewState(QTVRInstance qtvr, QTVRViewStateType viewStateType, UInt16 state)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetViewState
+	ENDIF
+
+;
+; extern OSErr QTVRGetViewState(QTVRInstance qtvr, QTVRViewStateType viewStateType, UInt16 *state)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetViewState
+	ENDIF
+
+;
+; extern UInt16 QTVRGetViewStateCount(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetViewStateCount
+	ENDIF
+
+;
+; extern OSErr QTVRSetAnimationSetting(QTVRInstance qtvr, QTVRObjectAnimationSetting setting, Boolean enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetAnimationSetting
+	ENDIF
+
+;
+; extern OSErr QTVRGetAnimationSetting(QTVRInstance qtvr, QTVRObjectAnimationSetting setting, Boolean *enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetAnimationSetting
+	ENDIF
+
+;
+; extern OSErr QTVRSetControlSetting(QTVRInstance qtvr, QTVRControlSetting setting, Boolean enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetControlSetting
+	ENDIF
+
+;
+; extern OSErr QTVRGetControlSetting(QTVRInstance qtvr, QTVRControlSetting setting, Boolean *enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetControlSetting
+	ENDIF
+
+;
+; extern OSErr QTVREnableFrameAnimation(QTVRInstance qtvr, Boolean enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVREnableFrameAnimation
+	ENDIF
+
+;
+; extern Boolean QTVRGetFrameAnimation(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetFrameAnimation
+	ENDIF
+
+;
+; extern OSErr QTVREnableViewAnimation(QTVRInstance qtvr, Boolean enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVREnableViewAnimation
+	ENDIF
+
+;
+; extern Boolean QTVRGetViewAnimation(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetViewAnimation
+	ENDIF
+
+
+
+;  =================================================================================================
+;    Imaging Characteristics 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRSetVisible(QTVRInstance qtvr, Boolean visible)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetVisible
+	ENDIF
+
+;
+; extern Boolean QTVRGetVisible(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetVisible
+	ENDIF
+
+;
+; extern OSErr QTVRSetImagingProperty(QTVRInstance qtvr, QTVRImagingMode imagingMode, UInt32 imagingProperty, SInt32 propertyValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetImagingProperty
+	ENDIF
+
+;
+; extern OSErr QTVRGetImagingProperty(QTVRInstance qtvr, QTVRImagingMode imagingMode, UInt32 imagingProperty, SInt32 *propertyValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetImagingProperty
+	ENDIF
+
+;
+; extern OSErr QTVRUpdate(QTVRInstance qtvr, QTVRImagingMode imagingMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRUpdate
+	ENDIF
+
+;
+; extern OSErr QTVRBeginUpdateStream(QTVRInstance qtvr, QTVRImagingMode imagingMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRBeginUpdateStream
+	ENDIF
+
+;
+; extern OSErr QTVREndUpdateStream(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVREndUpdateStream
+	ENDIF
+
+;
+; extern OSErr QTVRSetTransitionProperty(QTVRInstance qtvr, UInt32 transitionType, UInt32 transitionProperty, SInt32 transitionValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetTransitionProperty
+	ENDIF
+
+;
+; extern OSErr QTVREnableTransition(QTVRInstance qtvr, UInt32 transitionType, Boolean enable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVREnableTransition
+	ENDIF
+
+
+;  =================================================================================================
+;    Basic Conversion and Math Routines 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRSetAngularUnits(QTVRInstance qtvr, QTVRAngularUnits units)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetAngularUnits
+	ENDIF
+
+;
+; extern QTVRAngularUnits QTVRGetAngularUnits(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetAngularUnits
+	ENDIF
+
+;  Pano specific routines
+;
+; extern OSErr QTVRPtToAngles(QTVRInstance qtvr, Point pt, float *panAngle, float *tiltAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRPtToAngles
+	ENDIF
+
+;
+; extern OSErr QTVRCoordToAngles(QTVRInstance qtvr, QTVRFloatPoint *coord, float *panAngle, float *tiltAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRCoordToAngles
+	ENDIF
+
+;
+; extern OSErr QTVRAnglesToCoord(QTVRInstance qtvr, float panAngle, float tiltAngle, QTVRFloatPoint *coord)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRAnglesToCoord
+	ENDIF
+
+;  Object specific routines
+;
+; extern short QTVRPanToColumn(QTVRInstance qtvr, float panAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRPanToColumn
+	ENDIF
+
+;  zero based	
+;
+; extern float QTVRColumnToPan(QTVRInstance qtvr, short column)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRColumnToPan
+	ENDIF
+
+;  zero based	
+;
+; extern short QTVRTiltToRow(QTVRInstance qtvr, float tiltAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRTiltToRow
+	ENDIF
+
+;  zero based	
+;
+; extern float QTVRRowToTilt(QTVRInstance qtvr, short row)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRRowToTilt
+	ENDIF
+
+;  zero based				
+;
+; extern OSErr QTVRWrapAndConstrain(QTVRInstance qtvr, short kind, float value, float *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRWrapAndConstrain
+	ENDIF
+
+
+
+;  =================================================================================================
+;    Interaction Routines 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRSetEnteringNodeProc(QTVRInstance qtvr, QTVREnteringNodeUPP enteringNodeProc, SInt32 refCon, UInt32 flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetEnteringNodeProc
+	ENDIF
+
+;
+; extern OSErr QTVRSetLeavingNodeProc(QTVRInstance qtvr, QTVRLeavingNodeUPP leavingNodeProc, SInt32 refCon, UInt32 flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetLeavingNodeProc
+	ENDIF
+
+;
+; extern OSErr QTVRSetInteractionProperty(QTVRInstance qtvr, UInt32 property, void *value)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetInteractionProperty
+	ENDIF
+
+;
+; extern OSErr QTVRGetInteractionProperty(QTVRInstance qtvr, UInt32 property, void *value)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetInteractionProperty
+	ENDIF
+
+;
+; extern OSErr QTVRReplaceCursor(QTVRInstance qtvr, QTVRCursorRecord *cursRecord)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRReplaceCursor
+	ENDIF
+
+
+;  =================================================================================================
+;    Viewing Limits and Constraints 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRGetViewingLimits(QTVRInstance qtvr, UInt16 kind, float *minValue, float *maxValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetViewingLimits
+	ENDIF
+
+;
+; extern UInt32 QTVRGetConstraintStatus(QTVRInstance qtvr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetConstraintStatus
+	ENDIF
+
+;
+; extern OSErr QTVRGetConstraints(QTVRInstance qtvr, UInt16 kind, float *minValue, float *maxValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetConstraints
+	ENDIF
+
+;
+; extern OSErr QTVRSetConstraints(QTVRInstance qtvr, UInt16 kind, float minValue, float maxValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetConstraints
+	ENDIF
+
+
+
+;  =================================================================================================
+;    Back Buffer Memory Management 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRGetAvailableResolutions(QTVRInstance qtvr, UInt16 *resolutionsMask)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetAvailableResolutions
+	ENDIF
+
+;  These require QTVR 2.1 (kQTVRAPIMajorVersion02 + kQTVRAPIMinorVersion10)
+;
+; extern OSErr QTVRGetBackBufferMemInfo(QTVRInstance qtvr, UInt32 geometry, UInt16 resolution, UInt32 cachePixelFormat, SInt32 *minCacheBytes, SInt32 *suggestedCacheBytes, SInt32 *fullCacheBytes)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetBackBufferMemInfo
+	ENDIF
+
+;
+; extern OSErr QTVRGetBackBufferSettings(QTVRInstance qtvr, UInt32 *geometry, UInt16 *resolution, UInt32 *cachePixelFormat, SInt16 *cacheSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetBackBufferSettings
+	ENDIF
+
+;
+; extern OSErr QTVRSetBackBufferPrefs(QTVRInstance qtvr, UInt32 geometry, UInt16 resolution, UInt32 cachePixelFormat, SInt16 cacheSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetBackBufferPrefs
+	ENDIF
+
+	IF QTVR_OLD_CALLS THEN
+	IF TARGET_OS_MAC THEN
+
+;   These ≈Cache≈ calls have been replaced with the ≈BackBuffer≈ versions above.
+;   However, the ≈BackBuffer≈ calls require QuickTime VR 2.1 to work;
+;    these calls will work with QuickTime VR 2.0 and 2.0.1, but only on a Macintosh.
+
+
+;
+; extern OSErr QTVRGetCacheMemInfo(QTVRInstance qtvr, UInt16 resolution, SInt16 cacheDepth, SInt32 *minCacheBytes, SInt32 *suggestedCacheBytes, SInt32 *fullCacheBytes)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetCacheMemInfo
+	ENDIF
+
+;
+; extern OSErr QTVRGetCacheSettings(QTVRInstance qtvr, UInt16 *resolution, SInt16 *cacheDepth, SInt16 *cacheSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRGetCacheSettings
+	ENDIF
+
+;
+; extern OSErr QTVRSetCachePrefs(QTVRInstance qtvr, UInt16 resolution, SInt16 cacheDepth, SInt16 cacheSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetCachePrefs
+	ENDIF
+
+	ENDIF	; TARGET_OS_MAC
+	ENDIF	; QTVR_OLD_CALLS
+
+;  =================================================================================================
+;    Buffer Access 
+;  -------------------------------------------------------------------------------------------------
+
+
+
+;
+; extern OSErr QTVRSetPrescreenImagingCompleteProc(QTVRInstance qtvr, QTVRImagingCompleteUPP imagingCompleteProc, SInt32 refCon, UInt32 flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetPrescreenImagingCompleteProc
+	ENDIF
+
+;
+; extern OSErr QTVRSetBackBufferImagingProc(QTVRInstance qtvr, QTVRBackBufferImagingUPP backBufferImagingProc, UInt16 numAreas, QTVRAreaOfInterest areasOfInterest[2147483647], SInt32 refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRSetBackBufferImagingProc
+	ENDIF
+
+;
+; extern OSErr QTVRRefreshBackBuffer(QTVRInstance qtvr, UInt32 flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTVRRefreshBackBuffer
+	ENDIF
+
+
+
+
+;  =================================================================================================
+;    Old Names
+;  -------------------------------------------------------------------------------------------------
+
+
+	IF OLDROUTINENAMES THEN
+CursorRecord			RECORD 0
+f						 ds		QTVRCursorRecord
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+
+AreaOfInterest			RECORD 0
+f						 ds		QTVRAreaOfInterest
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+
+
+FloatPoint				RECORD 0
+f						 ds		QTVRFloatPoint
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+
+; typedef QTVRLeavingNodeProcPtr 		LeavingNodeProcPtr
+
+; typedef QTVRLeavingNodeUPP 			LeavingNodeUPP
+
+; typedef QTVREnteringNodeProcPtr 		EnteringNodeProcPtr
+
+; typedef QTVREnteringNodeUPP 			EnteringNodeUPP
+
+; typedef QTVRMouseOverHotSpotProcPtr 	MouseOverHotSpotProcPtr
+
+; typedef QTVRMouseOverHotSpotUPP 		MouseOverHotSpotUPP
+
+; typedef QTVRImagingCompleteProcPtr 	ImagingCompleteProcPtr
+
+; typedef QTVRImagingCompleteUPP 		ImagingCompleteUPP
+
+; typedef QTVRBackBufferImagingProcPtr 	BackBufferImagingProcPtr
+
+; typedef QTVRBackBufferImagingUPP 		BackBufferImagingUPP
+
+	ENDIF	; OLDROUTINENAMES
+
+	ENDIF ; __QUICKTIMEVR__ 
+

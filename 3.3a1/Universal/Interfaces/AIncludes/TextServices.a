@@ -1,0 +1,648 @@
+;
+;	File:		TextServices.a
+;
+;	Contains:	Text Services Manager Interfaces.
+;
+;	Version:	Technology:	System 8.2
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1991-1999 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__TEXTSERVICES__') = 'UNDEFINED' THEN
+__TEXTSERVICES__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+	include 'Events.a'
+	ENDIF
+	IF &TYPE('__MENUS__') = 'UNDEFINED' THEN
+	include 'Menus.a'
+	ENDIF
+	IF &TYPE('__AEDATAMODEL__') = 'UNDEFINED' THEN
+	include 'AEDataModel.a'
+	ENDIF
+	IF &TYPE('__AEREGISTRY__') = 'UNDEFINED' THEN
+	include 'AERegistry.a'
+	ENDIF
+	IF &TYPE('__COMPONENTS__') = 'UNDEFINED' THEN
+	include 'Components.a'
+	ENDIF
+
+
+kTextService					EQU		'tsvc'				; component type for the component description 
+kInputMethodService				EQU		'inpm'				; component subtype for the component description 
+kTSMVersion						EQU		$0150				; Version of the Text Services Manager is 1.5 
+
+kUnicodeDocument				EQU		'udoc'				; TSM Document type for Unicode-savvy application 
+kUnicodeTextService				EQU		'utsv'				; Component type for Unicode Text Service 
+;  Language and Script constants
+
+kUnknownLanguage				EQU		$FFFF
+kUnknownScript					EQU		$FFFF
+kNeutralScript					EQU		$FFFF
+
+
+															; Component Flags in ComponentDescription 
+bTakeActiveEvent				EQU		15					; bit set if the component takes active event 
+bHandleAERecording				EQU		16					; bit set if the component takes care of recording Apple Events <new in vers2.0> 
+bScriptMask						EQU		$00007F00			; bit 8 - 14 
+bLanguageMask					EQU		$000000FF			; bit 0 - 7  
+bScriptLanguageMask				EQU		$00007FFF			; bit 0 - 14  
+
+															; Typing method property constants for Input Methods 
+kIMJaTypingMethodProperty		EQU		'jtyp'				; Typing method property for Japanese input methods
+kIMJaTypingMethodRoman			EQU		'roma'				; Roman typing
+kIMJaTypingMethodKana			EQU		'kana'				; Kana typing
+
+															; Low level routines which are dispatched directly to the Component Manager 
+kCMGetScriptLangSupport			EQU		$0001				; Component Manager call selector 1 
+kCMInitiateTextService			EQU		$0002				; Component Manager call selector 2 
+kCMTerminateTextService			EQU		$0003				; Component Manager call selector 3 
+kCMActivateTextService			EQU		$0004				; Component Manager call selector 4 
+kCMDeactivateTextService		EQU		$0005				; Component Manager call selector 5 
+kCMTextServiceEvent				EQU		$0006				; Component Manager call selector 6 
+kCMGetTextServiceMenu			EQU		$0007				; Component Manager call selector 7 
+kCMTextServiceMenuSelect		EQU		$0008				; Component Manager call selector 8 
+kCMFixTextService				EQU		$0009				; Component Manager call selector 9 
+kCMSetTextServiceCursor			EQU		$000A				; Component Manager call selector 10 
+kCMHidePaletteWindows			EQU		$000B				; Component Manager call selector 11 
+kCMGetTextServiceProperty		EQU		$000C				; Component Manager call selector 12 
+kCMSetTextServiceProperty		EQU		$000D				; Component Manager call selector 13 
+
+															; New low level routines which are dispatched directly to the Component Manager 
+kCMUCTextServiceEvent			EQU		$000E				; Component Manager call selector 14 
+
+
+;  New opaque definitions for types 
+
+
+InterfaceTypeList		RECORD 0
+elements				 ds.l	1
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+
+
+
+;  Text Service Info List 
+TextServiceInfo			RECORD 0
+fComponent				 ds.l	1				; offset: $0 (0)
+fItemName				 ds		Str255			; offset: $4 (4)
+sizeof					 EQU *					; size:   $104 (260)
+						ENDR
+; typedef struct TextServiceInfo *		TextServiceInfoPtr
+
+TextServiceList			RECORD 0
+fTextServiceCount		 ds.w	1				; offset: $0 (0)		;  number of entries in the 'fServices' array 
+fServices				 ds		TextServiceInfo ; offset: $2 (2) <-- really an array of length one ;  Note: array of 'TextServiceInfo' records follows 
+sizeof					 EQU *					; size:   $106 (262)
+						ENDR
+; typedef struct TextServiceList *		TextServiceListPtr
+
+; typedef TextServiceListPtr *			TextServiceListHandle
+
+ScriptLanguageRecord	RECORD 0
+fScript					 ds.w	1				; offset: $0 (0)
+fLanguage				 ds.w	1				; offset: $2 (2)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+ScriptLanguageSupport	RECORD 0
+fScriptLanguageCount	 ds.w	1				; offset: $0 (0)		;  number of entries in the 'fScriptLanguageArray' array 
+fScriptLanguageArray	 ds		ScriptLanguageRecord ; offset: $2 (2) <-- really an array of length one ;  Note: array of 'ScriptLanguageRecord' records follows 
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct ScriptLanguageSupport * ScriptLanguageSupportPtr
+
+; typedef ScriptLanguageSupportPtr *	ScriptLanguageSupportHandle
+
+;  High level TSM Doucment routines 
+;
+; pascal OSErr NewTSMDocument(short numOfInterface, InterfaceTypeList supportedInterfaceTypes, TSMDocumentID *idocID, long refcon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NewTSMDocument
+			moveq           	#0,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewTSMDocument
+	ENDIF
+
+;
+; pascal OSErr DeleteTSMDocument(TSMDocumentID idocID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DeleteTSMDocument
+			moveq           	#1,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeleteTSMDocument
+	ENDIF
+
+;
+; pascal OSErr ActivateTSMDocument(TSMDocumentID idocID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ActivateTSMDocument
+			moveq           	#2,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ActivateTSMDocument
+	ENDIF
+
+;
+; pascal OSErr DeactivateTSMDocument(TSMDocumentID idocID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DeactivateTSMDocument
+			moveq           	#3,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeactivateTSMDocument
+	ENDIF
+
+;
+; pascal OSErr FixTSMDocument(TSMDocumentID idocID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_FixTSMDocument
+			moveq           	#7,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FixTSMDocument
+	ENDIF
+
+;
+; pascal OSErr GetServiceList(short numOfInterface, OSType *supportedInterfaceTypes, TextServiceListHandle *serviceInfo, long *seedValue)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetServiceList
+			moveq           	#8,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetServiceList
+	ENDIF
+
+;
+; pascal OSErr OpenTextService(TSMDocumentID idocID, Component aComponent, ComponentInstance *aComponentInstance)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_OpenTextService
+			moveq           	#9,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OpenTextService
+	ENDIF
+
+;
+; pascal OSErr CloseTextService(TSMDocumentID idocID, ComponentInstance aComponentInstance)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CloseTextService
+			moveq           	#10,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CloseTextService
+	ENDIF
+
+;
+; pascal OSErr SendAEFromTSMComponent(const AppleEvent *theAppleEvent, AppleEvent *reply, AESendMode sendMode, AESendPriority sendPriority, long timeOutInTicks, AEIdleUPP idleProc, AEFilterUPP filterProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SendAEFromTSMComponent
+			moveq           	#11,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SendAEFromTSMComponent
+	ENDIF
+
+;
+; pascal OSErr SetDefaultInputMethod(Component ts, ScriptLanguageRecord *slRecordPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetDefaultInputMethod
+			moveq           	#12,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDefaultInputMethod
+	ENDIF
+
+;
+; pascal OSErr GetDefaultInputMethod(Component *ts, ScriptLanguageRecord *slRecordPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetDefaultInputMethod
+			moveq           	#13,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDefaultInputMethod
+	ENDIF
+
+;
+; pascal OSErr SetTextServiceLanguage(ScriptLanguageRecord *slRecordPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetTextServiceLanguage
+			moveq           	#14,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetTextServiceLanguage
+	ENDIF
+
+;
+; pascal OSErr GetTextServiceLanguage(ScriptLanguageRecord *slRecordPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetTextServiceLanguage
+			moveq           	#15,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTextServiceLanguage
+	ENDIF
+
+;
+; pascal OSErr UseInputWindow(TSMDocumentID idocID, Boolean useWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_UseInputWindow
+			moveq           	#16,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UseInputWindow
+	ENDIF
+
+;  Following calls from Classic event loops not needed for Carbon clients. 
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal Boolean TSMEvent(EventRecord *event)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_TSMEvent
+			moveq           	#4,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TSMEvent
+	ENDIF
+
+;
+; pascal Boolean TSMMenuSelect(long menuResult)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_TSMMenuSelect
+			moveq           	#5,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TSMMenuSelect
+	ENDIF
+
+;
+; pascal Boolean SetTSMCursor(Point mousePos)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetTSMCursor
+			moveq           	#6,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetTSMCursor
+	ENDIF
+
+;  Following ServiceWindow API replaced by Window Manager API in Carbon. 
+;
+; pascal OSErr NewServiceWindow(void *wStorage, const Rect *boundsRect, ConstStr255Param title, Boolean visible, short theProc, WindowPtr behind, Boolean goAwayFlag, ComponentInstance ts, WindowPtr *window)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NewServiceWindow
+			moveq           	#17,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewServiceWindow
+	ENDIF
+
+;
+; pascal OSErr CloseServiceWindow(WindowPtr window)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CloseServiceWindow
+			moveq           	#18,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CloseServiceWindow
+	ENDIF
+
+;
+; pascal OSErr GetFrontServiceWindow(WindowPtr *window)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetFrontServiceWindow
+			moveq           	#19,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetFrontServiceWindow
+	ENDIF
+
+;
+; pascal short FindServiceWindow(Point thePoint, WindowPtr *theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_FindServiceWindow
+			moveq           	#23,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindServiceWindow
+	ENDIF
+
+;
+; pascal OSErr NewCServiceWindow(void *wStorage, const Rect *boundsRect, ConstStr255Param title, Boolean visible, short theProc, WindowPtr behind, Boolean goAwayFlag, ComponentInstance ts, WindowPtr *window)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NewCServiceWindow
+			moveq           	#26,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewCServiceWindow
+	ENDIF
+
+;  Explicit initialization not needed for Carbon clients, since TSM is 
+;  instanciated per-context. 
+;
+; pascal OSErr InitTSMAwareApplication(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InitTSMAwareApplication
+			moveq           	#20,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitTSMAwareApplication
+	ENDIF
+
+;
+; pascal OSErr CloseTSMAwareApplication(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CloseTSMAwareApplication
+			moveq           	#21,D0
+			dc.w            	$AA54
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CloseTSMAwareApplication
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+;  Component Manager Interfaces to Input Methods 
+;
+; pascal ComponentResult GetScriptLanguageSupport(ComponentInstance ts, ScriptLanguageSupportHandle *scriptHdl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetScriptLanguageSupport
+			move.l              #$00040001,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetScriptLanguageSupport
+	ENDIF
+
+;
+; pascal ComponentResult InitiateTextService(ComponentInstance ts)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InitiateTextService
+			move.l              #$00000002,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitiateTextService
+	ENDIF
+
+;
+; pascal ComponentResult TerminateTextService(ComponentInstance ts)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_TerminateTextService
+			move.l              #$00000003,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TerminateTextService
+	ENDIF
+
+;
+; pascal ComponentResult ActivateTextService(ComponentInstance ts)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ActivateTextService
+			move.l              #$00000004,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ActivateTextService
+	ENDIF
+
+;
+; pascal ComponentResult DeactivateTextService(ComponentInstance ts)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DeactivateTextService
+			move.l              #$00000005,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeactivateTextService
+	ENDIF
+
+;
+; pascal ComponentResult GetTextServiceMenu(ComponentInstance ts, MenuRef *serviceMenu)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetTextServiceMenu
+			move.l              #$00040007,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTextServiceMenu
+	ENDIF
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal ComponentResult TextServiceEvent(ComponentInstance ts, short numOfEvents, EventRecord *event)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_TextServiceEvent
+			move.l              #$00060006,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TextServiceEvent
+	ENDIF
+
+;
+; pascal ComponentResult UCTextServiceEvent(ComponentInstance ts, short numOfEvents, EventRecord *event, UniChar unicodeString[], UniCharCount unicodeStrLength)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_UCTextServiceEvent
+			move.l              #$000E000E,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UCTextServiceEvent
+	ENDIF
+
+;
+; pascal ComponentResult TextServiceMenuSelect(ComponentInstance ts, MenuRef serviceMenu, short item)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_TextServiceMenuSelect
+			move.l              #$00060008,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TextServiceMenuSelect
+	ENDIF
+
+;
+; pascal ComponentResult SetTextServiceCursor(ComponentInstance ts, Point mousePos)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetTextServiceCursor
+			move.l              #$0004000A,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetTextServiceCursor
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+;
+; pascal ComponentResult FixTextService(ComponentInstance ts)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_FixTextService
+			move.l              #$00000009,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FixTextService
+	ENDIF
+
+;
+; pascal ComponentResult HidePaletteWindows(ComponentInstance ts)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_HidePaletteWindows
+			move.l              #$0000000B,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HidePaletteWindows
+	ENDIF
+
+;
+; pascal ComponentResult GetTextServiceProperty(ComponentInstance ts, OSType propertySelector, SInt32 *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetTextServiceProperty
+			move.l              #$0008000C,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTextServiceProperty
+	ENDIF
+
+;
+; pascal ComponentResult SetTextServiceProperty(ComponentInstance ts, OSType propertySelector, SInt32 value)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetTextServiceProperty
+			move.l              #$0008000D,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetTextServiceProperty
+	ENDIF
+
+
+	ENDIF ; __TEXTSERVICES__ 
+

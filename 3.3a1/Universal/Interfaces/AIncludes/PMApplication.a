@@ -1,0 +1,696 @@
+;
+;	File:		PMApplication.a
+;
+;	Contains:	Carbon Printing Manager Interfaces.
+;
+;	Version:	Technology:	Mac OS 8.x
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1998-1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__PMAPPLICATION__') = 'UNDEFINED' THEN
+__PMAPPLICATION__ SET 1
+
+	IF &TYPE('__ERRORS__') = 'UNDEFINED' THEN
+	include 'Errors.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__DIALOGS__') = 'UNDEFINED' THEN
+	include 'Dialogs.a'
+	ENDIF
+	IF &TYPE('__CMAPPLICATION__') = 'UNDEFINED' THEN
+	include 'CMApplication.a'
+	ENDIF
+
+;  Carbon printing structures 
+
+
+
+
+; typedef PMObject 						PMPrintSettings
+
+; typedef PMObject 						PMPageFormat
+
+
+
+PMResolution			RECORD 0
+hRes					 ds		Float64			; offset: $0 (0)
+vRes					 ds		Float64			; offset: $8 (8)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+PMLanguageInfo			RECORD 0
+level					 ds.b	33				; offset: $0 (0)
+version					 ds.b	33				; offset: $21 (33)
+release					 ds.b	33				; offset: $42 (66)
+						 ORG 100
+sizeof					 EQU *					; size:   $64 (100)
+						ENDR
+PMRect					RECORD 0
+top						 ds		Float64			; offset: $0 (0)
+left					 ds		Float64			; offset: $8 (8)
+bottom					 ds		Float64			; offset: $10 (16)
+right					 ds		Float64			; offset: $18 (24)
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+;  Callbacks 
+;  enums 
+
+kPMCancel						EQU		$0080				; user hit cancel button in dialog 
+kPMNoData						EQU		0					; for general use 
+kPMDontWantSize					EQU		0					; for parameters which return size information 
+kPMDontWantData					EQU		0					; for parameters which return data 
+kPMDontWantBoolean				EQU		0					; for parameters which take a boolean reference 
+kPMNoPrintSettings				EQU		0					; for parameters which take a PrintSettings reference 
+kPMNoPageFormat					EQU		0					; for parameters which take a PageFormat reference 
+kPMNoReference					EQU		0					; for parameters which take an address pointer 
+
+; typedef UInt32						PMTag
+															; common tags 
+kPMCurrentValue					EQU		'curr'				; current setting or value 
+kPMDefaultValue					EQU		'dflt'				; default setting or value 
+kPMMinimumValue					EQU		'minv'				; the minimum setting or value 
+kPMMaximumValue					EQU		'maxv'				; the maximum setting or value 
+															; profile tags 
+kPMSourceProfile				EQU		'srcp'				; source profile 
+															; resolution tags 
+kPMMinRange						EQU		'mnrg'				; Min range supported by a printer 
+kPMMaxRange						EQU		'mxrg'				; Max range supported by a printer 
+kPMMinSquareResolution			EQU		'mins'				; Min with X and Y resolution equal 
+kPMMaxSquareResolution			EQU		'maxs'				; Max with X and Y resolution equal 
+kPMDefaultResolution			EQU		'dftr'				; printer default resolution 
+
+
+; typedef UInt16						PMOrientation
+kPMPortrait						EQU		1
+kPMLandscape					EQU		2
+kPMReversePortrait				EQU		3					; will revert to kPortrait for current drivers 
+kPMReverseLandscape				EQU		4					; will revert to kLandscape for current drivers 
+
+kSizeOfTPrint					EQU		120					; size of old TPrint record 
+;  OSStatus return codes 
+
+kPMNoError						EQU		0
+kPMGeneralError					EQU		-30870
+kPMOutOfScope					EQU		-30871				; an API call is out of scope 
+kPMInvalidParameter				EQU		-30872				; a required parameter is missing or invalid 
+kPMNotImplemented				EQU		-30873				; this API call is not supported 
+kPMNoSuchEntry					EQU		-30874				; no such entry 
+kPMInvalidPrintSettings			EQU		-30875				; the printsettings reference is invalid 
+kPMInvalidPageFormat			EQU		-30876				; the pageformat reference is invalid 
+kPMValueOutOfRange				EQU		-30877				; a value passed in is out of range 
+kPMLockIgnored					EQU		-30878				; the lock value was ignored 
+;  Print loop 
+;
+; pascal OSStatus PMBegin(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMBegin
+	ENDIF
+
+;
+; pascal OSStatus PMEnd(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMEnd
+	ENDIF
+
+;
+; pascal OSStatus PMBeginDocument(PMPrintSettings printSettings, PMPageFormat pageFormat, PMPrintContext *printContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMBeginDocument
+	ENDIF
+
+;
+; pascal OSStatus PMEndDocument(PMPrintContext printContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMEndDocument
+	ENDIF
+
+;
+; pascal OSStatus PMBeginPage(PMPrintContext printContext, const PMRect *pageFrame)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMBeginPage
+	ENDIF
+
+;
+; pascal OSStatus PMEndPage(PMPrintContext printContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMEndPage
+	ENDIF
+
+;
+; pascal OSStatus PMSetIdleProc(PMIdleUPP idleProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetIdleProc
+	ENDIF
+
+;
+; pascal OSStatus PMGetGrafPtr(PMPrintContext printContext, GrafPtr *grafPort)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetGrafPtr
+	ENDIF
+
+;  PMPageFormat 
+;
+; pascal OSStatus PMNewPageFormat(PMPageFormat *pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMNewPageFormat
+	ENDIF
+
+;
+; pascal OSStatus PMDisposePageFormat(PMPageFormat pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDisposePageFormat
+	ENDIF
+
+;
+; pascal OSStatus PMDefaultPageFormat(PMPageFormat pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDefaultPageFormat
+	ENDIF
+
+;
+; pascal OSStatus PMValidatePageFormat(PMPageFormat pageFormat, Boolean *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMValidatePageFormat
+	ENDIF
+
+;
+; pascal OSStatus PMCopyPageFormat(PMPageFormat formatSrc, PMPageFormat formatDest)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMCopyPageFormat
+	ENDIF
+
+;
+; pascal OSStatus PMFlattenPageFormat(PMPageFormat pageFormat, Handle *flatFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMFlattenPageFormat
+	ENDIF
+
+;
+; pascal OSStatus PMUnflattenPageFormat(Handle flatFormat, PMPageFormat *pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMUnflattenPageFormat
+	ENDIF
+
+;
+; pascal OSStatus PMGetPageFormatExtendedData(PMPageFormat pageFormat, OSType dataID, UInt32 *size, void *theData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPageFormatExtendedData
+	ENDIF
+
+;
+; pascal OSStatus PMSetPageFormatExtendedData(PMPageFormat pageFormat, OSType dataID, UInt32 size, void *theData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetPageFormatExtendedData
+	ENDIF
+
+;  PMPageFormat Accessors 
+;
+; pascal OSStatus PMGetScale(PMPageFormat pageFormat, double *scale)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetScale
+	ENDIF
+
+;
+; pascal OSStatus PMSetScale(PMPageFormat pageFormat, double scale)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetScale
+	ENDIF
+
+;
+; pascal OSStatus PMGetResolution(PMPageFormat pageFormat, PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetResolution
+	ENDIF
+
+;
+; pascal OSStatus PMSetResolution(PMPageFormat pageFormat, const PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetResolution
+	ENDIF
+
+;
+; pascal OSStatus PMGetPhysicalPaperSize(PMPageFormat pageFormat, PMRect *paperSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPhysicalPaperSize
+	ENDIF
+
+;
+; pascal OSStatus PMSetPhysicalPaperSize(PMPageFormat pageFormat, const PMRect *paperSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetPhysicalPaperSize
+	ENDIF
+
+;
+; pascal OSStatus PMGetPhysicalPageSize(PMPageFormat pageFormat, PMRect *pageSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPhysicalPageSize
+	ENDIF
+
+;
+; pascal OSStatus PMGetAdjustedPaperRect(PMPageFormat pageFormat, PMRect *paperRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetAdjustedPaperRect
+	ENDIF
+
+;
+; pascal OSStatus PMGetAdjustedPageRect(PMPageFormat pageFormat, PMRect *pageRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetAdjustedPageRect
+	ENDIF
+
+;
+; pascal OSStatus PMGetOrientation(PMPageFormat pageFormat, PMOrientation *orientation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetOrientation
+	ENDIF
+
+;
+; pascal OSStatus PMSetOrientation(PMPageFormat pageFormat, PMOrientation orientation, Boolean lock)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetOrientation
+	ENDIF
+
+;  PMPrintSettings 
+;
+; pascal OSStatus PMNewPrintSettings(PMPrintSettings *printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMNewPrintSettings
+	ENDIF
+
+;
+; pascal OSStatus PMDisposePrintSettings(PMPrintSettings printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDisposePrintSettings
+	ENDIF
+
+;
+; pascal OSStatus PMDefaultPrintSettings(PMPrintSettings printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDefaultPrintSettings
+	ENDIF
+
+;
+; pascal OSStatus PMValidatePrintSettings(PMPrintSettings printSettings, Boolean *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMValidatePrintSettings
+	ENDIF
+
+;
+; pascal OSStatus PMCopyPrintSettings(PMPrintSettings settingSrc, PMPrintSettings settingDest)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMCopyPrintSettings
+	ENDIF
+
+;
+; pascal OSStatus PMFlattenPrintSettings(PMPrintSettings printSettings, Handle *flatSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMFlattenPrintSettings
+	ENDIF
+
+;
+; pascal OSStatus PMUnflattenPrintSettings(Handle flatSettings, PMPrintSettings *printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMUnflattenPrintSettings
+	ENDIF
+
+;
+; pascal OSStatus PMGetPrintSettingsExtendedData(PMPrintSettings printSettings, OSType dataID, UInt32 *size, void *theData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPrintSettingsExtendedData
+	ENDIF
+
+;
+; pascal OSStatus PMSetPrintSettingsExtendedData(PMPrintSettings printSettings, OSType dataID, UInt32 size, void *theData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetPrintSettingsExtendedData
+	ENDIF
+
+;  PMPrintSettings Accessors 
+;
+; pascal OSStatus PMGetJobName(PMPrintSettings printSettings, StringPtr name)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetJobName
+	ENDIF
+
+;
+; pascal OSStatus PMSetJobName(PMPrintSettings printSettings, StringPtr name)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetJobName
+	ENDIF
+
+;
+; pascal OSStatus PMGetCopies(PMPrintSettings printSettings, UInt32 *copies)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetCopies
+	ENDIF
+
+;
+; pascal OSStatus PMSetCopies(PMPrintSettings printSettings, UInt32 copies, Boolean lock)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetCopies
+	ENDIF
+
+;
+; pascal OSStatus PMGetFirstPage(PMPrintSettings printSettings, UInt32 *first)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetFirstPage
+	ENDIF
+
+;
+; pascal OSStatus PMSetFirstPage(PMPrintSettings printSettings, UInt32 first, Boolean lock)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetFirstPage
+	ENDIF
+
+;
+; pascal OSStatus PMGetLastPage(PMPrintSettings printSettings, UInt32 *last)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetLastPage
+	ENDIF
+
+;
+; pascal OSStatus PMSetLastPage(PMPrintSettings printSettings, UInt32 last, Boolean lock)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetLastPage
+	ENDIF
+
+;
+; pascal OSStatus PMGetPageRange(PMPrintSettings printSettings, UInt32 *minPage, UInt32 *maxPage)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPageRange
+	ENDIF
+
+;
+; pascal OSStatus PMSetPageRange(PMPrintSettings printSettings, UInt32 minPage, UInt32 maxPage)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetPageRange
+	ENDIF
+
+;
+; pascal OSStatus PMSetProfile(PMPrintSettings printSettings, PMTag tag, const CMProfileLocation *profile)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetProfile
+	ENDIF
+
+;  Printing Dialogs 
+;
+; pascal OSStatus PMPageSetupDialog(PMPageFormat pageFormat, Boolean *accepted)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPageSetupDialog
+	ENDIF
+
+;
+; pascal OSStatus PMPrintDialog(PMPrintSettings printSettings, PMPageFormat constPageFormat, Boolean *accepted)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrintDialog
+	ENDIF
+
+;
+; pascal OSStatus PMPageSetupDialogInit(PMPageFormat pageFormat, PMDialog *newDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPageSetupDialogInit
+	ENDIF
+
+;
+; pascal OSStatus PMPrintDialogInit(PMPrintSettings printSettings, PMDialog *newDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrintDialogInit
+	ENDIF
+
+;
+; pascal OSStatus PMPrintDialogMain(PMPrintSettings printSettings, PMPageFormat constPageFormat, Boolean *accepted, PMPrintDialogInitUPP myInitProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrintDialogMain
+	ENDIF
+
+;
+; pascal OSStatus PMPageSetupDialogMain(PMPageFormat pageFormat, Boolean *accepted, PMPageSetupDialogInitUPP myInitProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPageSetupDialogMain
+	ENDIF
+
+;  Printing Dialog accessors 
+;
+; pascal OSStatus PMGetDialogPtr(PMDialog pmDialog, DialogPtr *theDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetDialogPtr
+	ENDIF
+
+;
+; pascal OSStatus PMGetModalFilterProc(PMDialog pmDialog, ModalFilterUPP *filterProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetModalFilterProc
+	ENDIF
+
+;
+; pascal OSStatus PMSetModalFilterProc(PMDialog pmDialog, ModalFilterUPP filterProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetModalFilterProc
+	ENDIF
+
+;
+; pascal OSStatus PMGetItemProc(PMDialog pmDialog, PMItemUPP *itemProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetItemProc
+	ENDIF
+
+;
+; pascal OSStatus PMSetItemProc(PMDialog pmDialog, PMItemUPP itemProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetItemProc
+	ENDIF
+
+;
+; pascal OSStatus PMGetDialogAccepted(PMDialog pmDialog, Boolean *process)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetDialogAccepted
+	ENDIF
+
+;
+; pascal OSStatus PMSetDialogAccepted(PMDialog pmDialog, Boolean process)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetDialogAccepted
+	ENDIF
+
+;
+; pascal OSStatus PMGetDialogDone(PMDialog pmDialog, Boolean *done)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetDialogDone
+	ENDIF
+
+;
+; pascal OSStatus PMSetDialogDone(PMDialog pmDialog, Boolean done)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetDialogDone
+	ENDIF
+
+;  Classic Support 
+;
+; pascal OSStatus PMGeneral(Ptr pData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGeneral
+	ENDIF
+
+;
+; pascal OSStatus PMConvertOldPrintRecord(Handle printRecordHandle, PMPrintSettings *printSettings, PMPageFormat *pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMConvertOldPrintRecord
+	ENDIF
+
+;
+; pascal OSStatus PMMakeOldPrintRecord(PMPrintSettings printSettings, PMPageFormat pageFormat, Handle *printRecordHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMMakeOldPrintRecord
+	ENDIF
+
+;  Driver Information 
+;
+; pascal OSStatus PMIsPostScriptDriver(Boolean *isPostScript)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMIsPostScriptDriver
+	ENDIF
+
+;
+; pascal OSStatus PMGetLanguageInfo(PMLanguageInfo *info)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetLanguageInfo
+	ENDIF
+
+;
+; pascal OSStatus PMGetDriverCreator(OSType *creator)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetDriverCreator
+	ENDIF
+
+;
+; pascal OSStatus PMGetDriverReleaseInfo(VersRec *release)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetDriverReleaseInfo
+	ENDIF
+
+;
+; pascal OSStatus PMGetPrinterResolutionCount(UInt32 *count)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPrinterResolutionCount
+	ENDIF
+
+;
+; pascal OSStatus PMGetPrinterResolution(PMTag tag, PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPrinterResolution
+	ENDIF
+
+;
+; pascal OSStatus PMGetIndexedPrinterResolution(UInt32 index, PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetIndexedPrinterResolution
+	ENDIF
+
+;  ColorSync & PostScript Support 
+;
+; pascal OSStatus PMEnableColorSync(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMEnableColorSync
+	ENDIF
+
+;
+; pascal OSStatus PMDisableColorSync(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDisableColorSync
+	ENDIF
+
+;
+; pascal OSStatus PMPostScriptBegin(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptBegin
+	ENDIF
+
+;
+; pascal OSStatus PMPostScriptEnd(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptEnd
+	ENDIF
+
+;
+; pascal OSStatus PMPostScriptHandle(Handle psHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptHandle
+	ENDIF
+
+;
+; pascal OSStatus PMPostScriptData(Ptr psPtr, Size len)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptData
+	ENDIF
+
+;
+; pascal OSStatus PMPostScriptFile(FSSpec *psFile)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptFile
+	ENDIF
+
+;  Error 
+;
+; pascal OSStatus PMError(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMError
+	ENDIF
+
+;
+; pascal OSStatus PMSetError(OSStatus printError)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetError
+	ENDIF
+
+	ENDIF ; __PMAPPLICATION__ 
+

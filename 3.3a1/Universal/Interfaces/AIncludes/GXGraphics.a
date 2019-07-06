@@ -1,0 +1,5346 @@
+;
+;	File:		GXGraphics.a
+;
+;	Contains:	QuickDraw GX graphic routine interfaces.
+;
+;	Version:	Technology:	Quickdraw GX 1.1
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1994-1999 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__GXGRAPHICS__') = 'UNDEFINED' THEN
+__GXGRAPHICS__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__FONTS__') = 'UNDEFINED' THEN
+	include 'Fonts.a'
+	ENDIF
+	IF &TYPE('__GXERRORS__') = 'UNDEFINED' THEN
+	include 'GXErrors.a'
+	ENDIF
+	IF &TYPE('__GXTYPES__') = 'UNDEFINED' THEN
+	include 'GXTypes.a'
+	ENDIF
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern gxGraphicsClient GXNewGraphicsClient(void *memoryStart, long memoryLength, gxClientAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewGraphicsClient
+			move.w              #$0059,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewGraphicsClient
+	ENDIF
+
+;
+; extern gxGraphicsClient GXGetGraphicsClient(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGraphicsClient
+			move.w              #$005A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGraphicsClient
+	ENDIF
+
+;
+; extern void GXSetGraphicsClient(gxGraphicsClient client)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetGraphicsClient
+			move.w              #$005B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetGraphicsClient
+	ENDIF
+
+;
+; extern void GXDisposeGraphicsClient(gxGraphicsClient client)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeGraphicsClient
+			move.w              #$005C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeGraphicsClient
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+; returns the count 
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern long GXGetGraphicsClients(long index, long count, gxGraphicsClient clients[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGraphicsClients
+			move.w              #$005E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGraphicsClients
+	ENDIF
+
+;
+; extern void GXEnterGraphics(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEnterGraphics
+			move.w              #$005F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEnterGraphics
+	ENDIF
+
+;
+; extern void GXExitGraphics(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXExitGraphics
+			move.w              #$0060,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXExitGraphics
+	ENDIF
+
+;
+; extern gxGraphicsError GXGetGraphicsError(gxGraphicsError *stickyError)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGraphicsError
+			move.w              #$0061,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGraphicsError
+	ENDIF
+
+;
+; extern gxGraphicsNotice GXGetGraphicsNotice(gxGraphicsNotice *stickyNotice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGraphicsNotice
+			move.w              #$0062,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGraphicsNotice
+	ENDIF
+
+;
+; extern gxGraphicsWarning GXGetGraphicsWarning(gxGraphicsWarning *stickyWarning)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGraphicsWarning
+			move.w              #$0063,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGraphicsWarning
+	ENDIF
+
+;
+; extern void GXPostGraphicsError(gxGraphicsError error)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXPostGraphicsError
+			move.w              #$0064,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXPostGraphicsError
+	ENDIF
+
+;
+; extern void GXPostGraphicsWarning(gxGraphicsWarning warning)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXPostGraphicsWarning
+			move.w              #$0066,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXPostGraphicsWarning
+	ENDIF
+
+;
+; extern gxUserErrorUPP GXGetUserGraphicsError(long *reference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetUserGraphicsError
+			move.w              #$0067,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetUserGraphicsError
+	ENDIF
+
+;
+; extern gxUserNoticeUPP GXGetUserGraphicsNotice(long *reference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetUserGraphicsNotice
+			move.w              #$0068,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetUserGraphicsNotice
+	ENDIF
+
+;
+; extern gxUserWarningUPP GXGetUserGraphicsWarning(long *reference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetUserGraphicsWarning
+			move.w              #$0069,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetUserGraphicsWarning
+	ENDIF
+
+;
+; extern void GXSetUserGraphicsError(gxUserErrorUPP userFunction, long reference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetUserGraphicsError
+			move.w              #$006A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetUserGraphicsError
+	ENDIF
+
+;
+; extern void GXSetUserGraphicsNotice(gxUserNoticeUPP userFunction, long reference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetUserGraphicsNotice
+			move.w              #$006B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetUserGraphicsNotice
+	ENDIF
+
+;
+; extern void GXSetUserGraphicsWarning(gxUserWarningUPP userFunction, long reference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetUserGraphicsWarning
+			move.w              #$006C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetUserGraphicsWarning
+	ENDIF
+
+;
+; extern void GXIgnoreGraphicsWarning(gxGraphicsWarning warning)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXIgnoreGraphicsWarning
+			move.w              #$006F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXIgnoreGraphicsWarning
+	ENDIF
+
+;
+; extern void GXPopGraphicsWarning(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXPopGraphicsWarning
+			move.w              #$0070,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXPopGraphicsWarning
+	ENDIF
+
+;
+; extern gxShape GXNewShapeVector(gxShapeType aType, const Fixed vector[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewShapeVector
+			move.w              #$0071,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewShapeVector
+	ENDIF
+
+;
+; extern void GXSetShapeVector(gxShape target, const Fixed vector[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeVector
+			move.w              #$0072,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeVector
+	ENDIF
+
+;
+; extern gxShape GXNewBitmap(const gxBitmap *data, const gxPoint *position)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewBitmap
+			move.w              #$0073,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewBitmap
+	ENDIF
+
+;
+; extern gxShape GXNewCurve(const gxCurve *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewCurve
+			move.w              #$0074,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewCurve
+	ENDIF
+
+;
+; extern gxShape GXNewGlyphs(long charCount, const unsigned char text[], const gxPoint positions[], const long advance[], const gxPoint tangents[], const short styleRuns[], const gxStyle glyphStyles[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewGlyphs
+			move.w              #$0075,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewGlyphs
+	ENDIF
+
+;
+; extern gxShape GXNewLine(const gxLine *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewLine
+			move.w              #$0076,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewLine
+	ENDIF
+
+;
+; extern gxShape GXNewPaths(const gxPaths *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewPaths
+			move.w              #$0077,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewPaths
+	ENDIF
+
+;
+; extern gxShape GXNewPicture(long count, const gxShape shapes[], const gxStyle styles[], const gxInk inks[], const gxTransform transforms[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewPicture
+			move.w              #$0078,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewPicture
+	ENDIF
+
+;
+; extern gxShape GXNewPoint(const gxPoint *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewPoint
+			move.w              #$0079,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewPoint
+	ENDIF
+
+;
+; extern gxShape GXNewPolygons(const gxPolygons *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewPolygons
+			move.w              #$007A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewPolygons
+	ENDIF
+
+;
+; extern gxShape GXNewRectangle(const gxRectangle *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewRectangle
+			move.w              #$007B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewRectangle
+	ENDIF
+
+;
+; extern gxShape GXNewText(long charCount, const unsigned char text[], const gxPoint *position)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewText
+			move.w              #$007C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewText
+	ENDIF
+
+;
+; extern gxBitmap *GXGetBitmap(gxShape source, gxBitmap *data, gxPoint *position)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetBitmap
+			move.w              #$007D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetBitmap
+	ENDIF
+
+;
+; extern gxCurve *GXGetCurve(gxShape source, gxCurve *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetCurve
+			move.w              #$007E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetCurve
+	ENDIF
+
+;  returns byte length of glyphs 
+;
+; extern long GXGetGlyphs(gxShape source, long *charCount, unsigned char text[], gxPoint positions[], long advance[], gxPoint tangents[], long *runCount, short styleRuns[], gxStyle glyphStyles[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGlyphs
+			move.w              #$007F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGlyphs
+	ENDIF
+
+;
+; extern gxLine *GXGetLine(gxShape source, gxLine *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetLine
+			move.w              #$0080,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetLine
+	ENDIF
+
+;  returns byte length 
+;
+; extern long GXGetPaths(gxShape source, gxPaths *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPaths
+			move.w              #$0081,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPaths
+	ENDIF
+
+;  returns count 
+;
+; extern long GXGetPicture(gxShape source, gxShape shapes[], gxStyle styles[], gxInk inks[], gxTransform transforms[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPicture
+			move.w              #$0082,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPicture
+	ENDIF
+
+;
+; extern gxPoint *GXGetPoint(gxShape source, gxPoint *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPoint
+			move.w              #$0083,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPoint
+	ENDIF
+
+;  returns byte length 
+;
+; extern long GXGetPolygons(gxShape source, gxPolygons *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPolygons
+			move.w              #$0084,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPolygons
+	ENDIF
+
+;
+; extern gxRectangle *GXGetRectangle(gxShape source, gxRectangle *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetRectangle
+			move.w              #$0085,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetRectangle
+	ENDIF
+
+;  returns byte length 
+;
+; extern long GXGetText(gxShape source, long *charCount, unsigned char text[], gxPoint *position)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetText
+			move.w              #$0086,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetText
+	ENDIF
+
+;
+; extern void GXSetBitmap(gxShape target, const gxBitmap *data, const gxPoint *position)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetBitmap
+			move.w              #$0087,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetBitmap
+	ENDIF
+
+;
+; extern void GXSetCurve(gxShape target, const gxCurve *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetCurve
+			move.w              #$0088,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetCurve
+	ENDIF
+
+;
+; extern void GXSetGlyphs(gxShape target, long charCount, const unsigned char text[], const gxPoint positions[], const long advance[], const gxPoint tangents[], const short styleRuns[], const gxStyle glyphStyles[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetGlyphs
+			move.w              #$0089,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetGlyphs
+	ENDIF
+
+;
+; extern void GXSetLine(gxShape target, const gxLine *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetLine
+			move.w              #$008A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetLine
+	ENDIF
+
+;
+; extern void GXSetPaths(gxShape target, const gxPaths *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetPaths
+			move.w              #$008B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetPaths
+	ENDIF
+
+;
+; extern void GXSetPicture(gxShape target, long count, const gxShape shapes[], const gxStyle styles[], const gxInk inks[], const gxTransform transforms[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetPicture
+			move.w              #$008C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetPicture
+	ENDIF
+
+;
+; extern void GXSetPoint(gxShape target, const gxPoint *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetPoint
+			move.w              #$008D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetPoint
+	ENDIF
+
+;
+; extern void GXSetPolygons(gxShape target, const gxPolygons *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetPolygons
+			move.w              #$008E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetPolygons
+	ENDIF
+
+;
+; extern void GXSetRectangle(gxShape target, const gxRectangle *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetRectangle
+			move.w              #$008F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetRectangle
+	ENDIF
+
+;
+; extern void GXSetText(gxShape target, long charCount, const unsigned char text[], const gxPoint *position)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetText
+			move.w              #$0090,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetText
+	ENDIF
+
+;
+; extern void GXDrawBitmap(const gxBitmap *data, const gxPoint *position)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawBitmap
+			move.w              #$0091,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawBitmap
+	ENDIF
+
+;
+; extern void GXDrawCurve(const gxCurve *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawCurve
+			move.w              #$0092,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawCurve
+	ENDIF
+
+;
+; extern void GXDrawGlyphs(long charCount, const unsigned char text[], const gxPoint positions[], const long advance[], const gxPoint tangents[], const short styleRuns[], const gxStyle glyphStyles[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawGlyphs
+			move.w              #$0093,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawGlyphs
+	ENDIF
+
+;
+; extern void GXDrawLine(const gxLine *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawLine
+			move.w              #$0094,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawLine
+	ENDIF
+
+;
+; extern void GXDrawPaths(const gxPaths *data, gxShapeFill fill)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawPaths
+			move.w              #$0095,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawPaths
+	ENDIF
+
+;
+; extern void GXDrawPicture(long count, const gxShape shapes[], const gxStyle styles[], const gxInk inks[], const gxTransform transforms[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawPicture
+			move.w              #$0096,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawPicture
+	ENDIF
+
+;
+; extern void GXDrawPoint(const gxPoint *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawPoint
+			move.w              #$0097,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawPoint
+	ENDIF
+
+;
+; extern void GXDrawPolygons(const gxPolygons *data, gxShapeFill fill)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawPolygons
+			move.w              #$0098,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawPolygons
+	ENDIF
+
+;
+; extern void GXDrawRectangle(const gxRectangle *data, gxShapeFill fill)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawRectangle
+			move.w              #$0099,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawRectangle
+	ENDIF
+
+;
+; extern void GXDrawText(long charCount, const unsigned char text[], const gxPoint *position)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawText
+			move.w              #$009A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawText
+	ENDIF
+
+;
+; extern gxColorProfile GXNewColorProfile(long size, void *colorProfileData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewColorProfile
+			move.w              #$009B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewColorProfile
+	ENDIF
+
+;
+; extern gxColorSet GXNewColorSet(gxColorSpace space, long count, const gxSetColor colors[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewColorSet
+			move.w              #$009C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewColorSet
+	ENDIF
+
+;
+; extern gxInk GXNewInk(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewInk
+			move.w              #$009D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewInk
+	ENDIF
+
+;
+; extern gxShape GXNewShape(gxShapeType aType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewShape
+			move.w              #$009E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewShape
+	ENDIF
+
+;
+; extern gxStyle GXNewStyle(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewStyle
+			move.w              #$009F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewStyle
+	ENDIF
+
+;
+; extern gxTag GXNewTag(long tagType, long length, const void *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewTag
+			move.w              #$00A0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewTag
+	ENDIF
+
+;
+; extern gxTransform GXNewTransform(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewTransform
+			move.w              #$00A1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewTransform
+	ENDIF
+
+;
+; extern gxViewDevice GXNewViewDevice(gxViewGroup group, gxShape bitmapShape)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewViewDevice
+			move.w              #$00A2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewViewDevice
+	ENDIF
+
+;
+; extern gxViewGroup GXNewViewGroup(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewViewGroup
+			move.w              #$00A3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewViewGroup
+	ENDIF
+
+;
+; extern gxViewPort GXNewViewPort(gxViewGroup group)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewViewPort
+			move.w              #$00A4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewViewPort
+	ENDIF
+
+;
+; extern void GXDisposeColorProfile(gxColorProfile target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeColorProfile
+			move.w              #$00A5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeColorProfile
+	ENDIF
+
+;
+; extern void GXDisposeColorSet(gxColorSet target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeColorSet
+			move.w              #$00A6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeColorSet
+	ENDIF
+
+;
+; extern void GXDisposeInk(gxInk target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeInk
+			move.w              #$00A7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeInk
+	ENDIF
+
+;
+; extern void GXDisposeShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeShape
+			move.w              #$00A8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeShape
+	ENDIF
+
+;
+; extern void GXDisposeStyle(gxStyle target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeStyle
+			move.w              #$00A9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeStyle
+	ENDIF
+
+;
+; extern void GXDisposeTag(gxTag target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeTag
+			move.w              #$00AA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeTag
+	ENDIF
+
+;
+; extern void GXDisposeTransform(gxTransform target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeTransform
+			move.w              #$00AB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeTransform
+	ENDIF
+
+;
+; extern void GXDisposeViewDevice(gxViewDevice target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeViewDevice
+			move.w              #$00AC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeViewDevice
+	ENDIF
+
+;
+; extern void GXDisposeViewGroup(gxViewGroup target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeViewGroup
+			move.w              #$00AD,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeViewGroup
+	ENDIF
+
+;
+; extern void GXDisposeViewPort(gxViewPort target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeViewPort
+			move.w              #$00AE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeViewPort
+	ENDIF
+
+;
+; extern gxColorProfile GXCloneColorProfile(gxColorProfile source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCloneColorProfile
+			move.w              #$00AF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCloneColorProfile
+	ENDIF
+
+;
+; extern gxColorSet GXCloneColorSet(gxColorSet source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCloneColorSet
+			move.w              #$00B0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCloneColorSet
+	ENDIF
+
+;
+; extern gxInk GXCloneInk(gxInk source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCloneInk
+			move.w              #$00B1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCloneInk
+	ENDIF
+
+;
+; extern gxShape GXCloneShape(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCloneShape
+			move.w              #$00B2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCloneShape
+	ENDIF
+
+;
+; extern gxStyle GXCloneStyle(gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCloneStyle
+			move.w              #$00B3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCloneStyle
+	ENDIF
+
+;
+; extern gxTag GXCloneTag(gxTag source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCloneTag
+			move.w              #$00B4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCloneTag
+	ENDIF
+
+;
+; extern gxTransform GXCloneTransform(gxTransform source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCloneTransform
+			move.w              #$00B5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCloneTransform
+	ENDIF
+
+;
+; extern gxColorProfile GXCopyToColorProfile(gxColorProfile target, gxColorProfile source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyToColorProfile
+			move.w              #$00B6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyToColorProfile
+	ENDIF
+
+;
+; extern gxColorSet GXCopyToColorSet(gxColorSet target, gxColorSet source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyToColorSet
+			move.w              #$00B7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyToColorSet
+	ENDIF
+
+;
+; extern gxInk GXCopyToInk(gxInk target, gxInk source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyToInk
+			move.w              #$00B8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyToInk
+	ENDIF
+
+;
+; extern gxShape GXCopyToShape(gxShape target, gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyToShape
+			move.w              #$00B9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyToShape
+	ENDIF
+
+;
+; extern gxStyle GXCopyToStyle(gxStyle target, gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyToStyle
+			move.w              #$00BA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyToStyle
+	ENDIF
+
+;
+; extern gxTag GXCopyToTag(gxTag target, gxTag source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyToTag
+			move.w              #$00BB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyToTag
+	ENDIF
+
+;
+; extern gxTransform GXCopyToTransform(gxTransform target, gxTransform source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyToTransform
+			move.w              #$00BC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyToTransform
+	ENDIF
+
+;
+; extern gxViewDevice GXCopyToViewDevice(gxViewDevice target, gxViewDevice source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyToViewDevice
+			move.w              #$00BD,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyToViewDevice
+	ENDIF
+
+;
+; extern gxViewPort GXCopyToViewPort(gxViewPort target, gxViewPort source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyToViewPort
+			move.w              #$00BE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyToViewPort
+	ENDIF
+
+;
+; extern Boolean GXEqualColorProfile(gxColorProfile one, gxColorProfile two)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEqualColorProfile
+			move.w              #$00BF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEqualColorProfile
+	ENDIF
+
+;
+; extern Boolean GXEqualColorSet(gxColorSet one, gxColorSet two)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEqualColorSet
+			move.w              #$00C0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEqualColorSet
+	ENDIF
+
+;
+; extern Boolean GXEqualInk(gxInk one, gxInk two)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEqualInk
+			move.w              #$00C1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEqualInk
+	ENDIF
+
+;
+; extern Boolean GXEqualShape(gxShape one, gxShape two)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEqualShape
+			move.w              #$00C2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEqualShape
+	ENDIF
+
+;
+; extern Boolean GXEqualStyle(gxStyle one, gxStyle two)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEqualStyle
+			move.w              #$00C3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEqualStyle
+	ENDIF
+
+;
+; extern Boolean GXEqualTag(gxTag one, gxTag two)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEqualTag
+			move.w              #$00C4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEqualTag
+	ENDIF
+
+;
+; extern Boolean GXEqualTransform(gxTransform one, gxTransform two)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEqualTransform
+			move.w              #$00C5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEqualTransform
+	ENDIF
+
+;
+; extern Boolean GXEqualViewDevice(gxViewDevice one, gxViewDevice two)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEqualViewDevice
+			move.w              #$00C6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEqualViewDevice
+	ENDIF
+
+;
+; extern Boolean GXEqualViewPort(gxViewPort one, gxViewPort two)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEqualViewPort
+			move.w              #$00C7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEqualViewPort
+	ENDIF
+
+;
+; extern void GXResetInk(gxInk target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXResetInk
+			move.w              #$00C8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXResetInk
+	ENDIF
+
+;
+; extern void GXResetShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXResetShape
+			move.w              #$00C9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXResetShape
+	ENDIF
+
+;
+; extern void GXResetStyle(gxStyle target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXResetStyle
+			move.w              #$00CA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXResetStyle
+	ENDIF
+
+;
+; extern void GXResetTransform(gxTransform target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXResetTransform
+			move.w              #$00CB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXResetTransform
+	ENDIF
+
+;
+; extern void GXLoadColorProfile(gxColorProfile target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLoadColorProfile
+			move.w              #$00CC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLoadColorProfile
+	ENDIF
+
+;
+; extern void GXLoadColorSet(gxColorSet target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLoadColorSet
+			move.w              #$00CD,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLoadColorSet
+	ENDIF
+
+;
+; extern void GXLoadInk(gxInk target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLoadInk
+			move.w              #$00CE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLoadInk
+	ENDIF
+
+;
+; extern void GXLoadShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLoadShape
+			move.w              #$00CF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLoadShape
+	ENDIF
+
+;
+; extern void GXLoadStyle(gxStyle target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLoadStyle
+			move.w              #$00D0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLoadStyle
+	ENDIF
+
+;
+; extern void GXLoadTag(gxTag target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLoadTag
+			move.w              #$00D1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLoadTag
+	ENDIF
+
+;
+; extern void GXLoadTransform(gxTransform target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLoadTransform
+			move.w              #$00D2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLoadTransform
+	ENDIF
+
+;
+; extern void GXUnloadColorProfile(gxColorProfile target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnloadColorProfile
+			move.w              #$00D3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnloadColorProfile
+	ENDIF
+
+;
+; extern void GXUnloadColorSet(gxColorSet target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnloadColorSet
+			move.w              #$00D4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnloadColorSet
+	ENDIF
+
+;
+; extern void GXUnloadInk(gxInk target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnloadInk
+			move.w              #$00D5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnloadInk
+	ENDIF
+
+;
+; extern void GXUnloadShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnloadShape
+			move.w              #$00D6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnloadShape
+	ENDIF
+
+;
+; extern void GXUnloadStyle(gxStyle target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnloadStyle
+			move.w              #$00D7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnloadStyle
+	ENDIF
+
+;
+; extern void GXUnloadTag(gxTag target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnloadTag
+			move.w              #$00D8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnloadTag
+	ENDIF
+
+;
+; extern void GXUnloadTransform(gxTransform target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnloadTransform
+			move.w              #$00D9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnloadTransform
+	ENDIF
+
+;
+; extern void GXCacheShape(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCacheShape
+			move.w              #$00DA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCacheShape
+	ENDIF
+
+;
+; extern gxShape GXCopyDeepToShape(gxShape target, gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyDeepToShape
+			move.w              #$00DB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyDeepToShape
+	ENDIF
+
+;
+; extern void GXDrawShape(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDrawShape
+			move.w              #$00DC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDrawShape
+	ENDIF
+
+;
+; extern void GXDisposeShapeCache(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeShapeCache
+			move.w              #$00DD,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeShapeCache
+	ENDIF
+
+;
+; extern gxColorProfile GXGetDefaultColorProfile(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetDefaultColorProfile
+			move.w              #$00DE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetDefaultColorProfile
+	ENDIF
+
+;
+; extern gxShape GXGetDefaultShape(gxShapeType aType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetDefaultShape
+			move.w              #$00DF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetDefaultShape
+	ENDIF
+
+;
+; extern gxColorSet GXGetDefaultColorSet(long pixelDepth)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetDefaultColorSet
+			move.w              #$00E0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetDefaultColorSet
+	ENDIF
+
+
+;
+; extern void GXSetDefaultShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetDefaultShape
+			move.w              #$00E1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetDefaultShape
+	ENDIF
+
+;
+; extern void GXSetDefaultColorSet(gxColorSet target, long pixelDepth)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetDefaultColorSet
+			move.w              #$00E2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetDefaultColorSet
+	ENDIF
+
+;
+; extern long GXGetTag(gxTag source, long *tagType, void *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTag
+			move.w              #$00E3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTag
+	ENDIF
+
+;
+; extern void GXSetTag(gxTag target, long tagType, long length, const void *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetTag
+			move.w              #$00E4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetTag
+	ENDIF
+
+;
+; extern gxRectangle *GXGetShapeBounds(gxShape source, long index, gxRectangle *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeBounds
+			move.w              #$00E5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeBounds
+	ENDIF
+
+;
+; extern gxShapeFill GXGetShapeFill(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeFill
+			move.w              #$00E6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeFill
+	ENDIF
+
+;
+; extern gxInk GXGetShapeInk(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeInk
+			move.w              #$00E7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeInk
+	ENDIF
+
+;
+; extern long GXGetShapePixel(gxShape source, long x, long y, gxColor *data, long *index)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapePixel
+			move.w              #$00E8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapePixel
+	ENDIF
+
+;
+; extern gxStyle GXGetShapeStyle(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeStyle
+			move.w              #$00E9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeStyle
+	ENDIF
+
+;
+; extern gxTransform GXGetShapeTransform(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeTransform
+			move.w              #$00EA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeTransform
+	ENDIF
+
+;
+; extern gxShapeType GXGetShapeType(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeType
+			move.w              #$00EB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeType
+	ENDIF
+
+;
+; extern gxRectangle *GXGetShapeTypographicBounds(gxShape source, gxRectangle *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeTypographicBounds
+			move.w              #$00EC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeTypographicBounds
+	ENDIF
+
+;
+; extern gxShape GXGetBitmapParts(gxShape source, const gxLongRectangle *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetBitmapParts
+			move.w              #$00ED,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetBitmapParts
+	ENDIF
+
+;
+; extern void GXGetStyleFontMetrics(gxStyle sourceStyle, gxPoint *before, gxPoint *after, gxPoint *caretAngle, gxPoint *caretOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleFontMetrics
+			move.w              #$00EE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleFontMetrics
+	ENDIF
+
+;
+; extern void GXGetShapeFontMetrics(gxShape source, gxPoint *before, gxPoint *after, gxPoint *caretAngle, gxPoint *caretOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeFontMetrics
+			move.w              #$00EF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeFontMetrics
+	ENDIF
+
+;
+; extern void GXSetShapeBounds(gxShape target, const gxRectangle *newBounds)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeBounds
+			move.w              #$00F0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeBounds
+	ENDIF
+
+;
+; extern void GXSetShapeFill(gxShape target, gxShapeFill newFill)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeFill
+			move.w              #$00F1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeFill
+	ENDIF
+
+;
+; extern void GXSetShapeInk(gxShape target, gxInk newInk)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeInk
+			move.w              #$00F2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeInk
+	ENDIF
+
+;
+; extern void GXSetShapePixel(gxShape target, long x, long y, const gxColor *newColor, long newIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapePixel
+			move.w              #$00F3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapePixel
+	ENDIF
+
+;
+; extern void GXSetShapeStyle(gxShape target, gxStyle newStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeStyle
+			move.w              #$00F4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeStyle
+	ENDIF
+
+;
+; extern void GXSetShapeTransform(gxShape target, gxTransform newTransform)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeTransform
+			move.w              #$00F5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeTransform
+	ENDIF
+
+;
+; extern void GXSetShapeType(gxShape target, gxShapeType newType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeType
+			move.w              #$00F6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeType
+	ENDIF
+
+;
+; extern void GXSetBitmapParts(gxShape target, const gxLongRectangle *bounds, gxShape bitmapShape)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetBitmapParts
+			move.w              #$00F7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetBitmapParts
+	ENDIF
+
+;
+; extern void GXSetShapeGeometry(gxShape target, gxShape geometry)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeGeometry
+			move.w              #$00F8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeGeometry
+	ENDIF
+
+;
+; extern Fixed GXGetShapeCurveError(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeCurveError
+			move.w              #$00F9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeCurveError
+	ENDIF
+
+;
+; extern gxDashRecord *GXGetShapeDash(gxShape source, gxDashRecord *dash)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeDash
+			move.w              #$00FA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeDash
+	ENDIF
+
+;
+; extern gxCapRecord *GXGetShapeCap(gxShape source, gxCapRecord *cap)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeCap
+			move.w              #$00FB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeCap
+	ENDIF
+
+;  returns the number of layers 
+;
+; extern long GXGetShapeFace(gxShape source, gxTextFace *face)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeFace
+			move.w              #$00FC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeFace
+	ENDIF
+
+;
+; extern gxFont GXGetShapeFont(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeFont
+			move.w              #$00FD,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeFont
+	ENDIF
+
+;
+; extern gxJoinRecord *GXGetShapeJoin(gxShape source, gxJoinRecord *join)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeJoin
+			move.w              #$00FE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeJoin
+	ENDIF
+
+;
+; extern Fract GXGetShapeJustification(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeJustification
+			move.w              #$00FF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeJustification
+	ENDIF
+
+;
+; extern gxPatternRecord *GXGetShapePattern(gxShape source, gxPatternRecord *pattern)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapePattern
+			move.w              #$0100,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapePattern
+	ENDIF
+
+;
+; extern Fixed GXGetShapePen(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapePen
+			move.w              #$0101,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapePen
+	ENDIF
+
+;
+; extern gxFontPlatform GXGetShapeEncoding(gxShape source, gxFontScript *script, gxFontLanguage *language)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeEncoding
+			move.w              #$0102,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeEncoding
+	ENDIF
+
+;
+; extern Fixed GXGetShapeTextSize(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeTextSize
+			move.w              #$0103,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeTextSize
+	ENDIF
+
+;
+; extern long GXGetShapeFontVariations(gxShape source, gxFontVariation variations[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeFontVariations
+			move.w              #$0104,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeFontVariations
+	ENDIF
+
+;
+; extern long GXGetShapeFontVariationSuite(gxShape source, gxFontVariation variations[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeFontVariationSuite
+			move.w              #$0105,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeFontVariationSuite
+	ENDIF
+
+;
+; extern Fixed GXGetStyleCurveError(gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleCurveError
+			move.w              #$0106,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleCurveError
+	ENDIF
+
+;
+; extern gxDashRecord *GXGetStyleDash(gxStyle source, gxDashRecord *dash)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleDash
+			move.w              #$0107,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleDash
+	ENDIF
+
+;
+; extern gxCapRecord *GXGetStyleCap(gxStyle source, gxCapRecord *cap)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleCap
+			move.w              #$0108,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleCap
+	ENDIF
+
+;  returns the number of layers 
+;
+; extern long GXGetStyleFace(gxStyle source, gxTextFace *face)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleFace
+			move.w              #$0109,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleFace
+	ENDIF
+
+;
+; extern gxFont GXGetStyleFont(gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleFont
+			move.w              #$010A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleFont
+	ENDIF
+
+;
+; extern gxJoinRecord *GXGetStyleJoin(gxStyle source, gxJoinRecord *join)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleJoin
+			move.w              #$010B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleJoin
+	ENDIF
+
+;
+; extern Fract GXGetStyleJustification(gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleJustification
+			move.w              #$010C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleJustification
+	ENDIF
+
+;
+; extern gxPatternRecord *GXGetStylePattern(gxStyle source, gxPatternRecord *pattern)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStylePattern
+			move.w              #$010D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStylePattern
+	ENDIF
+
+;
+; extern Fixed GXGetStylePen(gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStylePen
+			move.w              #$010E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStylePen
+	ENDIF
+
+;
+; extern gxFontPlatform GXGetStyleEncoding(gxStyle source, gxFontScript *script, gxFontLanguage *language)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleEncoding
+			move.w              #$010F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleEncoding
+	ENDIF
+
+;
+; extern Fixed GXGetStyleTextSize(gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleTextSize
+			move.w              #$0110,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleTextSize
+	ENDIF
+
+;
+; extern long GXGetStyleFontVariations(gxStyle source, gxFontVariation variations[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleFontVariations
+			move.w              #$0111,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleFontVariations
+	ENDIF
+
+;
+; extern long GXGetStyleFontVariationSuite(gxStyle source, gxFontVariation variations[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleFontVariationSuite
+			move.w              #$0112,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleFontVariationSuite
+	ENDIF
+
+;
+; extern void GXSetShapeCurveError(gxShape target, Fixed error)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeCurveError
+			move.w              #$0113,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeCurveError
+	ENDIF
+
+;
+; extern void GXSetShapeDash(gxShape target, const gxDashRecord *dash)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeDash
+			move.w              #$0114,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeDash
+	ENDIF
+
+;
+; extern void GXSetShapeCap(gxShape target, const gxCapRecord *cap)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeCap
+			move.w              #$0115,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeCap
+	ENDIF
+
+;
+; extern void GXSetShapeFace(gxShape target, const gxTextFace *face)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeFace
+			move.w              #$0116,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeFace
+	ENDIF
+
+;
+; extern void GXSetShapeFont(gxShape target, gxFont aFont)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeFont
+			move.w              #$0117,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeFont
+	ENDIF
+
+;
+; extern void GXSetShapeJoin(gxShape target, const gxJoinRecord *join)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeJoin
+			move.w              #$0118,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeJoin
+	ENDIF
+
+;
+; extern void GXSetShapeJustification(gxShape target, Fract justify)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeJustification
+			move.w              #$0119,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeJustification
+	ENDIF
+
+;
+; extern void GXSetShapePattern(gxShape target, const gxPatternRecord *pattern)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapePattern
+			move.w              #$011A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapePattern
+	ENDIF
+
+;
+; extern void GXSetShapePen(gxShape target, Fixed pen)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapePen
+			move.w              #$011B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapePen
+	ENDIF
+
+;
+; extern void GXSetShapeEncoding(gxShape target, gxFontPlatform platform, gxFontScript script, gxFontLanguage language)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeEncoding
+			move.w              #$011C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeEncoding
+	ENDIF
+
+;
+; extern void GXSetShapeTextSize(gxShape target, Fixed size)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeTextSize
+			move.w              #$011D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeTextSize
+	ENDIF
+
+;
+; extern void GXSetShapeFontVariations(gxShape target, long count, const gxFontVariation variations[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeFontVariations
+			move.w              #$011E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeFontVariations
+	ENDIF
+
+;
+; extern void GXSetStyleCurveError(gxStyle target, Fixed error)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleCurveError
+			move.w              #$011F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleCurveError
+	ENDIF
+
+;
+; extern void GXSetStyleDash(gxStyle target, const gxDashRecord *dash)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleDash
+			move.w              #$0120,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleDash
+	ENDIF
+
+;
+; extern void GXSetStyleCap(gxStyle target, const gxCapRecord *cap)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleCap
+			move.w              #$0121,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleCap
+	ENDIF
+
+;
+; extern void GXSetStyleFace(gxStyle target, const gxTextFace *face)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleFace
+			move.w              #$0122,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleFace
+	ENDIF
+
+;
+; extern void GXSetStyleFont(gxStyle target, gxFont aFont)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleFont
+			move.w              #$0123,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleFont
+	ENDIF
+
+;
+; extern void GXSetStyleJoin(gxStyle target, const gxJoinRecord *join)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleJoin
+			move.w              #$0124,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleJoin
+	ENDIF
+
+;
+; extern void GXSetStyleJustification(gxStyle target, Fract justify)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleJustification
+			move.w              #$0125,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleJustification
+	ENDIF
+
+;
+; extern void GXSetStylePattern(gxStyle target, const gxPatternRecord *pattern)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStylePattern
+			move.w              #$0126,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStylePattern
+	ENDIF
+
+;
+; extern void GXSetStylePen(gxStyle target, Fixed pen)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStylePen
+			move.w              #$0127,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStylePen
+	ENDIF
+
+;
+; extern void GXSetStyleEncoding(gxStyle target, gxFontPlatform platform, gxFontScript script, gxFontLanguage language)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleEncoding
+			move.w              #$0128,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleEncoding
+	ENDIF
+
+;
+; extern void GXSetStyleTextSize(gxStyle target, Fixed size)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleTextSize
+			move.w              #$0129,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleTextSize
+	ENDIF
+
+;
+; extern void GXSetStyleFontVariations(gxStyle target, long count, const gxFontVariation variations[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleFontVariations
+			move.w              #$012A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleFontVariations
+	ENDIF
+
+;
+; extern gxColor *GXGetShapeColor(gxShape source, gxColor *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeColor
+			move.w              #$012B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeColor
+	ENDIF
+
+;
+; extern gxTransferMode *GXGetShapeTransfer(gxShape source, gxTransferMode *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeTransfer
+			move.w              #$012C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeTransfer
+	ENDIF
+
+;
+; extern gxColor *GXGetInkColor(gxInk source, gxColor *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetInkColor
+			move.w              #$012D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetInkColor
+	ENDIF
+
+;
+; extern gxTransferMode *GXGetInkTransfer(gxInk source, gxTransferMode *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetInkTransfer
+			move.w              #$012E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetInkTransfer
+	ENDIF
+
+;
+; extern void GXSetShapeColor(gxShape target, const gxColor *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeColor
+			move.w              #$012F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeColor
+	ENDIF
+
+;
+; extern void GXSetShapeTransfer(gxShape target, const gxTransferMode *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeTransfer
+			move.w              #$0130,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeTransfer
+	ENDIF
+
+;
+; extern void GXSetInkColor(gxInk target, const gxColor *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetInkColor
+			move.w              #$0131,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetInkColor
+	ENDIF
+
+;
+; extern void GXSetInkTransfer(gxInk target, const gxTransferMode *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetInkTransfer
+			move.w              #$0132,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetInkTransfer
+	ENDIF
+
+;
+; extern gxShape GXGetShapeClip(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeClip
+			move.w              #$0133,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeClip
+	ENDIF
+
+;
+; extern gxShapeType GXGetShapeClipType(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeClipType
+			move.w              #$0276,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeClipType
+	ENDIF
+
+;
+; extern gxMapping *GXGetShapeMapping(gxShape source, gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeMapping
+			move.w              #$0134,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeMapping
+	ENDIF
+
+;
+; extern gxShapePart GXGetShapeHitTest(gxShape source, Fixed *tolerance)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeHitTest
+			move.w              #$0135,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeHitTest
+	ENDIF
+
+;
+; extern long GXGetShapeViewPorts(gxShape source, gxViewPort list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeViewPorts
+			move.w              #$0136,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeViewPorts
+	ENDIF
+
+;
+; extern gxShape GXGetTransformClip(gxTransform source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTransformClip
+			move.w              #$0137,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTransformClip
+	ENDIF
+
+;
+; extern gxShapeType GXGetTransformClipType(gxTransform source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTransformClipType
+			move.w              #$0277,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTransformClipType
+	ENDIF
+
+;
+; extern gxMapping *GXGetTransformMapping(gxTransform source, gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTransformMapping
+			move.w              #$0138,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTransformMapping
+	ENDIF
+
+;
+; extern gxShapePart GXGetTransformHitTest(gxTransform source, Fixed *tolerance)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTransformHitTest
+			move.w              #$0139,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTransformHitTest
+	ENDIF
+
+;
+; extern long GXGetTransformViewPorts(gxTransform source, gxViewPort list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTransformViewPorts
+			move.w              #$013A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTransformViewPorts
+	ENDIF
+
+;
+; extern void GXSetShapeClip(gxShape target, gxShape clip)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeClip
+			move.w              #$013B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeClip
+	ENDIF
+
+;
+; extern void GXSetShapeMapping(gxShape target, const gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeMapping
+			move.w              #$013C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeMapping
+	ENDIF
+
+;
+; extern void GXSetShapeHitTest(gxShape target, gxShapePart mask, Fixed tolerance)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeHitTest
+			move.w              #$013D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeHitTest
+	ENDIF
+
+;
+; extern void GXSetShapeViewPorts(gxShape target, long count, const gxViewPort list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeViewPorts
+			move.w              #$013E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeViewPorts
+	ENDIF
+
+;
+; extern void GXSetTransformClip(gxTransform target, gxShape clip)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetTransformClip
+			move.w              #$013F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetTransformClip
+	ENDIF
+
+;
+; extern void GXSetTransformMapping(gxTransform target, const gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetTransformMapping
+			move.w              #$0140,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetTransformMapping
+	ENDIF
+
+;
+; extern void GXSetTransformHitTest(gxTransform target, gxShapePart mask, Fixed tolerance)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetTransformHitTest
+			move.w              #$0141,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetTransformHitTest
+	ENDIF
+
+;
+; extern void GXSetTransformViewPorts(gxTransform target, long count, const gxViewPort list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetTransformViewPorts
+			move.w              #$0142,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetTransformViewPorts
+	ENDIF
+
+;
+; extern long GXGetColorSet(gxColorSet source, gxColorSpace *space, gxSetColor colors[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetColorSet
+			move.w              #$0143,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetColorSet
+	ENDIF
+
+;
+; extern long GXGetColorProfile(gxColorProfile source, void *colorProfileData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetColorProfile
+			move.w              #$0144,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetColorProfile
+	ENDIF
+
+;
+; extern void GXSetColorSet(gxColorSet target, gxColorSpace space, long count, const gxSetColor colors[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetColorSet
+			move.w              #$0145,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetColorSet
+	ENDIF
+
+;
+; extern void GXSetColorProfile(gxColorProfile target, long size, void *colorProfileData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetColorProfile
+			move.w              #$0146,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetColorProfile
+	ENDIF
+
+;
+; extern gxShape GXGetViewDeviceBitmap(gxViewDevice source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewDeviceBitmap
+			move.w              #$0147,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewDeviceBitmap
+	ENDIF
+
+;
+; extern gxShape GXGetViewDeviceClip(gxViewDevice source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewDeviceClip
+			move.w              #$0148,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewDeviceClip
+	ENDIF
+
+;
+; extern gxMapping *GXGetViewDeviceMapping(gxViewDevice source, gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewDeviceMapping
+			move.w              #$0149,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewDeviceMapping
+	ENDIF
+
+;
+; extern gxViewGroup GXGetViewDeviceViewGroup(gxViewDevice source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewDeviceViewGroup
+			move.w              #$014A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewDeviceViewGroup
+	ENDIF
+
+;
+; extern void GXSetViewDeviceBitmap(gxViewDevice target, gxShape bitmapShape)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewDeviceBitmap
+			move.w              #$014B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewDeviceBitmap
+	ENDIF
+
+;
+; extern void GXSetViewDeviceClip(gxViewDevice target, gxShape clip)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewDeviceClip
+			move.w              #$014C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewDeviceClip
+	ENDIF
+
+;
+; extern void GXSetViewDeviceMapping(gxViewDevice target, const gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewDeviceMapping
+			move.w              #$014D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewDeviceMapping
+	ENDIF
+
+;
+; extern void GXSetViewDeviceViewGroup(gxViewDevice target, gxViewGroup group)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewDeviceViewGroup
+			move.w              #$014E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewDeviceViewGroup
+	ENDIF
+
+;
+; extern long GXGetViewPortChildren(gxViewPort source, gxViewPort list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortChildren
+			move.w              #$014F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortChildren
+	ENDIF
+
+;
+; extern gxShape GXGetViewPortClip(gxViewPort source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortClip
+			move.w              #$0150,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortClip
+	ENDIF
+
+;
+; extern long GXGetViewPortDither(gxViewPort source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortDither
+			move.w              #$0151,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortDither
+	ENDIF
+
+;
+; extern Boolean GXGetViewPortHalftone(gxViewPort source, gxHalftone *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortHalftone
+			move.w              #$0152,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortHalftone
+	ENDIF
+
+;
+; extern gxMapping *GXGetViewPortMapping(gxViewPort source, gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortMapping
+			move.w              #$0153,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortMapping
+	ENDIF
+
+;
+; extern gxViewPort GXGetViewPortParent(gxViewPort source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortParent
+			move.w              #$0154,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortParent
+	ENDIF
+
+;
+; extern gxViewGroup GXGetViewPortViewGroup(gxViewPort source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortViewGroup
+			move.w              #$0155,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortViewGroup
+	ENDIF
+
+;
+; extern long GXGetViewPortHalftoneMatrix(gxViewPort source, gxViewDevice sourceDevice, gxHalftoneMatrix *theMatrix)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortHalftoneMatrix
+			move.w              #$0273,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortHalftoneMatrix
+	ENDIF
+
+;
+; extern void GXSetViewPortChildren(gxViewPort target, long count, const gxViewPort list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewPortChildren
+			move.w              #$0156,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewPortChildren
+	ENDIF
+
+;
+; extern void GXSetViewPortClip(gxViewPort target, gxShape clip)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewPortClip
+			move.w              #$0157,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewPortClip
+	ENDIF
+
+;
+; extern void GXSetViewPortDither(gxViewPort target, long level)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewPortDither
+			move.w              #$0158,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewPortDither
+	ENDIF
+
+;
+; extern void GXSetViewPortHalftone(gxViewPort target, const gxHalftone *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewPortHalftone
+			move.w              #$0159,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewPortHalftone
+	ENDIF
+
+;
+; extern void GXSetViewPortMapping(gxViewPort target, const gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewPortMapping
+			move.w              #$015A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewPortMapping
+	ENDIF
+
+;
+; extern void GXSetViewPortParent(gxViewPort target, gxViewPort parent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewPortParent
+			move.w              #$015B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewPortParent
+	ENDIF
+
+;
+; extern void GXSetViewPortViewGroup(gxViewPort target, gxViewGroup group)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewPortViewGroup
+			move.w              #$015C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewPortViewGroup
+	ENDIF
+
+;
+; extern long GXGetColorProfileTags(gxColorProfile source, long tagType, long index, long count, gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetColorProfileTags
+			move.w              #$015D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetColorProfileTags
+	ENDIF
+
+;
+; extern long GXGetColorSetTags(gxColorSet source, long tagType, long index, long count, gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetColorSetTags
+			move.w              #$015E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetColorSetTags
+	ENDIF
+
+;
+; extern long GXGetInkTags(gxInk source, long tagType, long index, long count, gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetInkTags
+			move.w              #$015F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetInkTags
+	ENDIF
+
+;
+; extern long GXGetShapeTags(gxShape source, long tagType, long index, long count, gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeTags
+			move.w              #$0160,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeTags
+	ENDIF
+
+;
+; extern long GXGetStyleTags(gxStyle source, long tagType, long index, long count, gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleTags
+			move.w              #$0161,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleTags
+	ENDIF
+
+;
+; extern long GXGetTransformTags(gxTransform source, long tagType, long index, long count, gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTransformTags
+			move.w              #$0162,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTransformTags
+	ENDIF
+
+;
+; extern long GXGetViewDeviceTags(gxViewDevice source, long tagType, long index, long count, gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewDeviceTags
+			move.w              #$0163,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewDeviceTags
+	ENDIF
+
+;
+; extern long GXGetViewPortTags(gxViewPort source, long tagType, long index, long count, gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortTags
+			move.w              #$0164,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortTags
+	ENDIF
+
+;
+; extern void GXSetColorProfileTags(gxColorProfile target, long tagType, long index, long oldCount, long newCount, const gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetColorProfileTags
+			move.w              #$0165,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetColorProfileTags
+	ENDIF
+
+;
+; extern void GXSetColorSetTags(gxColorSet target, long tagType, long index, long oldCount, long newCount, const gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetColorSetTags
+			move.w              #$0166,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetColorSetTags
+	ENDIF
+
+;
+; extern void GXSetInkTags(gxInk target, long tagType, long index, long oldCount, long newCount, const gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetInkTags
+			move.w              #$0167,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetInkTags
+	ENDIF
+
+;
+; extern void GXSetShapeTags(gxShape target, long tagType, long index, long oldCount, long newCount, const gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeTags
+			move.w              #$0168,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeTags
+	ENDIF
+
+;
+; extern void GXSetStyleTags(gxStyle target, long tagType, long index, long oldCount, long newCount, const gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleTags
+			move.w              #$0169,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleTags
+	ENDIF
+
+;
+; extern void GXSetTransformTags(gxTransform target, long tagType, long index, long oldCount, long newCount, const gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetTransformTags
+			move.w              #$016A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetTransformTags
+	ENDIF
+
+;
+; extern void GXSetViewDeviceTags(gxViewDevice target, long tagType, long index, long oldCount, long newCount, const gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewDeviceTags
+			move.w              #$016B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewDeviceTags
+	ENDIF
+
+;
+; extern void GXSetViewPortTags(gxViewPort target, long tagType, long index, long oldCount, long newCount, const gxTag items[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewPortTags
+			move.w              #$016C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewPortTags
+	ENDIF
+
+;
+; extern gxInkAttribute GXGetInkAttributes(gxInk source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetInkAttributes
+			move.w              #$016D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetInkAttributes
+	ENDIF
+
+;
+; extern gxShapeAttribute GXGetShapeAttributes(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeAttributes
+			move.w              #$016E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeAttributes
+	ENDIF
+
+;
+; extern gxInkAttribute GXGetShapeInkAttributes(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeInkAttributes
+			move.w              #$016F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeInkAttributes
+	ENDIF
+
+;
+; extern gxStyleAttribute GXGetShapeStyleAttributes(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeStyleAttributes
+			move.w              #$0170,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeStyleAttributes
+	ENDIF
+
+;
+; extern gxStyleAttribute GXGetStyleAttributes(gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleAttributes
+			move.w              #$0171,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleAttributes
+	ENDIF
+
+;
+; extern gxTextAttribute GXGetShapeTextAttributes(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeTextAttributes
+			move.w              #$0172,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeTextAttributes
+	ENDIF
+
+;
+; extern gxTextAttribute GXGetStyleTextAttributes(gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleTextAttributes
+			move.w              #$0173,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleTextAttributes
+	ENDIF
+
+;
+; extern gxDeviceAttribute GXGetViewDeviceAttributes(gxViewDevice source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewDeviceAttributes
+			move.w              #$0174,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewDeviceAttributes
+	ENDIF
+
+;
+; extern gxPortAttribute GXGetViewPortAttributes(gxViewPort source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortAttributes
+			move.w              #$0175,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortAttributes
+	ENDIF
+
+;
+; extern void GXSetInkAttributes(gxInk target, gxInkAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetInkAttributes
+			move.w              #$0176,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetInkAttributes
+	ENDIF
+
+;
+; extern void GXSetShapeAttributes(gxShape target, gxShapeAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeAttributes
+			move.w              #$0177,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeAttributes
+	ENDIF
+
+;
+; extern void GXSetShapeInkAttributes(gxShape target, gxInkAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeInkAttributes
+			move.w              #$0178,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeInkAttributes
+	ENDIF
+
+;
+; extern void GXSetShapeStyleAttributes(gxShape target, gxStyleAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeStyleAttributes
+			move.w              #$0179,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeStyleAttributes
+	ENDIF
+
+;
+; extern void GXSetStyleAttributes(gxStyle target, gxStyleAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleAttributes
+			move.w              #$017A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleAttributes
+	ENDIF
+
+;
+; extern void GXSetShapeTextAttributes(gxShape target, gxTextAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeTextAttributes
+			move.w              #$017B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeTextAttributes
+	ENDIF
+
+;
+; extern void GXSetStyleTextAttributes(gxStyle target, gxTextAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetStyleTextAttributes
+			move.w              #$017C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetStyleTextAttributes
+	ENDIF
+
+;
+; extern void GXSetViewDeviceAttributes(gxViewDevice target, gxDeviceAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewDeviceAttributes
+			move.w              #$017D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewDeviceAttributes
+	ENDIF
+
+;
+; extern void GXSetViewPortAttributes(gxViewPort target, gxPortAttribute attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetViewPortAttributes
+			move.w              #$017E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetViewPortAttributes
+	ENDIF
+
+;
+; extern long GXGetColorProfileOwners(gxColorProfile source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetColorProfileOwners
+			move.w              #$017F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetColorProfileOwners
+	ENDIF
+
+;
+; extern long GXGetColorSetOwners(gxColorSet source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetColorSetOwners
+			move.w              #$0180,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetColorSetOwners
+	ENDIF
+
+;
+; extern long GXGetInkOwners(gxInk source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetInkOwners
+			move.w              #$0181,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetInkOwners
+	ENDIF
+
+;
+; extern long GXGetShapeOwners(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeOwners
+			move.w              #$0182,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeOwners
+	ENDIF
+
+;
+; extern long GXGetStyleOwners(gxStyle source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetStyleOwners
+			move.w              #$0183,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetStyleOwners
+	ENDIF
+
+;
+; extern long GXGetTagOwners(gxTag source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTagOwners
+			move.w              #$0184,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTagOwners
+	ENDIF
+
+;
+; extern long GXGetTransformOwners(gxTransform source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTransformOwners
+			move.w              #$0185,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTransformOwners
+	ENDIF
+
+;
+; extern void GXLockShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLockShape
+			move.w              #$0186,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLockShape
+	ENDIF
+
+;
+; extern void GXLockTag(gxTag target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLockTag
+			move.w              #$0187,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLockTag
+	ENDIF
+
+;
+; extern void GXUnlockShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnlockShape
+			move.w              #$0188,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnlockShape
+	ENDIF
+
+;
+; extern void GXUnlockTag(gxTag target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnlockTag
+			move.w              #$0189,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnlockTag
+	ENDIF
+
+;
+; extern void *GXGetShapeStructure(gxShape source, long *length)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeStructure
+			move.w              #$018A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeStructure
+	ENDIF
+
+;
+; extern void *GXGetTagStructure(gxTag source, long *length)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTagStructure
+			move.w              #$018B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTagStructure
+	ENDIF
+
+;
+; extern Fixed GXGetColorDistance(const gxColor *target, const gxColor *source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetColorDistance
+			move.w              #$018C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetColorDistance
+	ENDIF
+
+;
+; extern gxPoint *GXShapeLengthToPoint(gxShape target, long index, Fixed length, gxPoint *location, gxPoint *tangent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXShapeLengthToPoint
+			move.w              #$018D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXShapeLengthToPoint
+	ENDIF
+
+;
+; extern wide *GXGetShapeArea(gxShape source, long index, wide *area)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeArea
+			move.w              #$018E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeArea
+	ENDIF
+
+;
+; extern long GXGetShapeCacheSize(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeCacheSize
+			move.w              #$018F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeCacheSize
+	ENDIF
+
+;
+; extern gxPoint *GXGetShapeCenter(gxShape source, long index, gxPoint *center)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeCenter
+			move.w              #$0190,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeCenter
+	ENDIF
+
+;
+; extern gxContourDirection GXGetShapeDirection(gxShape source, long contour)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeDirection
+			move.w              #$0191,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeDirection
+	ENDIF
+
+;
+; extern long GXGetShapeIndex(gxShape source, long contour, long vector)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeIndex
+			move.w              #$0192,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeIndex
+	ENDIF
+
+;
+; extern wide *GXGetShapeLength(gxShape source, long index, wide *length)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeLength
+			move.w              #$0193,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeLength
+	ENDIF
+
+;
+; extern long GXGetShapeSize(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeSize
+			move.w              #$0194,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeSize
+	ENDIF
+
+;
+; extern long GXCountShapeContours(gxShape source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCountShapeContours
+			move.w              #$0195,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCountShapeContours
+	ENDIF
+
+;
+; extern long GXCountShapePoints(gxShape source, long contour)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCountShapePoints
+			move.w              #$0196,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCountShapePoints
+	ENDIF
+
+;  returns the number of positions 
+;
+; extern long GXGetShapeDashPositions(gxShape source, gxMapping dashMappings[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeDashPositions
+			move.w              #$0197,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeDashPositions
+	ENDIF
+
+;
+; extern long GXGetShapeDeviceArea(gxShape source, gxViewPort port, gxViewDevice device)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeDeviceArea
+			move.w              #$0198,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeDeviceArea
+	ENDIF
+
+;
+; extern Boolean GXGetShapeDeviceBounds(gxShape source, gxViewPort port, gxViewDevice device, gxRectangle *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeDeviceBounds
+			move.w              #$0199,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeDeviceBounds
+	ENDIF
+
+;
+; extern gxColorSet GXGetShapeDeviceColors(gxShape source, gxViewPort port, gxViewDevice device, long *width)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeDeviceColors
+			move.w              #$019A,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeDeviceColors
+	ENDIF
+
+;
+; extern Boolean GXGetShapeGlobalBounds(gxShape source, gxViewPort port, gxViewGroup group, gxRectangle *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeGlobalBounds
+			move.w              #$019B,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeGlobalBounds
+	ENDIF
+
+;
+; extern long GXGetShapeGlobalViewDevices(gxShape source, gxViewPort port, gxViewDevice list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeGlobalViewDevices
+			move.w              #$019C,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeGlobalViewDevices
+	ENDIF
+
+;
+; extern long GXGetShapeGlobalViewPorts(gxShape source, gxViewPort list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeGlobalViewPorts
+			move.w              #$019D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeGlobalViewPorts
+	ENDIF
+
+;
+; extern gxRectangle *GXGetShapeLocalBounds(gxShape source, gxRectangle *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeLocalBounds
+			move.w              #$019E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeLocalBounds
+	ENDIF
+
+;  returns the number of positions 
+;
+; extern long GXGetShapePatternPositions(gxShape source, gxPoint positions[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapePatternPositions
+			move.w              #$019F,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapePatternPositions
+	ENDIF
+
+;
+; extern void GXGetShapeLocalFontMetrics(gxShape sourceShape, gxPoint *before, gxPoint *after, gxPoint *caretAngle, gxPoint *caretOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeLocalFontMetrics
+			move.w              #$01A0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeLocalFontMetrics
+	ENDIF
+
+;
+; extern void GXGetShapeDeviceFontMetrics(gxShape sourceShape, gxViewPort port, gxViewDevice device, gxPoint *before, gxPoint *after, gxPoint *caretAngle, gxPoint *caretOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeDeviceFontMetrics
+			move.w              #$01A1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeDeviceFontMetrics
+	ENDIF
+
+;
+; extern long GXGetViewGroupViewDevices(gxViewGroup source, gxViewDevice list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewGroupViewDevices
+			move.w              #$01A2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewGroupViewDevices
+	ENDIF
+
+;
+; extern long GXGetViewGroupViewPorts(gxViewGroup source, gxViewPort list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewGroupViewPorts
+			move.w              #$01A3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewGroupViewPorts
+	ENDIF
+
+;
+; extern gxMapping *GXGetViewPortGlobalMapping(gxViewPort source, gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortGlobalMapping
+			move.w              #$01A4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortGlobalMapping
+	ENDIF
+
+;
+; extern long GXGetViewPortViewDevices(gxViewPort source, gxViewDevice list[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetViewPortViewDevices
+			move.w              #$01A5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetViewPortViewDevices
+	ENDIF
+
+;
+; extern gxShape GXHitTestPicture(gxShape target, const gxPoint *test, gxHitTestInfo *result, long level, long depth)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXHitTestPicture
+			move.w              #$01A6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXHitTestPicture
+	ENDIF
+
+;
+; extern Boolean GXIntersectRectangle(gxRectangle *target, const gxRectangle *source, const gxRectangle *operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXIntersectRectangle
+			move.w              #$01A7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXIntersectRectangle
+	ENDIF
+
+;
+; extern gxRectangle *GXUnionRectangle(gxRectangle *target, const gxRectangle *source, const gxRectangle *operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnionRectangle
+			move.w              #$01A8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnionRectangle
+	ENDIF
+
+;
+; extern Boolean GXTouchesRectanglePoint(const gxRectangle *target, const gxPoint *test)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXTouchesRectanglePoint
+			move.w              #$01A9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXTouchesRectanglePoint
+	ENDIF
+
+;
+; extern Boolean GXTouchesShape(gxShape target, gxShape test)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXTouchesShape
+			move.w              #$01AA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXTouchesShape
+	ENDIF
+
+;
+; extern Boolean GXTouchesBoundsShape(const gxRectangle *target, gxShape test)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXTouchesBoundsShape
+			move.w              #$01AB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXTouchesBoundsShape
+	ENDIF
+
+;
+; extern Boolean GXContainsRectangle(const gxRectangle *container, const gxRectangle *test)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXContainsRectangle
+			move.w              #$01AC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXContainsRectangle
+	ENDIF
+
+;
+; extern Boolean GXContainsShape(gxShape container, gxShape test)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXContainsShape
+			move.w              #$01AD,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXContainsShape
+	ENDIF
+
+;
+; extern Boolean GXContainsBoundsShape(const gxRectangle *container, gxShape test, long index)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXContainsBoundsShape
+			move.w              #$01AE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXContainsBoundsShape
+	ENDIF
+
+;
+; extern gxColor *GXConvertColor(gxColor *target, gxColorSpace space, gxColorSet aSet, gxColorProfile profile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXConvertColor
+			move.w              #$01AF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXConvertColor
+	ENDIF
+
+;
+; extern gxColor *GXCombineColor(gxColor *target, gxInk operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCombineColor
+			move.w              #$01B0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCombineColor
+	ENDIF
+
+;
+; extern Boolean GXCheckColor(const gxColor *source, gxColorSpace space, gxColorSet aSet, gxColorProfile profile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCheckColor
+			move.w              #$01B1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCheckColor
+	ENDIF
+
+;
+; extern gxShape GXCheckBitmapColor(gxShape source, const gxLongRectangle *area, gxColorSpace space, gxColorSet aSet, gxColorProfile profile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCheckBitmapColor
+			move.w              #$01B2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCheckBitmapColor
+	ENDIF
+
+;
+; extern Fixed GXGetHalftoneDeviceAngle(gxViewDevice source, const gxHalftone *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetHalftoneDeviceAngle
+			move.w              #$01B3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetHalftoneDeviceAngle
+	ENDIF
+
+;
+; extern long GXGetColorSetParts(gxColorSet source, long index, long count, gxColorSpace *space, gxSetColor data[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetColorSetParts
+			move.w              #$01B4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetColorSetParts
+	ENDIF
+
+;  returns the glyph count 
+;
+; extern long GXGetGlyphParts(gxShape source, long index, long charCount, long *byteLength, unsigned char text[], gxPoint positions[], long advanceBits[], gxPoint tangents[], long *runCount, short styleRuns[], gxStyle styles[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGlyphParts
+			move.w              #$01B5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGlyphParts
+	ENDIF
+
+;
+; extern long GXGetPathParts(gxShape source, long index, long count, gxPaths *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPathParts
+			move.w              #$01B6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPathParts
+	ENDIF
+
+;
+; extern long GXGetPictureParts(gxShape source, long index, long count, gxShape shapes[], gxStyle styles[], gxInk inks[], gxTransform transforms[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPictureParts
+			move.w              #$01B7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPictureParts
+	ENDIF
+
+;
+; extern long GXGetPolygonParts(gxShape source, long index, long count, gxPolygons *data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPolygonParts
+			move.w              #$01B8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPolygonParts
+	ENDIF
+
+;
+; extern gxShape GXGetShapeParts(gxShape source, long index, long count, gxShape destination)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapeParts
+			move.w              #$01B9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapeParts
+	ENDIF
+
+;
+; extern long GXGetTextParts(gxShape source, long index, long charCount, unsigned char text[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTextParts
+			move.w              #$01BA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTextParts
+	ENDIF
+
+;
+; extern void GXSetColorSetParts(gxColorSet target, long index, long oldCount, long newCount, const gxSetColor data[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetColorSetParts
+			move.w              #$01BB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetColorSetParts
+	ENDIF
+
+;
+; extern void GXSetGlyphParts(gxShape source, long index, long oldCharCount, long newCharCount, const unsigned char text[], const gxPoint positions[], const long advanceBits[], const gxPoint tangents[], const short styleRuns[], const gxStyle styles[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetGlyphParts
+			move.w              #$01BC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetGlyphParts
+	ENDIF
+
+;
+; extern void GXSetPathParts(gxShape target, long index, long count, const gxPaths *data, gxEditShapeFlag flags)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetPathParts
+			move.w              #$01BD,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetPathParts
+	ENDIF
+
+;
+; extern void GXSetPictureParts(gxShape target, long index, long oldCount, long newCount, const gxShape shapes[], const gxStyle styles[], const gxInk inks[], const gxTransform transforms[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetPictureParts
+			move.w              #$01BE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetPictureParts
+	ENDIF
+
+;
+; extern void GXSetPolygonParts(gxShape target, long index, long count, const gxPolygons *data, gxEditShapeFlag flags)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetPolygonParts
+			move.w              #$01BF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetPolygonParts
+	ENDIF
+
+;
+; extern void GXSetShapeParts(gxShape target, long index, long count, gxShape insert, gxEditShapeFlag flags)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapeParts
+			move.w              #$01C0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapeParts
+	ENDIF
+
+;
+; extern void GXSetTextParts(gxShape target, long index, long oldCharCount, long newCharCount, const unsigned char text[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetTextParts
+			move.w              #$01C1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetTextParts
+	ENDIF
+
+;
+; extern long GXGetShapePoints(gxShape source, long index, long count, gxPoint data[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetShapePoints
+			move.w              #$01C2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetShapePoints
+	ENDIF
+
+;
+; extern void GXSetShapePoints(gxShape target, long index, long count, const gxPoint data[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetShapePoints
+			move.w              #$01C3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetShapePoints
+	ENDIF
+
+;
+; extern long GXGetGlyphPositions(gxShape source, long index, long charCount, long advance[], gxPoint positions[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGlyphPositions
+			move.w              #$01C4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGlyphPositions
+	ENDIF
+
+;
+; extern long GXGetGlyphTangents(gxShape source, long index, long charCount, gxPoint tangents[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGlyphTangents
+			move.w              #$01C5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGlyphTangents
+	ENDIF
+
+;
+; extern void GXSetGlyphPositions(gxShape target, long index, long charCount, const long advance[], const gxPoint positions[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetGlyphPositions
+			move.w              #$01C6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetGlyphPositions
+	ENDIF
+
+;
+; extern void GXSetGlyphTangents(gxShape target, long index, long charCount, const gxPoint tangents[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetGlyphTangents
+			move.w              #$01C7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetGlyphTangents
+	ENDIF
+
+;
+; extern long GXGetGlyphMetrics(gxShape source, gxPoint glyphOrigins[], gxRectangle boundingBoxes[], gxPoint sideBearings[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetGlyphMetrics
+			move.w              #$01C8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetGlyphMetrics
+	ENDIF
+
+;
+; extern void GXDifferenceShape(gxShape target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDifferenceShape
+			move.w              #$01C9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDifferenceShape
+	ENDIF
+
+;
+; extern void GXExcludeShape(gxShape target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXExcludeShape
+			move.w              #$01CA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXExcludeShape
+	ENDIF
+
+;
+; extern void GXIntersectShape(gxShape target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXIntersectShape
+			move.w              #$01CB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXIntersectShape
+	ENDIF
+
+;
+; extern void GXMapShape(gxShape target, const gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXMapShape
+			move.w              #$01CC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXMapShape
+	ENDIF
+
+;
+; extern void GXMoveShape(gxShape target, Fixed deltaX, Fixed deltaY)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXMoveShape
+			move.w              #$01CD,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXMoveShape
+	ENDIF
+
+;
+; extern void GXMoveShapeTo(gxShape target, Fixed x, Fixed y)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXMoveShapeTo
+			move.w              #$01CE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXMoveShapeTo
+	ENDIF
+
+;
+; extern void GXReverseDifferenceShape(gxShape target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXReverseDifferenceShape
+			move.w              #$01CF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXReverseDifferenceShape
+	ENDIF
+
+;
+; extern void GXRotateShape(gxShape target, Fixed degrees, Fixed xOffset, Fixed yOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXRotateShape
+			move.w              #$01D0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXRotateShape
+	ENDIF
+
+;
+; extern void GXScaleShape(gxShape target, Fixed hScale, Fixed vScale, Fixed xOffset, Fixed yOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXScaleShape
+			move.w              #$01D1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXScaleShape
+	ENDIF
+
+;
+; extern void GXSkewShape(gxShape target, Fixed xSkew, Fixed ySkew, Fixed xOffset, Fixed yOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSkewShape
+			move.w              #$01D2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSkewShape
+	ENDIF
+
+;
+; extern void GXUnionShape(gxShape target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnionShape
+			move.w              #$01D3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnionShape
+	ENDIF
+
+;
+; extern void GXDifferenceTransform(gxTransform target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDifferenceTransform
+			move.w              #$01D4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDifferenceTransform
+	ENDIF
+
+;
+; extern void GXExcludeTransform(gxTransform target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXExcludeTransform
+			move.w              #$01D5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXExcludeTransform
+	ENDIF
+
+;
+; extern void GXIntersectTransform(gxTransform target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXIntersectTransform
+			move.w              #$01D6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXIntersectTransform
+	ENDIF
+
+;
+; extern void GXMapTransform(gxTransform target, const gxMapping *map)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXMapTransform
+			move.w              #$01D7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXMapTransform
+	ENDIF
+
+;
+; extern void GXMoveTransform(gxTransform target, Fixed deltaX, Fixed deltaY)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXMoveTransform
+			move.w              #$01D8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXMoveTransform
+	ENDIF
+
+;
+; extern void GXMoveTransformTo(gxTransform target, Fixed x, Fixed y)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXMoveTransformTo
+			move.w              #$01D9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXMoveTransformTo
+	ENDIF
+
+;
+; extern void GXReverseDifferenceTransform(gxTransform target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXReverseDifferenceTransform
+			move.w              #$01DA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXReverseDifferenceTransform
+	ENDIF
+
+;
+; extern void GXRotateTransform(gxTransform target, Fixed degrees, Fixed xOffset, Fixed yOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXRotateTransform
+			move.w              #$01DB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXRotateTransform
+	ENDIF
+
+;
+; extern void GXScaleTransform(gxTransform target, Fixed hScale, Fixed vScale, Fixed xOffset, Fixed yOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXScaleTransform
+			move.w              #$01DC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXScaleTransform
+	ENDIF
+
+;
+; extern void GXSkewTransform(gxTransform target, Fixed xSkew, Fixed ySkew, Fixed xOffset, Fixed yOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSkewTransform
+			move.w              #$01DD,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSkewTransform
+	ENDIF
+
+;
+; extern void GXUnionTransform(gxTransform target, gxShape operand)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnionTransform
+			move.w              #$01DE,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnionTransform
+	ENDIF
+
+;
+; extern void GXBreakShape(gxShape target, long index)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXBreakShape
+			move.w              #$01DF,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXBreakShape
+	ENDIF
+
+;
+; extern void GXChangedShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXChangedShape
+			move.w              #$01E0,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXChangedShape
+	ENDIF
+
+;
+; extern gxShapePart GXHitTestShape(gxShape target, const gxPoint *test, gxHitTestInfo *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXHitTestShape
+			move.w              #$01E1,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXHitTestShape
+	ENDIF
+
+;
+; extern gxShape GXHitTestDevice(gxShape target, gxViewPort port, gxViewDevice device, const gxPoint *test, const gxPoint *tolerance)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXHitTestDevice
+			move.w              #$01E2,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXHitTestDevice
+	ENDIF
+
+;
+; extern void GXInsetShape(gxShape target, Fixed inset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXInsetShape
+			move.w              #$01E3,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXInsetShape
+	ENDIF
+
+;
+; extern void GXInvertShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXInvertShape
+			move.w              #$01E4,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXInvertShape
+	ENDIF
+
+;
+; extern void GXPrimitiveShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXPrimitiveShape
+			move.w              #$01E5,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXPrimitiveShape
+	ENDIF
+
+;
+; extern void GXReduceShape(gxShape target, long contour)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXReduceShape
+			move.w              #$01E6,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXReduceShape
+	ENDIF
+
+;
+; extern void GXReverseShape(gxShape target, long contour)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXReverseShape
+			move.w              #$01E7,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXReverseShape
+	ENDIF
+
+;
+; extern void GXSimplifyShape(gxShape target)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSimplifyShape
+			move.w              #$01E8,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSimplifyShape
+	ENDIF
+
+;
+; extern void GXLockColorProfile(gxColorProfile source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXLockColorProfile
+			move.w              #$01E9,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXLockColorProfile
+	ENDIF
+
+;
+; extern void GXUnlockColorProfile(gxColorProfile source)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnlockColorProfile
+			move.w              #$01EA,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnlockColorProfile
+	ENDIF
+
+;
+; extern void *GXGetColorProfileStructure(gxColorProfile source, long *length)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetColorProfileStructure
+			move.w              #$01EB,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetColorProfileStructure
+	ENDIF
+
+;
+; extern void GXFlattenShape(gxShape source, gxFlattenFlag flags, gxSpoolBlock *block)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXFlattenShape
+			move.w              #$01EC,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXFlattenShape
+	ENDIF
+
+;
+; extern gxShape GXUnflattenShape(gxSpoolBlock *block, long count, const gxViewPort portList[])
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnflattenShape
+			move.w              #$01ED,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnflattenShape
+	ENDIF
+
+;
+; extern void GXPostGraphicsNotice(gxGraphicsNotice notice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXPostGraphicsNotice
+			move.w              #$0065,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXPostGraphicsNotice
+	ENDIF
+
+;
+; extern void GXIgnoreGraphicsNotice(gxGraphicsNotice notice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXIgnoreGraphicsNotice
+			move.w              #$006D,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXIgnoreGraphicsNotice
+	ENDIF
+
+;
+; extern void GXPopGraphicsNotice(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXPopGraphicsNotice
+			move.w              #$006E,D0
+			dc.w            	$A832
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXPopGraphicsNotice
+	ENDIF
+
+
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF ; __GXGRAPHICS__ 
+

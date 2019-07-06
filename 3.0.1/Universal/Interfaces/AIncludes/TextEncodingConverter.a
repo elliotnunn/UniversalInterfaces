@@ -1,0 +1,290 @@
+;
+;	File:		TextEncodingConverter.a
+;
+;	Contains:	Text Encoding Conversion Interfaces.
+;
+;	Version:	Technology:	System 7.7
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1994-1997 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__TEXTENCODINGCONVERTER__') = 'UNDEFINED' THEN
+__TEXTENCODINGCONVERTER__ SET 1
+
+	IF &TYPE('__TYPES__') = 'UNDEFINED' THEN
+	include 'Types.a'
+	ENDIF
+	IF &TYPE('__MIXEDMODE__') = 'UNDEFINED' THEN
+	include 'MixedMode.a'
+	ENDIF
+	IF &TYPE('__TEXTCOMMON__') = 'UNDEFINED' THEN
+	include 'TextCommon.a'
+	ENDIF
+
+; typedef OSType 						TECPluginSignature
+
+; typedef UInt32 						TECPluginVersion
+
+;  plugin signatures 
+
+kTECSignature					EQU		'encv'
+kTECUnicodePluginSignature		EQU		'puni'
+kTECJapanesePluginSignature		EQU		'pjpn'
+kTECChinesePluginSignature		EQU		'pzho'
+kTECKoreanPluginSignature		EQU		'pkor'
+
+;  converter object reference 
+
+
+
+
+; typedef OSType 						TECPluginSig
+
+TECConversionInfo		RECORD 0
+sourceEncoding			 ds.l	1				; offset: $0 (0)
+destinationEncoding		 ds.l	1				; offset: $4 (4)
+reserved1				 ds.w	1				; offset: $8 (8)
+reserved2				 ds.w	1				; offset: $A (10)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+;  return number of encodings types supported by user's configuraton of the encoding converter 
+;
+; pascal OSStatus TECCountAvailableTextEncodings(ItemCount *numberEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCountAvailableTextEncodings
+	ENDIF
+
+;  fill in an array of type TextEncoding passed in by the user with types of encodings the current configuration of the encoder can handle. 
+;
+; pascal OSStatus TECGetAvailableTextEncodings(TextEncoding availableEncodings[2147483647], ItemCount maxAvailableEncodings, ItemCount *actualAvailableEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetAvailableTextEncodings
+	ENDIF
+
+;  return number of from-to encoding conversion pairs supported  
+;
+; pascal OSStatus TECCountDirectTextEncodingConversions(ItemCount *numberOfEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCountDirectTextEncodingConversions
+	ENDIF
+
+;  fill in an array of type TextEncodingPair passed in by the user with types of encoding pairs the current configuration of the encoder can handle. 
+;
+; pascal OSStatus TECGetDirectTextEncodingConversions(TECConversionInfo availableConversions[2147483647], ItemCount maxAvailableConversions, ItemCount *actualAvailableConversions)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetDirectTextEncodingConversions
+	ENDIF
+
+;  return number of encodings a given encoding can be converter into 
+;
+; pascal OSStatus TECCountDestinationTextEncodings(TextEncoding inputEncoding, ItemCount *numberOfEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCountDestinationTextEncodings
+	ENDIF
+
+;  fill in an array of type TextEncodingPair passed in by the user with types of encodings pairs the current configuration of the encoder can handle. 
+;
+; pascal OSStatus TECGetDestinationTextEncodings(TextEncoding inputEncoding, TextEncoding destinationEncodings[2147483647], ItemCount maxDestinationEncodings, ItemCount *actualDestinationEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetDestinationTextEncodings
+	ENDIF
+
+;  get info about a text encoding 
+;
+; pascal OSStatus TECGetTextEncodingInternetName(TextEncoding textEncoding, Str255 encodingName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetTextEncodingInternetName
+	ENDIF
+
+;
+; pascal OSStatus TECGetTextEncodingFromInternetName(TextEncoding *textEncoding, ConstStr255Param encodingName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetTextEncodingFromInternetName
+	ENDIF
+
+;  create/dispose converters 
+;
+; pascal OSStatus TECCreateConverter(TECObjectRef *newEncodingConverter, TextEncoding inputEncoding, TextEncoding outputEncoding)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCreateConverter
+	ENDIF
+
+;
+; pascal OSStatus TECCreateConverterFromPath(TECObjectRef *newEncodingConverter, const TextEncoding inPath[2147483647], ItemCount inEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCreateConverterFromPath
+	ENDIF
+
+;
+; pascal OSStatus TECDisposeConverter(TECObjectRef newEncodingConverter)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECDisposeConverter
+	ENDIF
+
+;  convert text encodings 
+;
+; pascal OSStatus TECClearConverterContextInfo(TECObjectRef encodingConverter)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECClearConverterContextInfo
+	ENDIF
+
+;
+; pascal OSStatus TECConvertText(TECObjectRef encodingConverter, ConstTextPtr inputBuffer, ByteCount inputBufferLength, ByteCount *actualInputLength, TextPtr outputBuffer, ByteCount outputBufferLength, ByteCount *actualOutputLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECConvertText
+	ENDIF
+
+;
+; pascal OSStatus TECFlushText(TECObjectRef encodingConverter, TextPtr outputBuffer, ByteCount outputBufferLength, ByteCount *actualOutputLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECFlushText
+	ENDIF
+
+;  one-to-many routines 
+;
+; pascal OSStatus TECCountSubTextEncodings(TextEncoding inputEncoding, ItemCount *numberOfEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCountSubTextEncodings
+	ENDIF
+
+;
+; pascal OSStatus TECGetSubTextEncodings(TextEncoding inputEncoding, TextEncoding subEncodings[2147483647], ItemCount maxSubEncodings, ItemCount *actualSubEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetSubTextEncodings
+	ENDIF
+
+;
+; pascal OSStatus TECGetEncodingList(TECObjectRef encodingConverter, ItemCount *numEncodings, Handle *encodingList)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetEncodingList
+	ENDIF
+
+;
+; pascal OSStatus TECCreateOneToManyConverter(TECObjectRef *newEncodingConverter, TextEncoding inputEncoding, ItemCount numOutputEncodings, const TextEncoding outputEncodings[2147483647])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCreateOneToManyConverter
+	ENDIF
+
+
+;
+; pascal OSStatus TECCreateOneToManyConverterFromPath(TECObjectRef *newEncodingConverter, const TextEncoding inPath[2147483647], ItemCount inEncodings, ItemCount numOutputEncodings, const TextEncoding outputEncodings[2147483647])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCreateOneToManyConverterFromPath
+	ENDIF
+
+;
+; pascal OSStatus TECConvertTextToMultipleEncodings(TECObjectRef encodingConverter, ConstTextPtr inputBuffer, ByteCount inputBufferLength, ByteCount *actualInputLength, TextPtr outputBuffer, ByteCount outputBufferLength, ByteCount *actualOutputLength, TextEncodingRun outEncodingsBuffer[2147483647], ItemCount maxOutEncodingRuns, ItemCount *actualOutEncodingRuns)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECConvertTextToMultipleEncodings
+	ENDIF
+
+;
+; pascal OSStatus TECFlushMultipleEncodings(TECObjectRef encodingConverter, TextPtr outputBuffer, ByteCount outputBufferLength, ByteCount *actualOutputLength, TextEncodingRun outEncodingsBuffer[2147483647], ItemCount maxOutEncodingRuns, ItemCount *actualOutEncodingRuns)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECFlushMultipleEncodings
+	ENDIF
+
+;  international internet info 
+;
+; pascal OSStatus TECCountWebTextEncodings(RegionCode locale, ItemCount *numberEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCountWebTextEncodings
+	ENDIF
+
+;
+; pascal OSStatus TECGetWebTextEncodings(RegionCode locale, TextEncoding availableEncodings[2147483647], ItemCount maxAvailableEncodings, ItemCount *actualAvailableEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetWebTextEncodings
+	ENDIF
+
+;
+; pascal OSStatus TECCountMailTextEncodings(RegionCode locale, ItemCount *numberEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCountMailTextEncodings
+	ENDIF
+
+;
+; pascal OSStatus TECGetMailTextEncodings(RegionCode locale, TextEncoding availableEncodings[2147483647], ItemCount maxAvailableEncodings, ItemCount *actualAvailableEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetMailTextEncodings
+	ENDIF
+
+;  examine text encodings 
+;
+; pascal OSStatus TECCountAvailableSniffers(ItemCount *numberOfEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCountAvailableSniffers
+	ENDIF
+
+;
+; pascal OSStatus TECGetAvailableSniffers(TextEncoding availableSniffers[2147483647], ItemCount maxAvailableSniffers, ItemCount *actualAvailableSniffers)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetAvailableSniffers
+	ENDIF
+
+;
+; pascal OSStatus TECCreateSniffer(TECSnifferObjectRef *encodingSniffer, TextEncoding testEncodings[2147483647], ItemCount numTextEncodings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECCreateSniffer
+	ENDIF
+
+;
+; pascal OSStatus TECSniffTextEncoding(TECSnifferObjectRef encodingSniffer, TextPtr inputBuffer, ByteCount inputBufferLength, TextEncoding testEncodings[2147483647], ItemCount numTextEncodings, ItemCount numErrsArray[2147483647], ItemCount maxErrs, ItemCount numFeaturesArray[2147483647], ItemCount maxFeatures)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECSniffTextEncoding
+	ENDIF
+
+;
+; pascal OSStatus TECDisposeSniffer(TECSnifferObjectRef encodingSniffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECDisposeSniffer
+	ENDIF
+
+;
+; pascal OSStatus TECClearSnifferContextInfo(TECSnifferObjectRef encodingSniffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECClearSnifferContextInfo
+	ENDIF
+
+
+
+	ENDIF ; __TEXTENCODINGCONVERTER__ 
+

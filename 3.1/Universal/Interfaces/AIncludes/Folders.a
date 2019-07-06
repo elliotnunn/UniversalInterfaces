@@ -1,0 +1,353 @@
+;
+;	File:		Folders.a
+;
+;	Contains:	Folder Manager Interfaces.
+;
+;	Version:	Technology:	Mac OS 8
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1995-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__FOLDERS__') = 'UNDEFINED' THEN
+__FOLDERS__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+
+
+kOnSystemDisk					EQU		-32768				; previously was 0x8000 but that is an unsigned value whereas vRefNum is signed
+
+kCreateFolder					EQU		1
+kDontCreateFolder				EQU		0
+
+kSystemFolderType				EQU		'macs'				; the system folder 
+kDesktopFolderType				EQU		'desk'				; the desktop folder; objects in this folder show on the desk top. 
+kTrashFolderType				EQU		'trsh'				; the trash folder; objects in this folder show up in the trash 
+kWhereToEmptyTrashFolderType	EQU		'empt'				; the "empty trash" folder; Finder starts empty from here down 
+kPrintMonitorDocsFolderType		EQU		'prnt'				; Print Monitor documents 
+kStartupFolderType				EQU		'strt'				; Finder objects (applications, documents, DAs, aliases, to...) to open at startup go here 
+kShutdownFolderType				EQU		'shdf'				; Finder objects (applications, documents, DAs, aliases, to...) to open at shutdown go here 
+kAppleMenuFolderType			EQU		'amnu'				; Finder objects to put into the Apple menu go here 
+kControlPanelFolderType			EQU		'ctrl'				; Control Panels go here (may contain INITs) 
+kExtensionFolderType			EQU		'extn'				; System extensions go here 
+kFontsFolderType				EQU		'font'				; Fonts go here 
+kPreferencesFolderType			EQU		'pref'				; preferences for applications go here 
+kTemporaryFolderType			EQU		'temp'				; temporary files go here (deleted periodically, but don't rely on it.) 
+; 
+;	Note: 	The FindFolder trap was not implemented until System 7.  If you want to call FindFolder
+;			while running on System 6 machines, then define USE_FINDFOLDER_GLUE and link with
+;			Interface.o which contains glue to implement FindFolder on pre-System 7 machines.
+;
+
+	IF &TYPE('USE_FINDFOLDER_GLUE') <> 'UNDEFINED' THEN
+;
+; pascal OSErr FindFolder(short vRefNum, OSType folderType, Boolean createFolder, short *foundVRefNum, long *foundDirID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindFolder
+	ENDIF
+
+	ELSE
+;
+; pascal OSErr FindFolder(short vRefNum, OSType folderType, Boolean createFolder, short *foundVRefNum, long *foundDirID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_FindFolder
+			moveq           	#0,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindFolder
+	ENDIF
+
+	ENDIF
+;
+; pascal OSErr ReleaseFolder(short vRefNum, OSType folderType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ReleaseFolder
+			moveq           	#11,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ReleaseFolder
+	ENDIF
+
+
+	IF ¬ TARGET_OS_MAC THEN
+;  Since non-mac targets don't know about VRef's or DirID's, the Ex version returns
+;   the found folder path.
+; 
+
+;
+; extern OSErr FindFolderEx(short vRefNum, OSType folderType, Boolean createFolder, short *foundVRefNum, long *foundDirID, char *foundFolder)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindFolderEx
+	ENDIF
+
+	ENDIF
+; *****************************************
+;  Extensible Folder Manager declarations 
+; *****************************************
+
+; ***************************
+;  Folder Manager constants 
+; ***************************
+
+
+kExtensionDisabledFolderType	EQU		'extD'
+kControlPanelDisabledFolderType	EQU		'ctrD'
+kSystemExtensionDisabledFolderType EQU	'macD'
+kStartupItemsDisabledFolderType	EQU		'strD'
+kShutdownItemsDisabledFolderType EQU	'shdD'
+kApplicationsFolderType			EQU		'apps'
+kDocumentsFolderType			EQU		'docs'
+
+															; new constants 
+kVolumeRootFolderType			EQU		'root'				; root folder of a volume 
+kChewableItemsFolderType		EQU		'flnt'				; items deleted at boot 
+kApplicationSupportFolderType	EQU		'asup'				; third-party items and folders 
+kTextEncodingsFolderType		EQU		'ƒtex'				; encoding tables 
+kStationeryFolderType			EQU		'odst'				; stationery 
+kOpenDocFolderType				EQU		'odod'				; OpenDoc root 
+kOpenDocShellPlugInsFolderType	EQU		'odsp'				; OpenDoc Shell Plug-Ins in OpenDoc folder 
+kEditorsFolderType				EQU		'oded'				; OpenDoc editors in MacOS Folder 
+kOpenDocEditorsFolderType		EQU		'ƒodf'				; OpenDoc subfolder of Editors folder 
+kOpenDocLibrariesFolderType		EQU		'odlb'				; OpenDoc libraries folder 
+kGenEditorsFolderType			EQU		'ƒedi'				; CKH general editors folder at root level of Sys folder 
+kHelpFolderType					EQU		'ƒhlp'				; CKH help folder currently at root of system folder 
+kInternetPlugInFolderType		EQU		'ƒnet'				; CKH internet plug ins for browsers and stuff 
+kModemScriptsFolderType			EQU		'ƒmod'				; CKH modem scripts, get 'em OUT of the Extensions folder 
+kPrinterDescriptionFolderType	EQU		'ppdf'				; CKH new folder at root of System folder for printer descs. 
+kPrinterDriverFolderType		EQU		'ƒprd'				; CKH new folder at root of System folder for printer drivers 
+kScriptingAdditionsFolderType	EQU		'ƒscr'				; CKH at root of system folder 
+kSharedLibrariesFolderType		EQU		'ƒlib'				; CKH for general shared libs. 
+kVoicesFolderType				EQU		'fvoc'				; CKH macintalk can live here 
+kControlStripModulesFolderType	EQU		'sdev'				; CKH for control strip modules 
+kAssistantsFolderType			EQU		'astƒ'				; SJF for Assistants (MacOS Setup Assistant, etc) 
+kUtilitiesFolderType			EQU		'utiƒ'				; SJF for Utilities folder 
+kAppleExtrasFolderType			EQU		'aexƒ'				; SJF for Apple Extras folder 
+kContextualMenuItemsFolderType	EQU		'cmnu'				; SJF for Contextual Menu items 
+kMacOSReadMesFolderType			EQU		'morƒ'				; SJF for MacOS ReadMes folder 
+kALMModulesFolderType			EQU		'walk'				; EAS for Location Manager Module files except type 'thng' (within kExtensionFolderType) 
+kALMPreferencesFolderType		EQU		'trip'				; EAS for Location Manager Preferences (within kPreferencesFolderType; contains kALMLocationsFolderType) 
+kALMLocationsFolderType			EQU		'fall'				; EAS for Location Manager Locations (within kALMPreferencesFolderType) 
+kColorSyncProfilesFolderType	EQU		'prof'				; for ColorSync™ Profiles 
+kThemesFolderType				EQU		'thme'				; for Theme data files 
+kFavoritesFolderType			EQU		'favs'				; Favorties folder for Navigation Services 
+
+;  FolderDescFlags values 
+
+kCreateFolderAtBoot				EQU		$00000002
+kFolderCreatedInvisible			EQU		$00000004
+kFolderCreatedNameLocked		EQU		$00000008
+; typedef UInt32 						FolderDescFlags
+
+;  FolderClass values 
+
+kRelativeFolder					EQU		'relf'
+kSpecialFolder					EQU		'spcf'
+; typedef OSType 						FolderClass
+
+;  special folder locations 
+
+kBlessedFolder					EQU		'blsf'
+kRootFolder						EQU		'rotf'
+; typedef OSType 						FolderType
+
+; typedef OSType 						FolderLocation
+
+
+FolderDesc				RECORD 0
+descSize				 ds.l	1				; offset: $0 (0)
+foldType				 ds.l	1				; offset: $4 (4)
+flags					 ds.l	1				; offset: $8 (8)
+foldClass				 ds.l	1				; offset: $C (12)
+foldLocation			 ds.l	1				; offset: $10 (16)
+badgeSignature			 ds.l	1				; offset: $14 (20)
+badgeType				 ds.l	1				; offset: $18 (24)
+reserved				 ds.l	1				; offset: $1C (28)
+name					 ds		StrFileName		; offset: $20 (32)		;  Str63 on MacOS
+sizeof					 EQU *					; size:   $60 (96)
+						ENDR
+; typedef struct FolderDesc *			FolderDescPtr
+
+
+; typedef UInt32 						RoutingFlags
+
+FolderRouting			RECORD 0
+descSize				 ds.l	1				; offset: $0 (0)
+fileType				 ds.l	1				; offset: $4 (4)
+routeFromFolder			 ds.l	1				; offset: $8 (8)
+routeToFolder			 ds.l	1				; offset: $C (12)
+flags					 ds.l	1				; offset: $10 (16)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+; typedef struct FolderRouting *		FolderRoutingPtr
+
+;  routing constants 
+; **************************
+;  Folder Manager routines 
+; **************************
+;  Folder Manager administration routines 
+;
+; pascal OSErr AddFolderDescriptor(FolderType foldType, FolderDescFlags flags, FolderClass foldClass, FolderLocation foldLocation, OSType badgeSignature, OSType badgeType, ConstStrFileNameParam name, Boolean replaceFlag)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AddFolderDescriptor
+			moveq           	#32,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AddFolderDescriptor
+	ENDIF
+
+;
+; pascal OSErr GetFolderDescriptor(FolderType foldType, Size descSize, FolderDesc *foldDesc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetFolderDescriptor
+			moveq           	#35,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetFolderDescriptor
+	ENDIF
+
+;
+; pascal OSErr GetFolderTypes(UInt32 requestedTypeCount, UInt32 *totalTypeCount, FolderType *theTypes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetFolderTypes
+			moveq           	#36,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetFolderTypes
+	ENDIF
+
+;
+; pascal OSErr RemoveFolderDescriptor(FolderType foldType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_RemoveFolderDescriptor
+			moveq           	#33,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RemoveFolderDescriptor
+	ENDIF
+
+;  legacy routines 
+;
+; pascal OSErr GetFolderName(short vRefNum, OSType foldType, short *foundVRefNum, StrFileName name)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetFolderName
+			moveq           	#14,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetFolderName
+	ENDIF
+
+;  routing routines 
+;
+; pascal OSErr AddFolderRouting(OSType fileType, FolderType routeFromFolder, FolderType routeToFolder, RoutingFlags flags, Boolean replaceFlag)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AddFolderRouting
+			moveq           	#38,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AddFolderRouting
+	ENDIF
+
+;
+; pascal OSErr RemoveFolderRouting(OSType fileType, FolderType routeFromFolder)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_RemoveFolderRouting
+			moveq           	#39,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RemoveFolderRouting
+	ENDIF
+
+;
+; pascal OSErr FindFolderRouting(OSType fileType, FolderType routeFromFolder, FolderType *routeToFolder, RoutingFlags *flags)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_FindFolderRouting
+			moveq           	#34,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindFolderRouting
+	ENDIF
+
+;
+; pascal OSErr GetFolderRoutings(UInt32 requestedRoutingCount, UInt32 *totalRoutingCount, Size routingSize, FolderRouting *theRoutings)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetFolderRoutings
+			moveq           	#30,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetFolderRoutings
+	ENDIF
+
+;
+; pascal OSErr InvalidateFolderDescriptorCache(short vRefNum, long dirID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InvalidateFolderDescriptorCache
+			moveq           	#37,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InvalidateFolderDescriptorCache
+	ENDIF
+
+;
+; pascal OSErr IdentifyFolder(short vRefNum, long dirID, FolderType *foldType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IdentifyFolder
+			moveq           	#31,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IdentifyFolder
+	ENDIF
+
+
+
+
+	ENDIF ; __FOLDERS__ 
+

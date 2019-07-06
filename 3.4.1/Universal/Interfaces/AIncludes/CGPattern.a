@@ -1,0 +1,120 @@
+;
+;    File:       CGPattern.a
+;
+;    Contains:   CoreGraphics patterns
+;
+;    Version:    Technology: CoreGraphics-122 (Mac OS X 10.1)
+;                Release:    Universal Interfaces 3.4.1
+;
+;    Copyright:  © 2001 by Apple Computer, Inc., all rights reserved.
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__CGPATTERN__') = 'UNDEFINED' THEN
+__CGPATTERN__ SET 1
+
+	IF &TYPE('__CGBASE__') = 'UNDEFINED' THEN
+	include 'CGBase.a'
+	ENDIF
+	IF &TYPE('__CGCONTEXT__') = 'UNDEFINED' THEN
+	include 'CGContext.a'
+	ENDIF
+
+
+
+;  kCGPatternTilingNoDistortion: The pattern cell is not distorted when
+; * painted, however the spacing between pattern cells may vary by as much
+; * as 1 device pixel.
+; *
+; * kCGPatternTilingConstantSpacingMinimalDistortion: Pattern cells are
+; * spaced consistently, however the pattern cell may be distorted by as
+; * much as 1 device pixel when the pattern is painted.
+; *
+; * kCGPatternTilingConstantSpacing: Pattern cells are spaced consistently
+; * as with kCGPatternTilingConstantSpacingMinimalDistortion, however the
+; * pattern cell may be distorted additionally to permit a more efficient
+; * implementation. 
+
+
+; typedef long							CGPatternTiling
+kCGPatternTilingNoDistortion	EQU		0
+kCGPatternTilingConstantSpacingMinimalDistortion EQU 1
+kCGPatternTilingConstantSpacing	EQU		2
+
+;  The drawing of the pattern is delegated to the callbacks.  The callbacks
+; * may be called one or many times to draw the pattern.
+; *
+; * `version' is the version number of the structure passed in as a
+; * parameter to the CGPattern creation functions. The structure defined
+; * below is version 0.
+; *
+; * `drawPattern' should draw the pattern in the context `c'. `info' is the
+; * parameter originally passed to the CGPattern creation functions.
+; *
+; * `releaseInfo' is called when the pattern is deallocated. 
+
+CGPatternCallbacks		RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+drawPattern				 ds.l	1				; offset: $4 (4)
+releaseInfo				 ds.l	1				; offset: $8 (8)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+;  Create a pattern. 
+
+; *  CGPatternCreate()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        not available
+; *    Mac OS X:         in version 10.1 and later
+; 
+
+;
+; extern CGPatternRef CGPatternCreate(void *info, CGRect bounds, CGAffineTransform matrix, float xStep, float yStep, CGPatternTiling tiling, int isColored, const CGPatternCallbacks *callbacks)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CGPatternCreate
+	ENDIF
+
+;  Increment the retain count of `pattern' and return it.  All patterns are
+; * created with an initial retain count of 1. 
+
+; *  CGPatternRetain()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        not available
+; *    Mac OS X:         in version 10.1 and later
+; 
+
+;
+; extern CGPatternRef CGPatternRetain(CGPatternRef pattern)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CGPatternRetain
+	ENDIF
+
+;  Decrement the retain count of `pattern'.  If the retain count reaches 0,
+; * then free it and release any associated resources. 
+
+; *  CGPatternRelease()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        not available
+; *    Mac OS X:         in version 10.1 and later
+; 
+
+;
+; extern void CGPatternRelease(CGPatternRef pattern)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CGPatternRelease
+	ENDIF
+
+	ENDIF ; __CGPATTERN__ 
+

@@ -1,0 +1,164 @@
+;
+;	File:		GXMessages.a
+;
+;	Contains:	This file contains all of the public data structures,
+;
+;	Version:	Technology:	Quickdraw GX 1.1
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1994-1997 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__GXMESSAGES__') = 'UNDEFINED' THEN
+__GXMESSAGES__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+	IF &TYPE('__TYPES__') = 'UNDEFINED' THEN
+	include 'Types.a'
+	ENDIF
+	IF &TYPE('__MIXEDMODE__') = 'UNDEFINED' THEN
+	include 'MixedMode.a'
+	ENDIF
+
+
+; 
+;
+;	>>>>>> CONSTANTS <<<<<<
+;
+;
+
+;  Message Manager Trap 
+
+messageManagerTrap				EQU		$ABFB
+
+;  Message Manager Error Result Codes 
+
+messageStopLoopingErr			EQU		-5775
+cantDeleteRunningHandlerErr		EQU		-5776
+noMessageTableErr				EQU		-5777
+dupSignatureErr					EQU		-5778
+messageNotReceivedErr			EQU		-5799
+
+; 
+;	DATA TYPES
+;
+
+	IF OLDROUTINENAMES THEN
+; typedef MessageHandlerOverrideProcPtr  MessageHandlerOverrideProc
+
+; typedef MessageGlobalsInitProcPtr 	MessageGlobalsInitProc
+
+	ENDIF	; OLDROUTINENAMES
+
+
+
+
+; 
+;
+;	PUBLIC INTERFACES
+;
+;	Message Handler API Routines
+;
+
+;
+; extern long CountMessageHandlerInstances(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CountMessageHandlerInstances
+			moveq           	#40,D0
+			dc.w            	$ABFB
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CountMessageHandlerInstances
+	ENDIF
+
+;
+; extern void *GetMessageHandlerClassContext(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMessageHandlerClassContext
+			moveq           	#41,D0
+			dc.w            	$ABFB
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMessageHandlerClassContext
+	ENDIF
+
+;
+; extern void *SetMessageHandlerClassContext(void *anyValue)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMessageHandlerClassContext
+			moveq           	#42,D0
+			dc.w            	$ABFB
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMessageHandlerClassContext
+	ENDIF
+
+;
+; extern void *GetMessageHandlerInstanceContext(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMessageHandlerInstanceContext
+			moveq           	#43,D0
+			dc.w            	$ABFB
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMessageHandlerInstanceContext
+	ENDIF
+
+;
+; extern void *SetMessageHandlerInstanceContext(void *anyValue)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMessageHandlerInstanceContext
+			moveq           	#44,D0
+			dc.w            	$ABFB
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMessageHandlerInstanceContext
+	ENDIF
+
+;
+; extern OSErr NewMessageGlobals(long messageGlobalsSize, MessageGlobalsInitUPP initProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NewMessageGlobals
+			moveq           	#45,D0
+			dc.w            	$ABFB
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewMessageGlobals
+	ENDIF
+
+;
+; extern void DisposeMessageGlobals(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DisposeMessageGlobals
+			moveq           	#46,D0
+			dc.w            	$ABFB
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisposeMessageGlobals
+	ENDIF
+
+
+	ENDIF ; __GXMESSAGES__ 
+

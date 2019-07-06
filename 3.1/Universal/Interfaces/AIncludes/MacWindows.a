@@ -1,0 +1,1114 @@
+;
+;	File:		MacWindows.a
+;
+;	Contains:	Window Manager Interfaces.
+;
+;	Version:	Technology:	Mac OS 8.1
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1997-1998 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__MACWINDOWS__') = 'UNDEFINED' THEN
+__MACWINDOWS__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__ALIASES__') = 'UNDEFINED' THEN
+	include 'Aliases.a'
+	ENDIF
+	IF &TYPE('__APPLEEVENTS__') = 'UNDEFINED' THEN
+	include 'AppleEvents.a'
+	ENDIF
+	IF &TYPE('__COLLECTIONS__') = 'UNDEFINED' THEN
+	include 'Collections.a'
+	ENDIF
+	IF &TYPE('__DRAG__') = 'UNDEFINED' THEN
+	include 'Drag.a'
+	ENDIF
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+	include 'Events.a'
+	ENDIF
+	IF &TYPE('__MENUS__') = 'UNDEFINED' THEN
+	include 'Menus.a'
+	ENDIF
+	IF &TYPE('__MIXEDMODE__') = 'UNDEFINED' THEN
+	include 'MixedMode.a'
+	ENDIF
+	IF &TYPE('__QDOFFSCREEN__') = 'UNDEFINED' THEN
+	include 'QDOffscreen.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__TEXTCOMMON__') = 'UNDEFINED' THEN
+	include 'TextCommon.a'
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Definition Type																
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kWindowDefProcType				EQU		'WDEF'
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • System 7.5 Window Definition Resource IDs											
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kStandardWindowDefinition		EQU		0					; for document windows and dialogs
+kRoundWindowDefinition			EQU		1					; old da-style window
+kFloatingWindowDefinition		EQU		124					; for floating windows
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Variant Codes																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+															; for use with kStandardWindowDefinition 
+kDocumentWindowVariantCode		EQU		0
+kModalDialogVariantCode			EQU		1
+kPlainDialogVariantCode			EQU		2
+kShadowDialogVariantCode		EQU		3
+kMovableModalDialogVariantCode	EQU		5
+kAlertVariantCode				EQU		7
+kMovableAlertVariantCode		EQU		9					; for use with kFloatingWindowDefinition 
+kSideFloaterVariantCode			EQU		8
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • DefProc IDs																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+															; classic ids 
+documentProc					EQU		0
+dBoxProc						EQU		1
+plainDBox						EQU		2
+altDBoxProc						EQU		3
+noGrowDocProc					EQU		4
+movableDBoxProc					EQU		5
+zoomDocProc						EQU		8
+zoomNoGrow						EQU		12
+rDocProc						EQU		16					; floating window defproc ids 
+floatProc						EQU		1985
+floatGrowProc					EQU		1987
+floatZoomProc					EQU		1989
+floatZoomGrowProc				EQU		1991
+floatSideProc					EQU		1993
+floatSideGrowProc				EQU		1995
+floatSideZoomProc				EQU		1997
+floatSideZoomGrowProc			EQU		1999
+
+															; Resource IDs for theme-savvy window defprocs 
+kWindowDocumentDefProcResID		EQU		64
+kWindowDialogDefProcResID		EQU		65
+kWindowUtilityDefProcResID		EQU		66
+kWindowUtilitySideTitleDefProcResID EQU	67
+
+															; Proc IDs for theme-savvy windows 
+kWindowDocumentProc				EQU		1024
+kWindowGrowDocumentProc			EQU		1025
+kWindowVertZoomDocumentProc		EQU		1026
+kWindowVertZoomGrowDocumentProc	EQU		1027
+kWindowHorizZoomDocumentProc	EQU		1028
+kWindowHorizZoomGrowDocumentProc EQU	1029
+kWindowFullZoomDocumentProc		EQU		1030
+kWindowFullZoomGrowDocumentProc	EQU		1031
+
+															; Proc IDs for theme-savvy dialogs 
+kWindowPlainDialogProc			EQU		1040
+kWindowShadowDialogProc			EQU		1041
+kWindowModalDialogProc			EQU		1042
+kWindowMovableModalDialogProc	EQU		1043
+kWindowAlertProc				EQU		1044
+kWindowMovableAlertProc			EQU		1045
+;  procIDs available in Appearance 1.0.1 or later 
+
+kWindowMovableModalGrowProc		EQU		1046
+
+															; Proc IDs for top title bar theme-savvy floating windows 
+kWindowFloatProc				EQU		1057
+kWindowFloatGrowProc			EQU		1059
+kWindowFloatVertZoomProc		EQU		1061
+kWindowFloatVertZoomGrowProc	EQU		1063
+kWindowFloatHorizZoomProc		EQU		1065
+kWindowFloatHorizZoomGrowProc	EQU		1067
+kWindowFloatFullZoomProc		EQU		1069
+kWindowFloatFullZoomGrowProc	EQU		1071
+
+
+															; Proc IDs for side title bar theme-savvy floating windows 
+kWindowFloatSideProc			EQU		1073
+kWindowFloatSideGrowProc		EQU		1075
+kWindowFloatSideVertZoomProc	EQU		1077
+kWindowFloatSideVertZoomGrowProc EQU	1079
+kWindowFloatSideHorizZoomProc	EQU		1081
+kWindowFloatSideHorizZoomGrowProc EQU	1083
+kWindowFloatSideFullZoomProc	EQU		1085
+kWindowFloatSideFullZoomGrowProc EQU	1087
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • System 7 Window Positioning Constants												
+; 																						
+;  Passed into StandardAlert and used in ‘WIND’, ‘DLOG’, and ‘ALRT’ templates			
+;  StandardAlert uses zero to specify the default position. Other calls use zero to		
+;  specify “no position”.  Do not pass these constants to RepositionWindow.  Do not		
+;  store these constants in the BasicWindowDescription of a ‘wind’ resource.			
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+
+kWindowNoPosition				EQU		$0000
+kWindowDefaultPosition			EQU		$0000
+kWindowCenterMainScreen			EQU		$280A
+kWindowAlertPositionMainScreen	EQU		$300A
+kWindowStaggerMainScreen		EQU		$380A
+kWindowCenterParentWindow		EQU		$A80A
+kWindowAlertPositionParentWindow EQU	$B00A
+kWindowStaggerParentWindow		EQU		$B80A
+kWindowCenterParentWindowScreen	EQU		$680A
+kWindowAlertPositionParentWindowScreen EQU $700A
+kWindowStaggerParentWindowScreen EQU	$780A
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • GetWindowRegion Types																
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+
+															; Region values to pass into GetWindowRegion 
+kWindowTitleBarRgn				EQU		0
+kWindowTitleTextRgn				EQU		1
+kWindowCloseBoxRgn				EQU		2
+kWindowZoomBoxRgn				EQU		3
+kWindowDragRgn					EQU		5
+kWindowGrowRgn					EQU		6
+kWindowCollapseBoxRgn			EQU		7
+kWindowStructureRgn				EQU		32
+kWindowContentRgn				EQU		33
+; typedef UInt16 						WindowRegionCode
+
+;  GetWindowRegionRec - used for WDEF calls with kWindowMsgGetRegion 
+GetWindowRegionRec		RECORD 0
+winRgn					 ds.l	1				; offset: $0 (0)
+regionCode				 ds.w	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct GetWindowRegionRec *	GetWindowRegionPtr
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Standard Window Kinds																
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+dialogKind						EQU		2
+userKind						EQU		8
+kDialogWindowKind				EQU		2
+kApplicationWindowKind			EQU		8
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • FindWindow Result Codes															
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+inDesk							EQU		0
+inNoWindow						EQU		0
+inMenuBar						EQU		1
+inSysWindow						EQU		2
+inContent						EQU		3
+inDrag							EQU		4
+inGrow							EQU		5
+inGoAway						EQU		6
+inZoomIn						EQU		7
+inZoomOut						EQU		8
+inCollapseBox					EQU		11
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Definition Hit Test Result Codes											
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+wNoHit							EQU		0
+wInContent						EQU		1
+wInDrag							EQU		2
+wInGrow							EQU		3
+wInGoAway						EQU		4
+wInZoomIn						EQU		5
+wInZoomOut						EQU		6
+wInCollapseBox					EQU		9
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Definition Messages															
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+
+kWindowMsgDraw					EQU		0
+kWindowMsgHitTest				EQU		1
+kWindowMsgCalculateShape		EQU		2
+kWindowMsgInitialize			EQU		3
+kWindowMsgCleanUp				EQU		4
+kWindowMsgDrawGrowOutline		EQU		5
+kWindowMsgDrawGrowBox			EQU		6
+kWindowMsgGetFeatures			EQU		7
+kWindowMsgGetRegion				EQU		8					; old names
+wDraw							EQU		0
+wHit							EQU		1
+wCalcRgns						EQU		2
+wNew							EQU		3
+wDispose						EQU		4
+wGrow							EQU		5
+wDrawGIcon						EQU		6
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Feature Bits																
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kWindowCanGrow					EQU		$01
+kWindowCanZoom					EQU		$02
+kWindowCanCollapse				EQU		$04
+kWindowIsModal					EQU		$08
+kWindowCanGetWindowRegion		EQU		$10
+kWindowIsAlert					EQU		$20
+kWindowHasTitleBar				EQU		$40
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Desktop Pattern Resource ID														
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+deskPatID						EQU		16
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Color Part Codes															
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+wContentColor					EQU		0
+wFrameColor						EQU		1
+wTextColor						EQU		2
+wHiliteColor					EQU		3
+wTitleBarColor					EQU		4
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Region Dragging Constants
+;/*——————————————————————————————————————————————————————————————————————————————————————
+
+
+kMouseUpOutOfSlop				EQU		$80008000
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Color Table																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+WinCTab					RECORD 0
+wCSeed					 ds.l	1				; offset: $0 (0)		;  reserved 
+wCReserved				 ds.w	1				; offset: $4 (4)		;  reserved 
+ctSize					 ds.w	1				; offset: $6 (6)		;  usually 4 for windows 
+ctTable					 ds.b	5 * ColorSpec.sizeof ; offset: $8 (8)
+sizeof					 EQU *					; size:   $30 (48)
+						ENDR
+; typedef struct WinCTab *				WCTabPtr
+
+; typedef WCTabPtr *					WCTabHandle
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • WindowRecord																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+
+; typedef WindowRecord *				WindowPeek
+
+WindowRecord			RECORD 0
+port					 ds		GrafPort		; offset: $0 (0)
+windowKind				 ds.w	1				; offset: $6C (108)
+visible					 ds.b	1				; offset: $6E (110)
+hilited					 ds.b	1				; offset: $6F (111)
+goAwayFlag				 ds.b	1				; offset: $70 (112)
+spareFlag				 ds.b	1				; offset: $71 (113)
+strucRgn				 ds.l	1				; offset: $72 (114)
+contRgn					 ds.l	1				; offset: $76 (118)
+updateRgn				 ds.l	1				; offset: $7A (122)
+windowDefProc			 ds.l	1				; offset: $7E (126)
+dataHandle				 ds.l	1				; offset: $82 (130)
+titleHandle				 ds.l	1				; offset: $86 (134)
+titleWidth				 ds.w	1				; offset: $8A (138)
+controlList				 ds.l	1				; offset: $8C (140)
+nextWindow				 ds.l	1				; offset: $90 (144)
+windowPic				 ds.l	1				; offset: $94 (148)
+refCon					 ds.l	1				; offset: $98 (152)
+sizeof					 EQU *					; size:   $9C (156)
+						ENDR
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Color WindowRecord																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+
+; typedef CWindowRecord *				CWindowPeek
+
+CWindowRecord			RECORD 0
+port					 ds		CGrafPort		; offset: $0 (0)
+windowKind				 ds.w	1				; offset: $6C (108)
+visible					 ds.b	1				; offset: $6E (110)
+hilited					 ds.b	1				; offset: $6F (111)
+goAwayFlag				 ds.b	1				; offset: $70 (112)
+spareFlag				 ds.b	1				; offset: $71 (113)
+strucRgn				 ds.l	1				; offset: $72 (114)
+contRgn					 ds.l	1				; offset: $76 (118)
+updateRgn				 ds.l	1				; offset: $7A (122)
+windowDefProc			 ds.l	1				; offset: $7E (126)
+dataHandle				 ds.l	1				; offset: $82 (130)
+titleHandle				 ds.l	1				; offset: $86 (134)
+titleWidth				 ds.w	1				; offset: $8A (138)
+controlList				 ds.l	1				; offset: $8C (140)
+nextWindow				 ds.l	1				; offset: $90 (144)
+windowPic				 ds.l	1				; offset: $94 (148)
+refCon					 ds.l	1				; offset: $98 (152)
+sizeof					 EQU *					; size:   $9C (156)
+						ENDR
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • AuxWinHandle																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+
+; typedef AuxWinRec *					AuxWinPtr
+
+; typedef AuxWinPtr *					AuxWinHandle
+
+AuxWinRec				RECORD 0
+awNext					 ds.l	1				; offset: $0 (0)		; handle to next AuxWinRec
+awOwner					 ds.l	1				; offset: $4 (4)		; ptr to window 
+awCTable				 ds.l	1				; offset: $8 (8)		; color table for this window
+reserved				 ds.l	1				; offset: $C (12)
+awFlags					 ds.l	1				; offset: $10 (16)		; reserved for expansion
+awReserved				 ds.l	1				; offset: $14 (20)		; reserved for expansion
+awRefCon				 ds.l	1				; offset: $18 (24)		; user Constant
+sizeof					 EQU *					; size:   $1C (28)
+						ENDR
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Class Ordering																
+; 																						
+; 	Special cases for the “behind” parameter in window creation calls.					
+; ——————————————————————————————————————————————————————————————————————————————————————
+	IF &TYPE('__cplusplus') = 'UNDEFINED' THEN
+
+kFirstWindowOfClass				EQU		-1
+kLastWindowOfClass				EQU		0
+	ELSE
+	ENDIF
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Zoom Information Handle 															
+; ——————————————————————————————————————————————————————————————————————————————————————
+WStateData				RECORD 0
+userState				 ds		Rect			; offset: $0 (0)		; user zoom state
+stdState				 ds		Rect			; offset: $8 (8)		; standard zoom state
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+; typedef struct WStateData *			WStateDataPtr
+
+; typedef WStateDataPtr *				WStateDataHandle
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Creation & Persistence														
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+;
+; pascal WindowPtr GetNewCWindow(short windowID, void *wStorage, WindowPtr behind)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetNewCWindow:	OPWORD	$AA46
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetNewCWindow
+	ENDIF
+
+;
+; pascal WindowPtr NewWindow(void *wStorage, const Rect *boundsRect, ConstStr255Param title, Boolean visible, short theProc, WindowPtr behind, Boolean goAwayFlag, long refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_NewWindow:	OPWORD	$A913
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewWindow
+	ENDIF
+
+;
+; pascal WindowPtr GetNewWindow(short windowID, void *wStorage, WindowPtr behind)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetNewWindow:	OPWORD	$A9BD
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetNewWindow
+	ENDIF
+
+;
+; pascal WindowPtr NewCWindow(void *wStorage, const Rect *boundsRect, ConstStr255Param title, Boolean visible, short procID, WindowPtr behind, Boolean goAwayFlag, long refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_NewCWindow:	OPWORD	$AA45
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewCWindow
+	ENDIF
+
+;
+; pascal void DisposeWindow(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DisposeWindow:	OPWORD	$A914
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisposeWindow
+	ENDIF
+
+;
+; pascal void CloseWindow(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CloseWindow:	OPWORD	$A92D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CloseWindow
+	ENDIF
+
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Background Imaging																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void SetWinColor(WindowPtr theWindow, WCTabHandle newColorTable)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetWinColor:	OPWORD	$AA41
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetWinColor
+	ENDIF
+
+;
+; pascal void SetDeskCPat(PixPatHandle deskPixPat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetDeskCPat:	OPWORD	$AA47
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDeskCPat
+	ENDIF
+
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Low-Level Region & Painting Routines												
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void ClipAbove(WindowPtr window)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ClipAbove:	OPWORD	$A90B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ClipAbove
+	ENDIF
+
+;
+; pascal void SaveOld(WindowPtr window)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SaveOld:	OPWORD	$A90E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SaveOld
+	ENDIF
+
+;
+; pascal void DrawNew(WindowPtr window, Boolean update)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DrawNew:	OPWORD	$A90F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawNew
+	ENDIF
+
+;
+; pascal void PaintOne(WindowPtr window, RgnHandle clobberedRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_PaintOne:	OPWORD	$A90C
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PaintOne
+	ENDIF
+
+;
+; pascal void PaintBehind(WindowPtr startWindow, RgnHandle clobberedRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_PaintBehind:	OPWORD	$A90D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PaintBehind
+	ENDIF
+
+;
+; pascal void CalcVis(WindowPtr window)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CalcVis:	OPWORD	$A909
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CalcVis
+	ENDIF
+
+;
+; pascal void CalcVisBehind(WindowPtr startWindow, RgnHandle clobberedRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CalcVisBehind:	OPWORD	$A90A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CalcVisBehind
+	ENDIF
+
+;
+; pascal Boolean CheckUpdate(EventRecord *theEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CheckUpdate:	OPWORD	$A911
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CheckUpdate
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window List																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal short FindWindow(Point thePoint, WindowPtr *theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_FindWindow:	OPWORD	$A92C
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindWindow
+	ENDIF
+
+;
+; pascal WindowPtr FrontWindow(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_FrontWindow:	OPWORD	$A924
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FrontWindow
+	ENDIF
+
+;
+; pascal void BringToFront(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_BringToFront:	OPWORD	$A920
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION BringToFront
+	ENDIF
+
+;
+; pascal void SendBehind(WindowPtr theWindow, WindowPtr behindWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SendBehind:	OPWORD	$A921
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SendBehind
+	ENDIF
+
+;
+; pascal void SelectWindow(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SelectWindow:	OPWORD	$A91F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SelectWindow
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Misc Low-Level stuff																			
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void InitWindows(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InitWindows:	OPWORD	$A912
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitWindows
+	ENDIF
+
+;
+; pascal void GetWMgrPort(GrafPtr *wPort)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetWMgrPort:	OPWORD	$A910
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetWMgrPort
+	ENDIF
+
+;
+; pascal void GetCWMgrPort(CGrafPtr *wMgrCPort)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetCWMgrPort:	OPWORD	$AA48
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetCWMgrPort
+	ENDIF
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Various & Sundry Window Accessors															
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void HiliteWindow(WindowPtr theWindow, Boolean fHilite)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_HiliteWindow:	OPWORD	$A91C
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HiliteWindow
+	ENDIF
+
+;
+; pascal OSStatus GetWindowFeatures(WindowPtr inWindow, UInt32 *outFeatures)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetWindowFeatures
+			move.w              #$0013,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetWindowFeatures
+	ENDIF
+
+;
+; pascal OSStatus GetWindowRegion(WindowPtr inWindow, WindowRegionCode inRegionCode, RgnHandle ioWinRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetWindowRegion
+			move.w              #$0014,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetWindowRegion
+	ENDIF
+
+;
+; pascal void SetWRefCon(WindowPtr theWindow, long data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetWRefCon:	OPWORD	$A918
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetWRefCon
+	ENDIF
+
+;
+; pascal long GetWRefCon(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetWRefCon:	OPWORD	$A917
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetWRefCon
+	ENDIF
+
+;
+; pascal void SetWindowPic(WindowPtr theWindow, PicHandle pic)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetWindowPic:	OPWORD	$A92E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetWindowPic
+	ENDIF
+
+;
+; pascal PicHandle GetWindowPic(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetWindowPic:	OPWORD	$A92F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetWindowPic
+	ENDIF
+
+;
+; pascal short GetWVariant(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetWVariant:	OPWORD	$A80A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetWVariant
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Update Events																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void InvalRect(const Rect *badRect)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InvalRect:	OPWORD	$A928
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InvalRect
+	ENDIF
+
+;
+; pascal void InvalRgn(RgnHandle badRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InvalRgn:	OPWORD	$A927
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InvalRgn
+	ENDIF
+
+;
+; pascal void ValidRect(const Rect *goodRect)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ValidRect:	OPWORD	$A92A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ValidRect
+	ENDIF
+
+;
+; pascal void ValidRgn(RgnHandle goodRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ValidRgn:	OPWORD	$A929
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ValidRgn
+	ENDIF
+
+;
+; pascal void BeginUpdate(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_BeginUpdate:	OPWORD	$A922
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION BeginUpdate
+	ENDIF
+
+;
+; pascal void EndUpdate(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_EndUpdate:	OPWORD	$A923
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION EndUpdate
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • DrawGrowIcon																		
+; 																						
+; 	With the advent of Appearance, DrawGrowIcon is obsolete.  From Appearance 1.0		
+; 	onward, the system WDEF automagically draws the grow icon for growable window		
+; 	procIDs.																			
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void DrawGrowIcon(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DrawGrowIcon:	OPWORD	$A904
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawGrowIcon
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Titles & Document Support													
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void SetWTitle(WindowPtr theWindow, ConstStr255Param title)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetWTitle:	OPWORD	$A91A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetWTitle
+	ENDIF
+
+;
+; pascal void GetWTitle(WindowPtr theWindow, Str255 title)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetWTitle:	OPWORD	$A919
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetWTitle
+	ENDIF
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Positioning																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal Boolean IsWindowCollapsable(WindowPtr inWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IsWindowCollapsable
+			move.w              #$000F,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsWindowCollapsable
+	ENDIF
+
+;
+; pascal Boolean IsWindowCollapsed(WindowPtr inWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IsWindowCollapsed
+			move.w              #$0010,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsWindowCollapsed
+	ENDIF
+
+;
+; pascal OSStatus CollapseWindow(WindowPtr inWindow, Boolean inCollapseIt)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CollapseWindow
+			move.w              #$0011,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CollapseWindow
+	ENDIF
+
+;
+; pascal OSStatus CollapseAllWindows(Boolean inCollapseEm)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CollapseAllWindows
+			move.w              #$0012,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CollapseAllWindows
+	ENDIF
+
+;
+; pascal void MoveWindow(WindowPtr theWindow, short hGlobal, short vGlobal, Boolean front)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_MoveWindow:	OPWORD	$A91B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MoveWindow
+	ENDIF
+
+;
+; pascal void SizeWindow(WindowPtr theWindow, short w, short h, Boolean fUpdate)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SizeWindow:	OPWORD	$A91D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SizeWindow
+	ENDIF
+
+
+;
+; pascal void ZoomWindow(WindowPtr theWindow, short partCode, Boolean front)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ZoomWindow:	OPWORD	$A83A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ZoomWindow
+	ENDIF
+
+;
+; pascal long GrowWindow(WindowPtr theWindow, Point startPt, const Rect *bBox)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GrowWindow:	OPWORD	$A92B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GrowWindow
+	ENDIF
+
+;
+; pascal void DragWindow(WindowPtr theWindow, Point startPt, const Rect *boundsRect)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DragWindow:	OPWORD	$A925
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DragWindow
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Visibility																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+;
+; pascal void HideWindow(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_HideWindow:	OPWORD	$A916
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HideWindow
+	ENDIF
+
+;
+; pascal void ShowWindow(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ShowWindow:	OPWORD	$A915
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ShowWindow
+	ENDIF
+
+;
+; pascal void ShowHide(WindowPtr theWindow, Boolean showFlag)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ShowHide:	OPWORD	$A908
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ShowHide
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Utilities																			
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal long PinRect(const Rect *theRect, Point thePt)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_PinRect:	OPWORD	$A94E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PinRect
+	ENDIF
+
+
+;
+; pascal RgnHandle GetGrayRgn(void)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetGrayRgn           &dest=(sp)
+			move.l            $09EE,&dest
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetGrayRgn
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Window Part Tracking																
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal Boolean TrackBox(WindowPtr theWindow, Point thePt, short partCode)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_TrackBox:	OPWORD	$A83B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TrackBox
+	ENDIF
+
+;
+; pascal Boolean TrackGoAway(WindowPtr theWindow, Point thePt)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_TrackGoAway:	OPWORD	$A91E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TrackGoAway
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Region Dragging																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal long DragGrayRgn(RgnHandle theRgn, Point startPt, const Rect *limitRect, const Rect *slopRect, short axis, DragGrayRgnUPP actionProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DragGrayRgn:	OPWORD	$A905
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DragGrayRgn
+	ENDIF
+
+;
+; pascal long DragTheRgn(RgnHandle theRgn, Point startPt, const Rect *limitRect, const Rect *slopRect, short axis, DragGrayRgnUPP actionProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DragTheRgn:	OPWORD	$A926
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DragTheRgn
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• GetAuxWin																			
+; 																						
+; 	Avoid using GetAuxWin if at all possible											
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal Boolean GetAuxWin(WindowPtr theWindow, AuxWinHandle *awHndl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetAuxWin:	OPWORD	$AA42
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetAuxWin
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • MixedMode & ProcPtrs																
+; ——————————————————————————————————————————————————————————————————————————————————————
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • C Glue																				
+; ——————————————————————————————————————————————————————————————————————————————————————
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • WindowRecord accessor macros														
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 
+;	*****************************************************************************
+;	*                                                                           *
+;	* The conditional STRICT_WINDOWS has been removed from this interface file. *
+;	* The accessor macros to a WindowRecord are no longer necessary.            *
+;	*                                                                           *
+;	* All ≈Ref Types have reverted to their original Handle and Ptr Types.      *
+;	*                                                                           *
+;	*****************************************************************************
+;
+;	Details:
+;	The original purpose of the STRICT_ conditionals and accessor macros was to
+;	help ease the transition to Copland.  Shared data structures are difficult
+;	to coordinate in a preemptive multitasking OS.  By hiding the fields in a
+;	WindowRecord and other data structures, we would begin the migration to the
+;	discipline wherein system data structures are completely hidden from
+;	applications.
+;	
+;	After many design reviews, we finally concluded that with this sort of
+;	migration, the system could never tell when an application was no longer
+;	peeking at a WindowRecord, and thus the data structure might never become
+;	system owned.  Additionally, there were many other limitations in the
+;	classic toolbox that were begging to be addressed.  The final decision was
+;	to leave the traditional toolbox as a compatibility mode.
+;	
+;	We also decided to use the Handle and Ptr based types in the function
+;	declarations.  For example, NewWindow now returns a WindowPtr rather than a
+;	WindowRef.  The Ref types are still defined in the header files, so all
+;	existing code will still compile exactly as it did before.  There are
+;	several reasons why we chose to do this:
+;	
+;	- The importance of backwards compatibility makes it unfeasible for us to
+;	enforce real opaque references in the implementation anytime in the
+;	foreseeable future.  Therefore, any opaque data types (e.g. WindowRef,
+;	ControlRef, etc.) in the documentation and header files would always be a
+;	fake veneer of opacity.
+;	
+;	- There exists a significant base of books and sample code that neophyte
+;	Macintosh developers use to learn how to program the Macintosh.  These
+;	books and sample code all use direct data access.  Introducing opaque data
+;	types at this point would confuse neophyte programmers more than it would
+;	help them.
+;	
+;	- Direct data structure access is used by nearly all Macintosh developers. 
+;	Changing the interfaces to reflect a false opacity would not provide any
+;	benefit to these developers.
+;	
+;	- Accessor functions are useful in and of themselves as convenience
+;	functions.
+;	
+;	- Note: some accessor names conflict with API's in Win32 and have been renamed
+;	to have a Mac prefix (QuickTime 3.0).
+;
+
+
+
+
+
+
+
+
+	ENDIF ; __MACWINDOWS__ 
+

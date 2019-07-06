@@ -1,0 +1,282 @@
+;
+;	File:		MacHelp.a
+;
+;	Contains:	Macintosh Help Package Interfaces.
+;
+;	Version:	Technology:	Carbon
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1998-1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__MACHELP__') = 'UNDEFINED' THEN
+__MACHELP__ SET 1
+
+	IF &TYPE('__CONTROLS__') = 'UNDEFINED' THEN
+	include 'Controls.a'
+	ENDIF
+	IF &TYPE('__DIALOGS__') = 'UNDEFINED' THEN
+	include 'Dialogs.a'
+	ENDIF
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+	include 'Events.a'
+	ENDIF
+	IF &TYPE('__MACWINDOWS__') = 'UNDEFINED' THEN
+	include 'MacWindows.a'
+	ENDIF
+	IF &TYPE('__MENUS__') = 'UNDEFINED' THEN
+	include 'Menus.a'
+	ENDIF
+	IF &TYPE('__MOVIES__') = 'UNDEFINED' THEN
+	include 'Movies.a'
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————
+;  Help Manager constants, etc.							    						
+; ——————————————————————————————————————————————————————————————————————————————————
+	IF TARGET_CARBON THEN
+;  So as to not conflict with Balloons.h on non-Carbon builds
+
+kMacHelpVersion					EQU		$0003
+hmBalloonHelpVersion			EQU		$0003				; Backwards compatibility 
+	ENDIF	; TARGET_CARBON
+
+kHMSupplyContent				EQU		0
+kHMDisposeContent				EQU		1
+; typedef SInt16 						HMContentRequest
+
+
+kHMNoContent					EQU		'none'
+kHMPascalStrContent				EQU		'pstr'
+kHMPictResContent				EQU		'pict'
+kHMStringResContent				EQU		'str#'
+kHMTEHandleContent				EQU		'txth'
+kHMPictHandleContent			EQU		'pcth'
+kHMTextResContent				EQU		'text'
+kHMStrResContent				EQU		'str '
+kHMMovieContent					EQU		'moov'
+; typedef UInt32 						HMContentType
+
+
+kHMDefaultSide					EQU		0
+kHMTopSide						EQU		1
+kHMLeftSide						EQU		2
+kHMBottomSide					EQU		3
+kHMRightSide					EQU		4
+kHMTopLeftCorner				EQU		5
+kHMTopRightCorner				EQU		6
+kHMLeftTopCorner				EQU		7
+kHMLeftBottomCorner				EQU		8
+kHMBottomLeftCorner				EQU		9
+kHMBottomRightCorner			EQU		10
+kHMRightTopCorner				EQU		11
+kHMRightBottomCorner			EQU		12
+; typedef SInt16 						HMTagDisplaySide
+
+
+kHMContentProvided				EQU		0
+kHMContentNotProvided			EQU		1
+kHMContentNotProvidedDontPropagate EQU	2
+; typedef SInt16 						HMContentProvidedType
+
+
+kHMMinimumContentIndex			EQU		0
+kHMMaximumContentIndex			EQU		1
+
+kHMIllegalContentForMinimumState EQU	-1000				; *** Need real numbers here
+
+kHMHelpPropertyContentTag		EQU		'help'
+	IF &TYPE('__BALLOONS__') = 'UNDEFINED' THEN
+HMStringResType			RECORD 0
+hmmResID				 ds.w	1				; offset: $0 (0)
+hmmIndex				 ds.w	1				; offset: $2 (2)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+	ENDIF
+HMHelpContent			RECORD 0
+contentType				 ds.l	1				; offset: $0 (0)
+tagString				 ds		Str255			; offset: $4 (4)		;  Pascal String
+						 ORG 4
+tagPictID				 ds.w	1				; offset: $4 (4)		;  ‘PICT' resource ID
+						 ORG 4
+tagStringRes			 ds		HMStringResType ; offset: $4 (4)		;  STR# resource ID and index
+						 ORG 4
+tagTEHandle				 ds.l	1				; offset: $4 (4)		;  TextEdit handle
+						 ORG 4
+tagPictHandle			 ds.l	1				; offset: $4 (4)		;  Picture handle
+						 ORG 4
+tagTextRes				 ds.w	1				; offset: $4 (4)		;  TEXT/styl resource ID
+						 ORG 4
+tagStrRes				 ds.w	1				; offset: $4 (4)		;  STR resource ID
+						 ORG 4
+tagMovie				 ds.l	1				; offset: $4 (4)		;  QuickTime movie
+						 ORG 260
+sizeof					 EQU *					; size:   $104 (260)
+						ENDR
+HMHelpContentRec		RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+absHotRect				 ds		Rect			; offset: $4 (4)
+tagSide					 ds.w	1				; offset: $C (12)
+content					 ds.b	2 * HMHelpContent.sizeof ; offset: $E (14)
+sizeof					 EQU *					; size:   $216 (534)
+						ENDR
+; typedef struct HMHelpContentRec *		HMHelpContentPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————————
+;  Callback procs									    
+; —————————————————————————————————————————————————————————————————————————————————————————— 
+; ——————————————————————————————————————————————————————————————————————————————————————————
+;  API											    										
+; ——————————————————————————————————————————————————————————————————————————————————————————
+;  Installing/Retrieving Content 
+;
+; pascal OSStatus HMSetControlHelpContent(ControlRef inControl, const HMHelpContentRec *inContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMSetControlHelpContent
+	ENDIF
+
+;
+; pascal OSStatus HMGetControlHelpContent(ControlRef inControl, HMHelpContentRec *outContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMGetControlHelpContent
+	ENDIF
+
+;
+; pascal OSStatus HMSetWindowHelpContent(WindowRef inWindow, const HMHelpContentRec *inContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMSetWindowHelpContent
+	ENDIF
+
+;
+; pascal OSStatus HMGetWindowHelpContent(WindowRef inWindow, HMHelpContentRec *outContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMGetWindowHelpContent
+	ENDIF
+
+;
+; pascal OSStatus HMSetMenuItemHelpContent(MenuRef inMenu, MenuItemIndex inItem, const HMHelpContentRec *inContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMSetMenuItemHelpContent
+	ENDIF
+
+;
+; pascal OSStatus HMGetMenuItemHelpContent(MenuRef inMenu, MenuItemIndex inItem, HMHelpContentRec *outContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMGetMenuItemHelpContent
+	ENDIF
+
+;  Installing/Retrieving Content Callbacks 
+;
+; pascal OSStatus HMInstallControlContentCallback(ControlRef inControl, HMControlContentUPP inContentUPP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMInstallControlContentCallback
+	ENDIF
+
+;
+; pascal OSStatus HMInstallWindowContentCallback(WindowRef inWindow, HMWindowContentUPP inContentUPP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMInstallWindowContentCallback
+	ENDIF
+
+;
+; pascal OSStatus HMInstallMenuTitleContentCallback(MenuRef inMenu, HMMenuTitleContentUPP inContentUPP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMInstallMenuTitleContentCallback
+	ENDIF
+
+;
+; pascal OSStatus HMInstallMenuItemContentCallback(MenuRef inMenu, HMMenuItemContentUPP inContentUPP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMInstallMenuItemContentCallback
+	ENDIF
+
+
+;
+; pascal OSStatus HMGetControlContentCallback(ControlRef inControl, HMControlContentUPP *outContentUPP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMGetControlContentCallback
+	ENDIF
+
+;
+; pascal OSStatus HMGetWindowContentCallback(WindowRef inWindow, HMWindowContentUPP *outContentUPP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMGetWindowContentCallback
+	ENDIF
+
+;
+; pascal OSStatus HMGetMenuTitleContentCallback(MenuRef inMenu, HMMenuTitleContentUPP *outContentUPP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMGetMenuTitleContentCallback
+	ENDIF
+
+;
+; pascal OSStatus HMGetMenuItemContentCallback(MenuRef inMenu, HMMenuItemContentUPP *outContentUPP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMGetMenuItemContentCallback
+	ENDIF
+
+;  Enabling and Disabling Help Tags 
+;
+; pascal Boolean HMAreHelpTagsDisplayed(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMAreHelpTagsDisplayed
+	ENDIF
+
+;
+; pascal OSStatus HMSetHelpTagsDisplayed(Boolean inDisplayTags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMSetHelpTagsDisplayed
+	ENDIF
+
+;
+; pascal OSStatus HMSetTagDelay(Duration inDelay)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMSetTagDelay
+	ENDIF
+
+;
+; pascal OSStatus HMGetTagDelay(Duration *outDelay)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMGetTagDelay
+	ENDIF
+
+;  Compatibility 
+;
+; pascal OSStatus HMSetMenuHelpFromBalloonRsrc(MenuRef inMenu, SInt16 inHmnuRsrcID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMSetMenuHelpFromBalloonRsrc
+	ENDIF
+
+;
+; pascal OSStatus HMSetDialogHelpFromBalloonRsrc(DialogRef inDialog, SInt16 inHdlgRsrcID, SInt16 inItemStart)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HMSetDialogHelpFromBalloonRsrc
+	ENDIF
+
+	ENDIF ; __MACHELP__ 
+

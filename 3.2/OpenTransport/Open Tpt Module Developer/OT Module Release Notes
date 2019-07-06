@@ -1,0 +1,154 @@
+
+Open Transport Module Release Notes
+
+Revision 1.3
+9/19/97
+
+
+
+Comments and technical support questions should be directed to the Internet address 'devsupport@apple.com'.
+
+
+What this release contains
+
+This release includes  
+• an Installer that will install Open Transport 1.3 and Apple Shared Library Manager 2.0.1 onto your machine. 
+• an Open Transport SDK folder that contains header files, libraries, and documents and samples.
+
+WARNINGS
+
+See also the ReadMe file that accompanies Open Transport
+
+• If you are not already aware of it, you MUST test mp->b_datap->db_ref for 1 before modifying any message block (other than initial M_PROTO or M_PCPROTOs, for which this should always be true).  If it is anything other than 1, you must copy the block before modifying it.  In addition, make sure you never create an initial M_PROTO or M_PCPROTO using "dupb", "dupmsg" or "OTAllocReadOnlyMsg"
+
+
+API changes in OT 1.1.1
+
+• The #pragma aligns in the Open Transport header files have been updated so that they don't change the alignment settings for other header files.
+
+• The API mi_reuse_proto was added.  This is used when you are going to reuse an M_PROTO or M_PCPROTO message, and the size of your new M_PROTO is or might be greater than 64 (If it's known to be less than 64, you can just reuse the message, since STREAMS guarantees that all M_PROTOs and M_PCPROTO messages are at least 64 bytes long).
+
+• The API OTAllocReadOnlyMsg was added to create a message block pointing to user data that must NOT be modified (mp->b_datap->db_ref is set to 2).  The API OTAllocMsg or esballoc should normally be used to create messages to data buffers unless it is important that others not write into the data buffer.
+
+• A new API exported by stream modules has been introduced.  Instead of exporting "InitStreamModule", if you export "InitializeStreamModule" instead, you can return an OTUnixErr to Open Transport so that an error other than ENXIO is returned to the client attempting to open your module.
+
+API changes in OT 1.3
+
+• Added mi_open_detached. It was already in OpenTptModule.h, but never properly exported by OT. It is similar to mi_open_comm, but is useful when you need to make the call before the module is actually open, such as when you maintain separate q_ptr data for upper and lower queues, and you want to allocate the q_ptr for the lower queue before the I_LINK is received.
+
+Other changes in OT 1.1.1
+
+• If you didn't already know this, you might find this helpful - if you're running the debugging version of Open Transport, holding down the command key at boot time will force "Classic" networking to load.  This is often helpful while debugging new modules that aren't quite working yet.
+
+• One of the internal locking routines in Open Transport for handling queueing between modules was still turning interrupts on and off.
+
+• Flow control between modules was fixed.  There was a bug that caused canput to alway fail once a queue was in contention (i.e. once someone tried to "put" to the queue, but the module being "put" to was locked  because of it's SQLVL value).
+
+• The dlpiether.c template is included in the SDK, as well as a shared library implementing it, and documentation on using the template.
+
+• It is now possible to write port scanners using CFM rather than ASLM on PowerPC machines.
+
+Other changes in OT 1.3
+
+•Support the new 8.0.1 DriverLoaderLib which allows multiple ndrv's in a CFM code fragment.
+
+•Really added support for CFM port scanners and configurators. On PowerPC, you no longer need to write your port scanners and resident configurators using ASLM. This support was actually in OT 1.1.1, but only worked if you explicitly registered your shared library with CFM (which required use of a private CFM api). OT will now scan the Extensions folder on boot, looking for all 'shlb' and 'libr' files with an extended 'cfrg' resources. The extended 'cfrg' is then used to locate port scanner and resident configurator shared libraries with the file. Your extended 'cfrg' resource for a resident configurator should look as follows:
+
+#define UseExtendedCFRGTemplate	1
+
+#include "OpenTransport.r"
+#include "CodeFragmentTypes.r"
+
+resource 'cfrg' (0)
+{
+	{
+		extendedEntry {
+			kPowerPC,
+			kFullLib,
+			kNoVersionNum,				/* Current Version Number 	*/
+			kNoVersionNum,				/* Old Def Version Number	*/
+			kDefaultStackSize,
+			kNoAppSubFolder,
+			kIsLib,
+			kOnDiskFlat,
+			kZeroOffset,
+			kWholeFork,
+			"XYZProtocolRS_ConfiguratorLib",
+			/* start of extended info */
+			kOTCFMClass,
+			kOTConfiguratorCFMTag,
+			"",
+			"",
+			"XYZProtocol"		/* external name: may be seen by user */
+		}
+	}
+};
+
+Use kOTPortScannerCFMTag for port scanners instead of kOTPortConfiguratorCFMTag.
+
+Bug Fixes in OT 1.1.1
+
+• Fixed a problem with flow control on the DLPI driver that interfaces with the .ENET/.TOKN/.FDDI drivers.  A bit variable was uninitialized, and if it happened to be non-zero, after the first packet is sent to the DLPI driver, a "canput" call to it's queue will always fail.
+
+.Developing Open Transport compliant protocols or drivers
+
+This release does contain information for developers who wish to write DLPI hardware drivers for Open Transport.  The document "Open Tpt Driver Dev. Note" describes the procedure for creating a loadable STREAMS module for driver writers.  The document does not fully address the needs of protocol implementors, but all of the header files and libraries are present to do the development, and the differences between writing drivers and protocol modules is minimal (You can probably glean the differences by reading the "Open Tpt Driver Dev. Note" document.  We still need to document how to get your module usable by the streams environment if "plumbing" is more involved than just "pushing" the module on top of a pre-existing STREAM.
+
+All protocols in the Open Transport architecture are implemented as UNIX System V, release 4.2 STREAMS modules. Open Transport includes a standard STREAMS environment that allows STREAMS modules to be recompiled on the Macintosh.
+
+You may want to read about UNIX STREAMS and the TPI and DLPI specifications which define the formats of messages that flow between STREAMS modules.
+Sources of information that are applicable to XTI include:
+
+- OSF/1 Operating System: Network Applications Programmer's Guide; Open Software Foundation, Prentice Hall, ISBN 0-13-640145-7
+
+- UNIX Network Programming; W. Richard Stevens, Prentice Hall, ISBN 0-13-949876-1
+
+- Programming UNIX SVR4.2: Network Programming Interhces; UNIX Press (A Prentice Hall title), ISBN 0-13-017641-9
+
+- X/Open CAE Specification: X/Open Transport Interface (XTI); X/Open Company, Ltd. (XO/CAE/91/600) ISBN 1-872630-29-4.
+
+Sources of information that are applicable to STREAMS modules and drivers include:
+
+-STREAMS  Modules and Drivers, UNIX SVR4.2; UNIX Press (A Prentice Hall title), ISBN 0-13-066879-6. A much improved revision to the former Programmer’s Guide for STREAMS (listed below). It also includes the TPI specification and a description of DLPI.
+
+- UNIX System V Relase 4: Programmer's Guide: STREAMS; Unix Press (A Prentice Hall title), ISBN - 0-13-020660-1
+
+-UNIX System V Network Programming; Stephen A. Rago, Addison-Wesley Publishing Company, ISBN 0-201-56318-5. A good book for learning to write STREAMS modules and drivers. The book contains (among other things) a discussion of TLI (precursor to XTI) and a complete DPLI STREAMS driver for Ethernet. 
+
+- Transport Provider Interface Specification, revision 1.5 (92/12/10); UNIX International, OSI Special Interest Group.
+
+- Data Link Provider Interface Specification, revision 2.0.0 (91/08/20); UNIX International, OSI Work Group.
+
+Documentation
+
+There is a "Document" folder which contains more documentation:
+
+• Open Transport Client Note - A reference document for programmers wishing to write software using the Open Transport APIs.
+• Open Tpt AppleTalk Dev. Note - Material specific to AppleTalk.
+• Open Tpt  Serial Dev. Note - Material specific to Serial endpoints.
+• Open Tpt TCP/IP Dev. Note - Material specific to TCP/IP.
+• Open Tpt 802.2 Dev. Note - Material specific to 802.2 datalinks like Ethernet and Token Ring.
+• Open Tpt Ethernet Dev. Not - Material specific to the Ethernet datalink.
+
+Debugger support
+
+The debug version of the installer will install Open Transport Debugger preferences into the "OT Debugger Prefs" file in the Macsbug Preferences folder. This is a changed from 1.2 and earlier which installed the debugger prefs into the Debugger Prefs file in the System Folder. These debugger prefs contain the ASLM debugger prefs plus Macsbug templates for virtually all structures used in the API. A Macsbug dcmd is installed also that can display strings for error messages. For example, typing “OTErr -3158” will tell you what error number -3158 is.
+
+Sample Code
+
+There is a "Samples" folder which contains sample modules and source files.
+
+All of the samples have makefiles that can be used to build them. All of the makefiles use shell variables that must be set to the full pathname of the folders containing the Apple Shared Library Manager and Open Transport header files and object libraries. If you drag the header files and object files from the developer tools diskette to the normal places in MPW, you’d want to set up the shell variables like this before building.
+
+					Set ASLMIncludes “{CIncludes}”
+					Set OTIncludes “{CIncludes}”
+					Set OTModIncludes “{CIncludes}”
+					Set OTLibs “{CLibraries}”
+					Set ASLMLibs “{CLibraries}”
+					Export ASLMIncludes OTIncludes OTLibs ASLMLibs
+
+After doing this,you can build the sample programs by setting your current MPW directory to be the one containing the samples and using the ‘make’ tool:
+
+Make -f Makefile.SampleModules
+
+OpenTransport header files require the header files that were released on E.T.O. #19 in the "Prerelease MPW" folder, although later header files will most likely work.

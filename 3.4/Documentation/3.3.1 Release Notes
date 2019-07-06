@@ -1,0 +1,126 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.3.1
+Date:    March 13, 2000
+Author:  Nick Kledzik
+
+
+=================
+Important Notice
+=================
+
+This set of headers and libraries supports
+CarbonLib 1.0.2 and QuickTime 4.1 development.
+
+See 3.3 Release Notes for information on changes
+from 3.2 to 3.3.
+
+
+==========================================
+Notes on CarbonLib 1.0.2 development
+==========================================
+
+- CarbonLib 1.0.2 is designed to run on Mac OS 8.1 
+  through OS 9.  
+  
+- Not all CarbonLib functions are available on older
+  System versions.  For instance, NavServices might
+  not be installed on an 8.1 system.  Just as you
+  would for a traditional application, your application's
+  code should use Gestalt and/or other mechanisms
+  to see if a particular manager or function is 
+  available before calling it.
+
+- The CarbonLib stub library is constructed to
+  cause the linker to automatically weak link 
+  symbols in CarbonLib that might not be 
+  available when running on a pre Mac OS 9 system.
+
+
+==================================================
+Changes since Universal Interfaces 3.3
+==================================================
+
+- There is no longer a CoreFoundation subfolder in
+  CIncludes.  Instead all CF .h files are in CIncludes.
+
+- New .h/.a/.p/.r files:
+
+		InternetConfig.h
+
+- General bug fixes/enhancements to .h/.a/.p/.r files:
+
+		ATA.h - add AIM definitions
+		Appearance.h - fix kThemeState values
+		ControlDefinitions.h - add kControlPictureHandleTag
+		Drag.h - add constants
+		ImageCodec.h - updates for QuickTime 4.1
+		ImageCompression.h - updates for QuickTime 4.1
+		MacWindows.h - update FindWindowOfClass
+		MediaHandlers.i - updates for QuickTime 4.1
+		Menus.h - add DuplicateMenuBar and DisposeMenuBar
+		Movies.h - updates for QuickTime 4.1
+		NetworkSetup.h - update for version 1.2
+		OpenTransportProtocol.h - fix caddr_t
+		Quickdraw.h - add SetQDError
+		QuickTimeComponents.h - updates for QuickTime 4.1
+		Resources.h - add GetTopResourceFile and GetNextResourceFile
+		Scrap.h - fix comments
+		Sound.h - updates for Sound Mgr 3.6
+		TextUtils.h - fix OLDP2C and comments
+		USB.h - updates for USB 1.4
+
+- Changes to CALL_NOT_IN_CARBON and/or UPP's in .h/.a/.p/.r files:
+
+		ColorPickerComponents.h
+		Components.h
+		CMApplication.h
+		Events.h
+		Files.h
+		FindByContent.h
+		GXMath.h
+		ImageCodec.h
+		ImageCompression.h
+		MacMemory.h
+		MediaHandlers.h
+		Movies.h
+		Quickdraw.h
+		QuickTimeComponents.h
+		SpeechRecognition.h
+		SpeechSynthesis.h
+		Timer.h
+		UTCUtils.h
+
+- The use of CALL_NOT_IN_CARBON was changed in these headers to allow CFM 
+  CarbonLib based applications to use these technologies on OS 8/9 even 
+  though they are not in CarbonLib.
+  		
+  		DrawSprocket.h
+  		InputSprocket.h
+  		Keychain.h
+  		NetSprocket.h
+  		SoundSprocket.h
+		
+
+- Updated PowerPC .o files:
+
+		CarbonAccessors.o      - renamed from PreCarbon.o
+		PascalPreCarbonUPPGlue.o
+
+
+-  Updated stub libraries
+
+		CarbonLib				- auto-weak-link optional symbols
+		NavServicesLib			- added CFM68K support
+		FontManager				- fix conflict with InterfaceLib
+		QuickTimeLib			- updates for QuickTime 4.1
+		QTStreamLib				- updates for QuickTime 4.1
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+
+

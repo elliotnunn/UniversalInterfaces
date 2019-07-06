@@ -1,0 +1,40 @@
+Open Transport 1.3 Client Developer ReadMe
+9/16/97
+
+IMPORTANT INSTALLATION INFORMATION!!!
+
+All users - NOTE:
+
+If you are installing any product on your Macintosh, it's always a good idea to reboot your machine first, then run the installer.  In addition, running Disk First Aid or other disk repair utility is always a good idea before installing, since anything wrong with your disk may become a serious problem after installation.
+
+Unlike other installations, you should install Open Transport with the standard shipping set of extensions enabled for best result.  If you are using Extension Manager, this is easily done by configuring the "System Extensions Only" set.
+
+MacTCP users - NOTE:
+
+The installer does not delete MacTCP.  Open Transport now "hides" the MacTCP control panel if it is booting.  This feature allows a disk with Open Transport installed to be booted on a system that does not support Open Transport.  Open Transport will automatically load "Classic" networking in this case and "unhide" the MacTCP control panel.
+
+Known Bugs/Incompatibilities
+
+All users :
+
+
+TCP/IP users :
+
+• NFS/Share 1.3.x and 1.4 are not OpenTransport compatible. OT customers will need to get an NFS/Share update from Intercon to work with OT 1.1.
+
+AppleTalk users :
+
+• Open Transport is incompatible with "Assistant Toolbox" v1.2 and below.  Assistant Toolbox will turn AppleTalk off at boot time.  If you are having problems with AppleTalk being turned off after rebooting your machine, check for the present of this file in your Extensions folder.
+
+
+
+
+
+
+
+
+
+
+
+
+

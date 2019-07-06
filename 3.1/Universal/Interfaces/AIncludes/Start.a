@@ -1,0 +1,351 @@
+;
+;	File:		Start.a
+;
+;	Contains:	Start Manager Interfaces.
+;
+;	Version:	Technology:	System 7.5
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1987-1993, 1996-1998 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__START__') = 'UNDEFINED' THEN
+__START__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+
+; 
+;	Important: When the major version number of kExtensionTableVersion and the value
+;	returned by gestaltExtensionTableVersion change, it indicates that the Extension
+;	Table startup mechanism has radically changed and code that doesn't know about
+;	the new major version must not attempt to use the Extension Table startup
+;	mechanism.
+;	
+;	Changes to the minor version number of kExtensionTableVersion indicate that the
+;	definition of the ExtensionElement structure has been extended, but the fields
+;	defined for previous minor versions of kExtensionTableVersion have not changed.
+;
+
+
+kExtensionTableVersion			EQU		$00000100			; current ExtensionTable version (1.0.0) 
+;  ExtensionNotification message codes 
+
+extNotificationBeforeFirst		EQU		0					; Before any extensions have loaded 
+extNotificationAfterLast		EQU		1					; After all extensions have loaded 
+extNotificationBeforeCurrent	EQU		2					; Before extension at extElementIndex is loaded 
+extNotificationAfterCurrent		EQU		3					; After extension at extElementIndex is loaded 
+ExtensionElement		RECORD 0
+fileName				 ds		Str31			; offset: $0 (0)		;  The file name 
+parentDirID				 ds.l	1				; offset: $20 (32)		;  the file's parent directory ID 
+;  and everything after ioNamePtr in the HParamBlockRec.fileParam variant 
+ioVRefNum				 ds.w	1				; offset: $24 (36)		;  always the real volume reference number (not a drive, default, or working dirID) 
+ioFRefNum				 ds.w	1				; offset: $26 (38)
+ioFVersNum				 ds.b	1				; offset: $28 (40)
+filler1					 ds.b	1				; offset: $29 (41)
+ioFDirIndex				 ds.w	1				; offset: $2A (42)		;  always 0 in table 
+ioFlAttrib				 ds.b	1				; offset: $2C (44)
+ioFlVersNum				 ds.b	1				; offset: $2D (45)
+ioFlFndrInfo			 ds		FInfo			; offset: $2E (46)
+ioDirID					 ds.l	1				; offset: $3E (62)
+ioFlStBlk				 ds.w	1				; offset: $42 (66)
+ioFlLgLen				 ds.l	1				; offset: $44 (68)
+ioFlPyLen				 ds.l	1				; offset: $48 (72)
+ioFlRStBlk				 ds.w	1				; offset: $4C (76)
+ioFlRLgLen				 ds.l	1				; offset: $4E (78)
+ioFlRPyLen				 ds.l	1				; offset: $52 (82)
+ioFlCrDat				 ds.l	1				; offset: $56 (86)
+ioFlMdDat				 ds.l	1				; offset: $5A (90)
+sizeof					 EQU *					; size:   $5E (94)
+						ENDR
+; typedef struct ExtensionElement *		ExtensionElementPtr
+
+ExtensionTableHeader	RECORD 0
+extTableHeaderSize		 ds.l	1				; offset: $0 (0)		;  size of ExtensionTable header ( equal to offsetof(ExtensionTable, extElements[0]) ) 
+extTableVersion			 ds.l	1				; offset: $4 (4)		;  current ExtensionTable version (same as returned by gestaltExtTableVersion Gestalt selector) 
+extElementIndex			 ds.l	1				; offset: $8 (8)		;  current index into ExtensionElement records (zero-based) 
+extElementSize			 ds.l	1				; offset: $C (12)		;  size of ExtensionElement 
+extElementCount			 ds.l	1				; offset: $10 (16)		;  number of ExtensionElement records in table (1-based) 
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+ExtensionTable			RECORD 0
+extTableHeader			 ds		ExtensionTableHeader ; offset: $0 (0)	;  the ExtensionTableHeader 
+extElements				 ds		ExtensionElement ; offset: $14 (20) <-- really an array of length one ;  one element for each extension to load 
+sizeof					 EQU *					; size:   $72 (114)
+						ENDR
+; typedef struct ExtensionTable *		ExtensionTablePtr
+
+; typedef ExtensionTablePtr *			ExtensionTableHandle
+
+DefStartRec				RECORD 0
+sdExtDevID				 ds.b	1				; offset: $0 (0)
+sdPartition				 ds.b	1				; offset: $1 (1)
+sdSlotNum				 ds.b	1				; offset: $2 (2)
+sdSRsrcID				 ds.b	1				; offset: $3 (3)
+						 ORG 0
+sdReserved1				 ds.b	1				; offset: $0 (0)
+sdReserved2				 ds.b	1				; offset: $1 (1)
+sdRefNum				 ds.w	1				; offset: $2 (2)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; typedef union DefStartRec *			DefStartPtr
+
+DefVideoRec				RECORD 0
+sdSlot					 ds.b	1				; offset: $0 (0)
+sdsResource				 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+; typedef struct DefVideoRec *			DefVideoPtr
+
+DefOSRec				RECORD 0
+sdReserved				 ds.b	1				; offset: $0 (0)
+sdOSType				 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+; typedef struct DefOSRec *				DefOSPtr
+
+;
+; pascal void GetDefaultStartup(DefStartPtr paramBlock)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		; parameters:
+		;	paramBlock      => A0
+		_GetDefaultStartup:	OPWORD	$A07D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDefaultStartup
+	ENDIF
+
+;
+; pascal void SetDefaultStartup(DefStartPtr paramBlock)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		; parameters:
+		;	paramBlock      => A0
+		_SetDefaultStartup:	OPWORD	$A07E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDefaultStartup
+	ENDIF
+
+;
+; pascal void GetVideoDefault(DefVideoPtr paramBlock)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		; parameters:
+		;	paramBlock      => A0
+		_GetVideoDefault:	OPWORD	$A080
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetVideoDefault
+	ENDIF
+
+;
+; pascal void SetVideoDefault(DefVideoPtr paramBlock)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		; parameters:
+		;	paramBlock      => A0
+		_SetVideoDefault:	OPWORD	$A081
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetVideoDefault
+	ENDIF
+
+;
+; pascal void GetOSDefault(DefOSPtr paramBlock)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		; parameters:
+		;	paramBlock      => A0
+		_GetOSDefault:	OPWORD	$A084
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetOSDefault
+	ENDIF
+
+;
+; pascal void SetOSDefault(DefOSPtr paramBlock)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		; parameters:
+		;	paramBlock      => A0
+		_SetOSDefault:	OPWORD	$A083
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetOSDefault
+	ENDIF
+
+;
+; pascal void SetTimeout(short count)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetTimeout
+			move.w              #$0001,A0
+			dc.w            	$A07F
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetTimeout
+	ENDIF
+
+;
+; pascal void GetTimeout(short *count)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetTimeout
+			sub.l               A0,A0
+			dc.w            	$A07F
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTimeout
+	ENDIF
+
+; 
+;	InstallExtensionNotificationProc
+;
+;	Installs an ExtensionNotificationUPP.
+;
+;	Parameters:
+;		extNotificationProc	The ExtensionNotificationUPP to install.
+;
+;	Results:
+;		noErr		0		The ExtensionNotificationUPP was installed.
+;		paramErr	-50		This ExtensionNotificationUPP has already been installed.
+;		memFullErr	-108	Not enough memory to install the ExtensionNotificationUPP.
+;
+
+;
+; pascal OSErr InstallExtensionNotificationProc(ExtensionNotificationUPP extNotificationProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InstallExtensionNotificationProc
+			moveq           	#0,D0
+			dc.w            	$AA7D
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InstallExtensionNotificationProc
+	ENDIF
+
+
+; 
+;	RemoveExtensionNotificationProc
+;
+;	Removes an ExtensionNotificationUPP.
+;	
+;	Note:	ExtensionNotificationUPPs can't call RemoveExtensionNotificationProc.
+;
+;	Parameters:
+;		extNotificationProc	The ExtensionNotificationUPP to remove.
+;
+;	Results:
+;		noErr		0		The ExtensionNotificationUPP was removed.
+;		paramErr	-50		The ExtensionNotificationUPP was not found, or
+;							RemoveExtensionNotificationProc was called from within
+;							a ExtensionNotificationUPP (ExtensionNotificationUPPs can't
+;							call RemoveExtensionNotificationProc).
+;
+
+;
+; pascal OSErr RemoveExtensionNotificationProc(ExtensionNotificationUPP extNotificationProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_RemoveExtensionNotificationProc
+			moveq           	#1,D0
+			dc.w            	$AA7D
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RemoveExtensionNotificationProc
+	ENDIF
+
+
+; 
+;	InstallExtensionTableHandlerProc
+;
+;	Installs an ExtensionTableHandlerUPP. Control is taken away from the system's default
+;	handler and the ExtensionTableHandlerUPP is responsible for all changes to the
+;	ExtensionTable (except for incrementing extElementIndex between extensions). This is
+;	always the first handler called with extNotificationBeforeFirst and
+;	extNotificationBeforeCurrent messages and the last handler called with
+;	extNotificationAfterLast and extNotificationAfterCurrent messages. extElementIndex
+;	is always incremented immediately after the ExtensionTableHandlerUPP is called with
+;	the extNotificationAfterCurrent message.
+;	
+;	There can only be one ExtensionTableHandler installed.
+;	
+;	Warning:	The only safe time to change what ExtensionElement is at
+;				ExtensionTable.extElements[extElementIndex] is when your
+;				ExtensionTableHandlerUPP is called with the extNotificationAfterCurrent
+;				message. You may change the ExtensionTable or the extElementIndex at other
+;				times, but you must ensure that the ExtensionElement at
+;				ExtensionTable.extElements[extElementIndex] stays the same.
+;				
+;	Note:		If the ExtensionTable or the contents of the folders included in the
+;				ExtensionTable are changed after installing an ExtensionTableHandler,
+;				RemoveExtensionTableHandlerProc cannot be called.
+;
+;	Parameters:
+;		extMgrProc			The ExtensionTableHandlerUPP to install.
+;		extTable			A pointer to an ExtensionTableHandle where
+;							InstallExtensionTableHandlerProc will return the current
+;							ExtensionTableHandle. You don't own the handle itself and
+;							must not dispose of it, but you can change the extElementIndex.
+;							the extElementCount, and the ExtensionElements in the table.
+;
+;	Results:
+;		noErr		0		The ExtensionTableHandlerUPP was installed.
+;		paramErr	-50		Another ExtensionTableHandlerUPP has already been installed.
+;		memFullErr	-108	Not enough memory to install the ExtensionTableHandlerUPP.
+;
+
+;
+; pascal OSErr InstallExtensionTableHandlerProc(ExtensionTableHandlerUPP extMgrProc, ExtensionTableHandle *extTable)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InstallExtensionTableHandlerProc
+			moveq           	#2,D0
+			dc.w            	$AA7D
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InstallExtensionTableHandlerProc
+	ENDIF
+
+
+; 
+;	RemoveExtensionTableHandlerProc
+;
+;	Remove an ExtensionTableUPP. Control is passed back to the default handler.
+;
+;	Parameters:
+;		extMgrProc			The ExtensionTableUPP to remove.
+;
+;	Results:
+;		noErr		0		The ExtensionTableUPP was removed.
+;		paramErr	-50		This ExtensionTableUPP was not installed,
+;							or the ExtensionTable no longer matches the
+;							original boot ExtensionTable.
+;
+
+;
+; pascal OSErr RemoveExtensionTableHandlerProc(ExtensionTableHandlerUPP extMgrProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_RemoveExtensionTableHandlerProc
+			moveq           	#3,D0
+			dc.w            	$AA7D
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RemoveExtensionTableHandlerProc
+	ENDIF
+
+	ENDIF ; __START__ 
+

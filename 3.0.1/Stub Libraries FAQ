@@ -1,0 +1,43 @@
+  
+                                                   
+                                                                 Stub Libraries FAQ 
+
+
+Q	What is a stub library?
+A	A stub library is a special kind of PEF shared library that has no code or data sections - only exports. The file type is 'stub' and creator is 'MPS '.
+
+
+Q 	How do I make a stub library?
+A 	With the MPW tool MakeStub which takes an export list as input.
+
+
+Q 	What is the difference between a stub library and a shared library?
+A	A stub library is the "interface" to a shared library.  A runtime library is the "implementation" of a shared library.  
+
+
+Q 	Why was the concept of stub libraries created?
+A 	Stub libraries were created to separate interface and implementation of shared libraries.  This is necessary if you want to build two or more shared libraries that are mutually dependent on one another.  Without a stub library, you are in a Catch-22 and cannot link one without the other.  Since the "interface" (i.e. the list of exports) for a shared library is usually frozen early on, a stub library can be created separately and the Catch-22 is removed.
+
+
+Q 	What if CFM finds and tries to load a stub library, but it contains no code?
+A 	The file type of all stub libraries is 'stub'.  CFM will not find and load shared libraries with this file type.  This is another reason stub libraries were created.  Previously, developers could run into confusing bugs if CFM accidentally loaded the library used for linking and not the intended shared library.  
+
+
+Q	How are stub libraries named?
+A	Stub libraries must have the same fragment name and PEF versioning as the implementation library, but the filename can differ.  Our convention is that	the stub library file name be the same as the fragment name.  If we've been	shipping the stub library with a different file name, we will keep that file name to avoid breaking developers builds.
+
+
+Q	Should stub libraries be FAT?
+A	If a shared library is available in both PowerPC and CFM68K forms, a FAT stub library should be created for it.  This is done by running MakeStub twice (once for CFM68K and once for PowerPC) and then using MergeFragment to merge them into one file.  Note: It is our convention that PowerPC and CFM68K fragments that implement the same functionality, use the same fragment name (e.g. "InterfaceLib" is the fragment named used by both CFM68K and PowerPC).
+
+
+Q	What should the stub library contain for a shared library in which a newer version exports more symbols?
+A	There general strategy is to create more than one stub library, each having the same fragment name, but exporting different sets of symbols. The file names for these stub libraries should be different to avoid confusion (e.g. MyUtils1.0 and MyUtils2.0).  Where this strategy fails is when a the client needs to weak link against the newer symbols, but link normally against the older symbols.  To support this, a new "auto-weak-linking" feature is being added to stub libraries.  Once our linkers support this feature, a stub library file can be created which specifies exactly which symbols the client should have weak linked.  Multiple stub libraries can then be created, each having different sets of auto-weak-linked symbols.
+
+
+
+
+
+
+
+

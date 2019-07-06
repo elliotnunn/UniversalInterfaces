@@ -1,0 +1,759 @@
+;
+;    File:       AEDataModel.a
+;
+;    Contains:   AppleEvent Data Model Interfaces.
+;
+;    Version:    Technology: System 7.5
+;                Release:    Universal Interfaces 3.3.2
+;
+;    Copyright:  © 1996-2000 by Apple Computer, Inc., all rights reserved
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__AEDATAMODEL__') = 'UNDEFINED' THEN
+__AEDATAMODEL__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__MIXEDMODE__') = 'UNDEFINED' THEN
+	include 'MixedMode.a'
+	ENDIF
+
+;  Apple event descriptor types 
+
+typeBoolean						EQU		'bool'
+typeChar						EQU		'TEXT'
+;  Preferred numeric Apple event descriptor types 
+
+typeSInt16						EQU		'shor'
+typeSInt32						EQU		'long'
+typeUInt32						EQU		'magn'
+typeSInt64						EQU		'comp'
+typeIEEE32BitFloatingPoint		EQU		'sing'
+typeIEEE64BitFloatingPoint		EQU		'doub'
+type128BitFloatingPoint			EQU		'ldbl'
+typeDecimalStruct				EQU		'decm'
+;  Non-preferred Apple event descriptor types 
+
+typeSMInt						EQU		'shor'
+typeShortInteger				EQU		'shor'
+typeInteger						EQU		'long'
+typeLongInteger					EQU		'long'
+typeMagnitude					EQU		'magn'
+typeComp						EQU		'comp'
+typeSMFloat						EQU		'sing'
+typeShortFloat					EQU		'sing'
+typeFloat						EQU		'doub'
+typeLongFloat					EQU		'doub'
+typeExtended					EQU		'exte'
+;  More Apple event descriptor types 
+
+typeAEList						EQU		'list'
+typeAERecord					EQU		'reco'
+typeAppleEvent					EQU		'aevt'
+typeEventRecord					EQU		'evrc'
+typeTrue						EQU		'true'
+typeFalse						EQU		'fals'
+typeAlias						EQU		'alis'
+typeEnumerated					EQU		'enum'
+typeType						EQU		'type'
+typeAppParameters				EQU		'appa'
+typeProperty					EQU		'prop'
+typeFSS							EQU		'fss '
+typeKeyword						EQU		'keyw'
+typeSectionH					EQU		'sect'
+typeWildCard					EQU		'****'
+typeApplSignature				EQU		'sign'
+typeQDRectangle					EQU		'qdrt'
+typeFixed						EQU		'fixd'
+typeSessionID					EQU		'ssid'
+typeTargetID					EQU		'targ'
+typeProcessSerialNumber			EQU		'psn '
+typeKernelProcessID				EQU		'kpid'
+typeDispatcherID				EQU		'dspt'
+typeNull						EQU		'null'				; null or nonexistent data 
+;  Keywords for Apple event attributes 
+
+keyTransactionIDAttr			EQU		'tran'
+keyReturnIDAttr					EQU		'rtid'
+keyEventClassAttr				EQU		'evcl'
+keyEventIDAttr					EQU		'evid'
+keyAddressAttr					EQU		'addr'
+keyOptionalKeywordAttr			EQU		'optk'
+keyTimeoutAttr					EQU		'timo'
+keyInteractLevelAttr			EQU		'inte'				; this attribute is read only - will be set in AESend 
+keyEventSourceAttr				EQU		'esrc'				; this attribute is read only 
+keyMissedKeywordAttr			EQU		'miss'				; this attribute is read only 
+keyOriginalAddressAttr			EQU		'from'				; new in 1.0.1 
+
+;   Constants used for specifying the factoring of AEDescLists. 
+
+kAEDescListFactorNone			EQU		0
+kAEDescListFactorType			EQU		4
+kAEDescListFactorTypeAndSize	EQU		8
+;  Constants used creating an AppleEvent 
+
+															; Constant for the returnID param of AECreateAppleEvent 
+kAutoGenerateReturnID			EQU		-1					; AECreateAppleEvent will generate a session-unique ID 
+															; Constant for transaction ID’s 
+kAnyTransactionID				EQU		0					; no transaction is in use 
+;  Apple event manager data types 
+; typedef ResType 						DescType
+
+; typedef FourCharCode 					AEKeyword
+
+	IF OPAQUE_TOOLBOX_STRUCTS THEN
+
+
+	ELSE
+; typedef Handle 						AEDataStorage
+
+	ENDIF	; OPAQUE_TOOLBOX_STRUCTS
+AEDesc					RECORD 0
+descriptorType			 ds.l	1				; offset: $0 (0)
+dataHandle				 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct AEDesc *				AEDescPtr
+
+AEKeyDesc				RECORD 0
+descKey					 ds.l	1				; offset: $0 (0)
+descContent				 ds		AEDesc			; offset: $4 (4)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+;  a list of AEDesc's is a special kind of AEDesc 
+AEDescList				RECORD 0
+f						 ds		AEDesc
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+
+;  AERecord is a list of keyworded AEDesc's 
+AERecord				RECORD 0
+f						 ds		AEDescList
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+
+;  an AEDesc which contains address data 
+AEAddressDesc			RECORD 0
+f						 ds		AEDesc
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+
+;  an AERecord that contains an AppleEvent, and related data types 
+AppleEvent				RECORD 0
+f						 ds		AERecord
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+
+; typedef struct AppleEvent *			AppleEventPtr
+
+; typedef SInt16 						AEReturnID
+
+; typedef SInt32 						AETransactionID
+
+; typedef FourCharCode 					AEEventClass
+
+; typedef FourCharCode 					AEEventID
+
+; typedef SInt8 						AEArrayType
+
+
+kAEDataArray					EQU		0
+kAEPackedArray					EQU		1
+kAEDescArray					EQU		3
+kAEKeyDescArray					EQU		4
+
+
+kAEHandleArray					EQU		2
+AEArrayData				RECORD 0
+kAEDataArray			 ds.w	1				; offset: $0 (0) <-- really an array of length one
+						 ORG 0
+kAEPackedArray			 ds.b	1				; offset: $0 (0) <-- really an array of length one
+						 ORG 0
+kAEHandleArray			 ds.l	1				; offset: $0 (0) <-- really an array of length one
+						 ORG 0
+kAEDescArray			 ds		AEDesc			; offset: $0 (0) <-- really an array of length one
+						 ORG 0
+kAEKeyDescArray			 ds		AEKeyDesc		; offset: $0 (0) <-- really an array of length one
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+; typedef union AEArrayData *			AEArrayDataPointer
+
+
+; **************************************************************************
+;  These calls are used to set up and modify the coercion dispatch table.
+;*************************************************************************
+
+; typedef UniversalProcPtr 				AECoercionHandlerUPP
+
+;
+; pascal OSErr AEInstallCoercionHandler(DescType fromType, DescType toType, AECoercionHandlerUPP handler, long handlerRefcon, Boolean fromTypeIsDesc, Boolean isSysHandler)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEInstallCoercionHandler
+			move.w              #$0A22,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEInstallCoercionHandler
+	ENDIF
+
+;
+; pascal OSErr AERemoveCoercionHandler(DescType fromType, DescType toType, AECoercionHandlerUPP handler, Boolean isSysHandler)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AERemoveCoercionHandler
+			move.w              #$0723,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AERemoveCoercionHandler
+	ENDIF
+
+;
+; pascal OSErr AEGetCoercionHandler(DescType fromType, DescType toType, AECoercionHandlerUPP *handler, long *handlerRefcon, Boolean *fromTypeIsDesc, Boolean isSysHandler)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetCoercionHandler
+			move.w              #$0B24,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetCoercionHandler
+	ENDIF
+
+; **************************************************************************
+;  The following calls provide for a coercion interface.
+;*************************************************************************
+
+;
+; pascal OSErr AECoercePtr(DescType typeCode, const void *dataPtr, Size dataSize, DescType toType, AEDesc *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AECoercePtr
+			move.w              #$0A02,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AECoercePtr
+	ENDIF
+
+;
+; pascal OSErr AECoerceDesc(const AEDesc *theAEDesc, DescType toType, AEDesc *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AECoerceDesc
+			move.w              #$0603,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AECoerceDesc
+	ENDIF
+
+
+; **************************************************************************
+; The following calls apply to any AEDesc. Every 'result' descriptor is
+; created for you, so you will be responsible for memory management
+; (including disposing) of the descriptors so created.  
+;*************************************************************************
+
+;
+; pascal OSErr AECreateDesc(DescType typeCode, const void *dataPtr, Size dataSize, AEDesc *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AECreateDesc
+			move.w              #$0825,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AECreateDesc
+	ENDIF
+
+;
+; pascal OSErr AEDisposeDesc(AEDesc *theAEDesc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEDisposeDesc
+			move.w              #$0204,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEDisposeDesc
+	ENDIF
+
+;
+; pascal OSErr AEDuplicateDesc(const AEDesc *theAEDesc, AEDesc *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEDuplicateDesc
+			move.w              #$0405,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEDuplicateDesc
+	ENDIF
+
+
+; **************************************************************************
+;  The following calls apply to AEDescList. Since AEDescList is a subtype of
+;  AEDesc, the calls in the previous section can also be used for AEDescList.
+;  All list and array indices are 1-based. If the data was greater than
+;  maximumSize in the routines below, then actualSize will be greater than
+;  maximumSize, but only maximumSize bytes will actually be retrieved.
+;*************************************************************************
+
+;
+; pascal OSErr AECreateList(const void *factoringPtr, Size factoredSize, Boolean isRecord, AEDescList *resultList)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AECreateList
+			move.w              #$0706,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AECreateList
+	ENDIF
+
+;
+; pascal OSErr AECountItems(const AEDescList *theAEDescList, long *theCount)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AECountItems
+			move.w              #$0407,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AECountItems
+	ENDIF
+
+;
+; pascal OSErr AEPutPtr(AEDescList *theAEDescList, long index, DescType typeCode, const void *dataPtr, Size dataSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEPutPtr
+			move.w              #$0A08,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEPutPtr
+	ENDIF
+
+;
+; pascal OSErr AEPutDesc(AEDescList *theAEDescList, long index, const AEDesc *theAEDesc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEPutDesc
+			move.w              #$0609,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEPutDesc
+	ENDIF
+
+;
+; pascal OSErr AEGetNthPtr(const AEDescList *theAEDescList, long index, DescType desiredType, AEKeyword *theAEKeyword, DescType *typeCode, void *dataPtr, Size maximumSize, Size *actualSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetNthPtr
+			move.w              #$100A,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetNthPtr
+	ENDIF
+
+;
+; pascal OSErr AEGetNthDesc(const AEDescList *theAEDescList, long index, DescType desiredType, AEKeyword *theAEKeyword, AEDesc *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetNthDesc
+			move.w              #$0A0B,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetNthDesc
+	ENDIF
+
+;
+; pascal OSErr AESizeOfNthItem(const AEDescList *theAEDescList, long index, DescType *typeCode, Size *dataSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AESizeOfNthItem
+			move.w              #$082A,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AESizeOfNthItem
+	ENDIF
+
+;
+; pascal OSErr AEGetArray(const AEDescList *theAEDescList, AEArrayType arrayType, AEArrayDataPointer arrayPtr, Size maximumSize, DescType *itemType, Size *itemSize, long *itemCount)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetArray
+			move.w              #$0D0C,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetArray
+	ENDIF
+
+;
+; pascal OSErr AEPutArray(AEDescList *theAEDescList, AEArrayType arrayType, const AEArrayData *arrayPtr, DescType itemType, Size itemSize, long itemCount)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEPutArray
+			move.w              #$0B0D,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEPutArray
+	ENDIF
+
+;
+; pascal OSErr AEDeleteItem(AEDescList *theAEDescList, long index)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEDeleteItem
+			move.w              #$040E,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEDeleteItem
+	ENDIF
+
+
+; **************************************************************************
+; The following calls apply to AERecord. Since AERecord is a subtype of
+; AEDescList, the calls in the previous sections can also be used for
+; AERecord an AERecord can be created by using AECreateList with isRecord
+; set to true. 
+;*************************************************************************
+
+; 
+;  Note: none of the “key” calls were available in the PowerPC 7.x IntefaceLib.
+;  In C, a #define is used to map “key” calls to “param” calls.  In pascal
+;  this mapping is done in externally linked glue code.
+;
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal OSErr AEPutKeyPtr(AERecord *theAERecord, AEKeyword theAEKeyword, DescType typeCode, const void *dataPtr, Size dataSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEPutKeyPtr
+			move.w              #$0A0F,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEPutKeyPtr
+	ENDIF
+
+;
+; pascal OSErr AEPutKeyDesc(AERecord *theAERecord, AEKeyword theAEKeyword, const AEDesc *theAEDesc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEPutKeyDesc
+			move.w              #$0610,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEPutKeyDesc
+	ENDIF
+
+;
+; pascal OSErr AEGetKeyPtr(const AERecord *theAERecord, AEKeyword theAEKeyword, DescType desiredType, DescType *typeCode, void *dataPtr, Size maximumSize, Size *actualSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetKeyPtr
+			move.w              #$0E11,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetKeyPtr
+	ENDIF
+
+;
+; pascal OSErr AEGetKeyDesc(const AERecord *theAERecord, AEKeyword theAEKeyword, DescType desiredType, AEDesc *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetKeyDesc
+			move.w              #$0812,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetKeyDesc
+	ENDIF
+
+;
+; pascal OSErr AESizeOfKeyDesc(const AERecord *theAERecord, AEKeyword theAEKeyword, DescType *typeCode, Size *dataSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AESizeOfKeyDesc
+			move.w              #$0829,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AESizeOfKeyDesc
+	ENDIF
+
+;
+; pascal OSErr AEDeleteKeyDesc(AERecord *theAERecord, AEKeyword theAEKeyword)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEDeleteKeyDesc
+			move.w              #$0413,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEDeleteKeyDesc
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+; **************************************************************************
+;  The following calls create and manipulate the AppleEvent data type.
+;*************************************************************************
+
+;
+; pascal OSErr AECreateAppleEvent(AEEventClass theAEEventClass, AEEventID theAEEventID, const AEAddressDesc *target, AEReturnID returnID, AETransactionID transactionID, AppleEvent *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AECreateAppleEvent
+			move.w              #$0B14,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AECreateAppleEvent
+	ENDIF
+
+
+; **************************************************************************
+;  The following calls are used to pack and unpack parameters from records
+;  of type AppleEvent. Since AppleEvent is a subtype of AERecord, the calls
+;  in the previous sections can also be used for variables of type
+;  AppleEvent. The next six calls are in fact identical to the six calls
+;  for AERecord.
+;*************************************************************************
+
+;
+; pascal OSErr AEPutParamPtr(AppleEvent *theAppleEvent, AEKeyword theAEKeyword, DescType typeCode, const void *dataPtr, Size dataSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEPutParamPtr
+			move.w              #$0A0F,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEPutParamPtr
+	ENDIF
+
+;
+; pascal OSErr AEPutParamDesc(AppleEvent *theAppleEvent, AEKeyword theAEKeyword, const AEDesc *theAEDesc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEPutParamDesc
+			move.w              #$0610,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEPutParamDesc
+	ENDIF
+
+;
+; pascal OSErr AEGetParamPtr(const AppleEvent *theAppleEvent, AEKeyword theAEKeyword, DescType desiredType, DescType *typeCode, void *dataPtr, Size maximumSize, Size *actualSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetParamPtr
+			move.w              #$0E11,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetParamPtr
+	ENDIF
+
+;
+; pascal OSErr AEGetParamDesc(const AppleEvent *theAppleEvent, AEKeyword theAEKeyword, DescType desiredType, AEDesc *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetParamDesc
+			move.w              #$0812,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetParamDesc
+	ENDIF
+
+;
+; pascal OSErr AESizeOfParam(const AppleEvent *theAppleEvent, AEKeyword theAEKeyword, DescType *typeCode, Size *dataSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AESizeOfParam
+			move.w              #$0829,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AESizeOfParam
+	ENDIF
+
+;
+; pascal OSErr AEDeleteParam(AppleEvent *theAppleEvent, AEKeyword theAEKeyword)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEDeleteParam
+			move.w              #$0413,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEDeleteParam
+	ENDIF
+
+
+
+; **************************************************************************
+; The following calls also apply to type AppleEvent. Message attributes are
+; far more restricted, and can only be accessed through the following 5
+; calls. The various list and record routines cannot be used to access the
+; attributes of an event. 
+;*************************************************************************
+
+;
+; pascal OSErr AEGetAttributePtr(const AppleEvent *theAppleEvent, AEKeyword theAEKeyword, DescType desiredType, DescType *typeCode, void *dataPtr, Size maximumSize, Size *actualSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetAttributePtr
+			move.w              #$0E15,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetAttributePtr
+	ENDIF
+
+;
+; pascal OSErr AEGetAttributeDesc(const AppleEvent *theAppleEvent, AEKeyword theAEKeyword, DescType desiredType, AEDesc *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEGetAttributeDesc
+			move.w              #$0826,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetAttributeDesc
+	ENDIF
+
+;
+; pascal OSErr AESizeOfAttribute(const AppleEvent *theAppleEvent, AEKeyword theAEKeyword, DescType *typeCode, Size *dataSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AESizeOfAttribute
+			move.w              #$0828,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AESizeOfAttribute
+	ENDIF
+
+;
+; pascal OSErr AEPutAttributePtr(AppleEvent *theAppleEvent, AEKeyword theAEKeyword, DescType typeCode, const void *dataPtr, Size dataSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEPutAttributePtr
+			move.w              #$0A16,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEPutAttributePtr
+	ENDIF
+
+;
+; pascal OSErr AEPutAttributeDesc(AppleEvent *theAppleEvent, AEKeyword theAEKeyword, const AEDesc *theAEDesc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AEPutAttributeDesc
+			move.w              #$0627,D0
+			dc.w            	$A816
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEPutAttributeDesc
+	ENDIF
+
+; **************************************************************************
+; The following calls are necessary to deal with opaque data in AEDescs, because the
+; traditional way of dealing with a basic AEDesc has been to dereference the dataHandle
+; directly.  This is not supported under Carbon.
+;*************************************************************************
+
+	IF ACCESSOR_CALLS_ARE_FUNCTIONS THEN
+; 
+;        AEGetDescData no longer supports automatic coercion. If you'd like to
+;        coerce the descriptor use AECoerceDesc.
+;    
+
+;
+; pascal OSErr AEGetDescData(const AEDesc *theAEDesc, void *dataPtr, Size maximumSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetDescData
+	ENDIF
+
+;
+; pascal Size AEGetDescDataSize(const AEDesc *theAEDesc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEGetDescDataSize
+	ENDIF
+
+;
+; pascal OSErr AEReplaceDescData(DescType typeCode, const void *dataPtr, Size dataSize, AEDesc *theAEDesc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AEReplaceDescData
+	ENDIF
+
+	ENDIF	; ACCESSOR_CALLS_ARE_FUNCTIONS
+	ENDIF ; __AEDATAMODEL__ 
+

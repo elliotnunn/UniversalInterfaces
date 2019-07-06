@@ -1,0 +1,838 @@
+;
+;	File:		DriverServices.a
+;
+;	Contains:	Driver Services Interfaces.
+;
+;	Version:	Technology:	PowerSurge 1.0.2 and beyond (including Copland)
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1985-1997 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__DRIVERSERVICES__') = 'UNDEFINED' THEN
+__DRIVERSERVICES__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+	IF &TYPE('__TYPES__') = 'UNDEFINED' THEN
+	include 'Types.a'
+	ENDIF
+	IF &TYPE('__ERRORS__') = 'UNDEFINED' THEN
+	include 'Errors.a'
+	ENDIF
+	IF &TYPE('__MACHINEEXCEPTIONS__') = 'UNDEFINED' THEN
+	include 'MachineExceptions.a'
+	ENDIF
+	IF &TYPE('__DEVICES__') = 'UNDEFINED' THEN
+	include 'Devices.a'
+	ENDIF
+	IF &TYPE('__DRIVERSYNCHRONIZATION__') = 'UNDEFINED' THEN
+	include 'DriverSynchronization.a'
+	ENDIF
+
+; ******************************************************************
+; *
+; * 		Previously in Kernel.h
+; *
+; *****************************************************************
+
+;  Kernel basics
+
+
+
+
+
+
+
+
+;  OrderedItem stuff
+; typedef OSType 						OrderedItemService
+
+; typedef OSType 						OrderedItemSignature
+
+
+kMatchAnyOrderedItemService		EQU		'****'
+kMatchAnyOrderedItemSignature	EQU		'****'
+kDoNotMatchAnyOrderedItemService EQU	'----'
+kDoNotMatchAnyOrderedItemSignature EQU	'----'
+OrderedItemName			RECORD 0
+service					 ds.l	1				; offset: $0 (0)
+signature				 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct OrderedItemName *		OrderedItemNamePtr
+
+; typedef OptionBits 					OrderedItemOptions
+
+
+kOrderedItemIsRightBefore		EQU		$00000001
+kOrderedItemIsRightAfter		EQU		$00000002
+OrderRequirements		RECORD 0
+options					 ds.l	1				; offset: $0 (0)
+itemBefore				 ds		OrderedItemName ; offset: $4 (4)
+itemAfter				 ds		OrderedItemName ; offset: $C (12)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+; typedef struct OrderRequirements *	OrderRequirementsPtr
+
+;  Tasking
+; typedef UInt32 						ExecutionLevel
+
+
+kTaskLevel						EQU		0
+kSoftwareInterruptLevel			EQU		1
+kAcceptFunctionLevel			EQU		2
+kKernelLevel					EQU		3
+kSIHAcceptFunctionLevel			EQU		4
+kSecondaryInterruptLevel		EQU		5
+kHardwareInterruptLevel			EQU		6
+
+kCurrentAddressSpaceID			EQU		-1
+
+;  Memory System basics
+LogicalAddressRange		RECORD 0
+address					 ds.l	1				; offset: $0 (0)
+count					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct LogicalAddressRange *	LogicalAddressRangePtr
+
+PhysicalAddressRange	RECORD 0
+address					 ds.l	1				; offset: $0 (0)
+count					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct PhysicalAddressRange *	PhysicalAddressRangePtr
+
+;  For PrepareMemoryForIO and CheckpointIO
+; typedef OptionBits 					IOPreparationOptions
+
+
+kIOMultipleRanges				EQU		$00000001
+kIOLogicalRanges				EQU		$00000002
+kIOMinimalLogicalMapping		EQU		$00000004
+kIOShareMappingTables			EQU		$00000008
+kIOIsInput						EQU		$00000010
+kIOIsOutput						EQU		$00000020
+kIOCoherentDataPath				EQU		$00000040
+kIOTransferIsLogical			EQU		$00000080
+kIOClientIsUserMode				EQU		$00000080
+; typedef OptionBits 					IOPreparationState
+
+
+kIOStateDone					EQU		$00000001
+
+kInvalidPageAddress				EQU		-1
+AddressRange			RECORD 0
+base					 ds.l	1				; offset: $0 (0)
+length					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+;  C's treatment of arrays and array pointers is atypical
+LogicalMappingTable		RECORD 0
+elements				 ds.l	1
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+
+
+; typedef LogicalMappingTable *			LogicalMappingTablePtr
+
+PhysicalMappingTable	RECORD 0
+elements				 ds.l	1
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+
+
+; typedef PhysicalMappingTable *		PhysicalMappingTablePtr
+
+AddressRangeTable		RECORD 0
+elements				 ds.b	1 * AddressRange.sizeof
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+
+; typedef AddressRangeTable *			AddressRangeTablePtr
+
+MultipleAddressRange	RECORD 0
+entryCount				 ds.l	1				; offset: $0 (0)
+rangeTable				 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+;   Separate C definition so that union has a name.  A future version of the interfacer
+;   tool will allow a name (that gets thrown out in Pascal and Asm).
+
+
+IOPreparationTable		RECORD 0
+options					 ds.l	1				; offset: $0 (0)
+state					 ds.l	1				; offset: $4 (4)
+preparationID			 ds.l	1				; offset: $8 (8)
+addressSpace			 ds.l	1				; offset: $C (12)
+granularity				 ds.l	1				; offset: $10 (16)
+firstPrepared			 ds.l	1				; offset: $14 (20)
+lengthPrepared			 ds.l	1				; offset: $18 (24)
+mappingEntryCount		 ds.l	1				; offset: $1C (28)
+logicalMapping			 ds.l	1				; offset: $20 (32)
+physicalMapping			 ds.l	1				; offset: $24 (36)
+range					 ds		AddressRange	; offset: $28 (40)
+						 ORG 40
+multipleRanges			 ds		MultipleAddressRange ; offset: $28 (40)
+sizeof					 EQU *					; size:   $30 (48)
+						ENDR
+; typedef OptionBits 					IOCheckpointOptions
+
+
+kNextIOIsInput					EQU		$00000001
+kNextIOIsOutput					EQU		$00000002
+kMoreIOTransfers				EQU		$00000004
+;  For SetProcessorCacheMode
+
+; typedef UInt32 						ProcessorCacheMode
+
+
+kProcessorCacheModeDefault		EQU		0
+kProcessorCacheModeInhibited	EQU		1
+kProcessorCacheModeWriteThrough	EQU		2
+kProcessorCacheModeCopyBack		EQU		3
+;  For GetPageInformation
+
+
+kPageInformationVersion			EQU		1
+; typedef UInt32 						PageStateInformation
+
+
+kPageIsProtected				EQU		$00000001
+kPageIsProtectedPrivileged		EQU		$00000002
+kPageIsModified					EQU		$00000004
+kPageIsReferenced				EQU		$00000008
+kPageIsLockedResident			EQU		$00000010
+kPageIsInMemory					EQU		$00000020
+kPageIsShared					EQU		$00000040
+kPageIsWriteThroughCached		EQU		$00000080
+kPageIsCopyBackCached			EQU		$00000100
+kPageIsLocked					EQU		$00000010			; Deprecated
+kPageIsResident					EQU		$00000020			; Deprecated
+PageInformation			RECORD 0
+area					 ds.l	1				; offset: $0 (0)
+count					 ds.l	1				; offset: $4 (4)
+information				 ds.l	1				; offset: $8 (8) <-- really an array of length one
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+; typedef struct PageInformation *		PageInformationPtr
+
+
+;   Tasks  
+;
+; extern ExecutionLevel CurrentExecutionLevel(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CurrentExecutionLevel
+	ENDIF
+
+;
+; extern TaskID CurrentTaskID(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CurrentTaskID
+	ENDIF
+
+;
+; extern OSStatus DelayFor(Duration delayDuration)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DelayFor
+	ENDIF
+
+;
+; extern Boolean InPrivilegedMode(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InPrivilegedMode
+	ENDIF
+
+
+;   Software Interrupts  
+;
+; extern OSStatus CreateSoftwareInterrupt(SoftwareInterruptHandler handler, TaskID task, void *p1, Boolean persistent, SoftwareInterruptID *theSoftwareInterrupt)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CreateSoftwareInterrupt
+	ENDIF
+
+
+;
+; extern OSStatus SendSoftwareInterrupt(SoftwareInterruptID theSoftwareInterrupt, void *p2)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SendSoftwareInterrupt
+	ENDIF
+
+;
+; extern OSStatus DeleteSoftwareInterrupt(SoftwareInterruptID theSoftwareInterrupt)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeleteSoftwareInterrupt
+	ENDIF
+
+;   Secondary Interrupts  
+;
+; extern OSStatus CallSecondaryInterruptHandler2(SecondaryInterruptHandler2 theHandler, ExceptionHandler exceptionHandler, void *p1, void *p2)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CallSecondaryInterruptHandler2
+	ENDIF
+
+;
+; extern OSStatus QueueSecondaryInterruptHandler(SecondaryInterruptHandler2 theHandler, ExceptionHandler exceptionHandler, void *p1, void *p2)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QueueSecondaryInterruptHandler
+	ENDIF
+
+
+;   Timers  
+;
+; extern OSStatus SetInterruptTimer(const AbsoluteTime *expirationTime, SecondaryInterruptHandler2 handler, void *p1, TimerID *theTimer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetInterruptTimer
+	ENDIF
+
+;
+; extern OSStatus CancelTimer(TimerID theTimer, AbsoluteTime *timeRemaining)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CancelTimer
+	ENDIF
+
+
+;   I/O related Operations  
+;
+; extern OSStatus PrepareMemoryForIO(IOPreparationTable *theIOPreparationTable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PrepareMemoryForIO
+	ENDIF
+
+;
+; extern OSStatus CheckpointIO(IOPreparationID theIOPreparation, IOCheckpointOptions options)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CheckpointIO
+	ENDIF
+
+
+;   Memory Operations  
+;
+; extern OSStatus GetPageInformation(AddressSpaceID addressSpace, ConstLogicalAddress base, ItemCount requestedPages, PBVersion version, PageInformation *thePageInfo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetPageInformation
+	ENDIF
+
+;   Processor Cache Related  
+;
+; extern OSStatus SetProcessorCacheMode(AddressSpaceID addressSpace, ConstLogicalAddress base, ByteCount length, ProcessorCacheMode cacheMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetProcessorCacheMode
+	ENDIF
+
+; ******************************************************************
+; *
+; * 		Was in DriverSupport.h or DriverServices.h
+; *
+; *****************************************************************
+
+; typedef LogicalAddress *				DeviceLogicalAddressPtr
+
+
+durationMicrosecond				EQU		-1					; Microseconds are negative
+durationMillisecond				EQU		1					; Milliseconds are positive
+durationSecond					EQU		1000				; 1000 * durationMillisecond
+durationMinute					EQU		60000				; 60 * durationSecond,
+durationHour					EQU		3600000				; 60 * durationMinute,
+durationDay						EQU		86400000			; 24 * durationHour,
+durationNoWait					EQU		0					; don't block
+durationForever					EQU		$7FFFFFFF			; no time limit
+
+k8BitAccess						EQU		0					; access as 8 bit
+k16BitAccess					EQU		1					; access as 16 bit
+k32BitAccess					EQU		2					; access as 32 bit
+Nanoseconds				RECORD 0
+f						 ds		UnsignedWide
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+
+
+;
+; extern OSErr IOCommandIsComplete(IOCommandID theID, OSErr theResult)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IOCommandIsComplete
+	ENDIF
+
+;
+; extern OSErr GetIOCommandInfo(IOCommandID theID, IOCommandContents *theContents, IOCommandCode *theCommand, IOCommandKind *theKind)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetIOCommandInfo
+	ENDIF
+
+;
+; extern void UpdateDeviceActivity(RegEntryID *deviceEntry)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UpdateDeviceActivity
+	ENDIF
+
+;
+; extern void BlockCopy(const void *srcPtr, void *destPtr, Size byteCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION BlockCopy
+	ENDIF
+
+;
+; extern LogicalAddress PoolAllocateResident(ByteCount byteSize, Boolean clear)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PoolAllocateResident
+	ENDIF
+
+;
+; extern OSStatus PoolDeallocate(LogicalAddress address)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PoolDeallocate
+	ENDIF
+
+;
+; extern ByteCount GetLogicalPageSize(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetLogicalPageSize
+	ENDIF
+
+;
+; extern ByteCount GetDataCacheLineSize(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDataCacheLineSize
+	ENDIF
+
+;
+; extern OSStatus FlushProcessorCache(AddressSpaceID spaceID, LogicalAddress base, ByteCount length)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FlushProcessorCache
+	ENDIF
+
+;
+; extern LogicalAddress MemAllocatePhysicallyContiguous(ByteCount byteSize, Boolean clear)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MemAllocatePhysicallyContiguous
+	ENDIF
+
+;
+; extern OSStatus MemDeallocatePhysicallyContiguous(LogicalAddress address)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MemDeallocatePhysicallyContiguous
+	ENDIF
+
+
+;
+; extern AbsoluteTime UpTime(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UpTime
+	ENDIF
+
+;
+; extern void GetTimeBaseInfo(UInt32 *minAbsoluteTimeDelta, UInt32 *theAbsoluteTimeToNanosecondNumerator, UInt32 *theAbsoluteTimeToNanosecondDenominator, UInt32 *theProcessorToAbsoluteTimeNumerator, UInt32 *theProcessorToAbsoluteTimeDenominator)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTimeBaseInfo
+	ENDIF
+
+
+;
+; extern Nanoseconds AbsoluteToNanoseconds(AbsoluteTime absoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AbsoluteToNanoseconds
+	ENDIF
+
+;
+; extern Duration AbsoluteToDuration(AbsoluteTime absoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AbsoluteToDuration
+	ENDIF
+
+;
+; extern AbsoluteTime NanosecondsToAbsolute(Nanoseconds nanoseconds)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NanosecondsToAbsolute
+	ENDIF
+
+;
+; extern AbsoluteTime DurationToAbsolute(Duration duration)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DurationToAbsolute
+	ENDIF
+
+;
+; extern AbsoluteTime AddAbsoluteToAbsolute(AbsoluteTime absoluteTime1, AbsoluteTime absoluteTime2)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AddAbsoluteToAbsolute
+	ENDIF
+
+;
+; extern AbsoluteTime SubAbsoluteFromAbsolute(AbsoluteTime leftAbsoluteTime, AbsoluteTime rightAbsoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SubAbsoluteFromAbsolute
+	ENDIF
+
+;
+; extern AbsoluteTime AddNanosecondsToAbsolute(Nanoseconds nanoseconds, AbsoluteTime absoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AddNanosecondsToAbsolute
+	ENDIF
+
+;
+; extern AbsoluteTime AddDurationToAbsolute(Duration duration, AbsoluteTime absoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AddDurationToAbsolute
+	ENDIF
+
+;
+; extern AbsoluteTime SubNanosecondsFromAbsolute(Nanoseconds nanoseconds, AbsoluteTime absoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SubNanosecondsFromAbsolute
+	ENDIF
+
+;
+; extern AbsoluteTime SubDurationFromAbsolute(Duration duration, AbsoluteTime absoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SubDurationFromAbsolute
+	ENDIF
+
+;
+; extern Nanoseconds AbsoluteDeltaToNanoseconds(AbsoluteTime leftAbsoluteTime, AbsoluteTime rightAbsoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AbsoluteDeltaToNanoseconds
+	ENDIF
+
+;
+; extern Duration AbsoluteDeltaToDuration(AbsoluteTime leftAbsoluteTime, AbsoluteTime rightAbsoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AbsoluteDeltaToDuration
+	ENDIF
+
+;
+; extern Nanoseconds DurationToNanoseconds(Duration theDuration)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DurationToNanoseconds
+	ENDIF
+
+;
+; extern Duration NanosecondsToDuration(Nanoseconds theNanoseconds)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NanosecondsToDuration
+	ENDIF
+
+
+;
+; extern OSErr PBQueueInit(QHdrPtr qHeader)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PBQueueInit
+	ENDIF
+
+;
+; extern OSErr PBQueueCreate(QHdrPtr *qHeader)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PBQueueCreate
+	ENDIF
+
+;
+; extern OSErr PBQueueDelete(QHdrPtr qHeader)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PBQueueDelete
+	ENDIF
+
+;
+; extern void PBEnqueue(QElemPtr qElement, QHdrPtr qHeader)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PBEnqueue
+	ENDIF
+
+;
+; extern OSErr PBEnqueueLast(QElemPtr qElement, QHdrPtr qHeader)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PBEnqueueLast
+	ENDIF
+
+;
+; extern OSErr PBDequeue(QElemPtr qElement, QHdrPtr qHeader)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PBDequeue
+	ENDIF
+
+;
+; extern OSErr PBDequeueFirst(QHdrPtr qHeader, QElemPtr *theFirstqElem)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PBDequeueFirst
+	ENDIF
+
+;
+; extern OSErr PBDequeueLast(QHdrPtr qHeader, QElemPtr *theLastqElem)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PBDequeueLast
+	ENDIF
+
+;
+; extern char *CStrCopy(char *dst, const char *src)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CStrCopy
+	ENDIF
+
+;
+; extern StringPtr PStrCopy(StringPtr dst, ConstStr255Param src)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PStrCopy
+	ENDIF
+
+;
+; extern char *CStrNCopy(char *dst, const char *src, UInt32 max)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CStrNCopy
+	ENDIF
+
+;
+; extern StringPtr PStrNCopy(StringPtr dst, ConstStr255Param src, UInt32 max)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PStrNCopy
+	ENDIF
+
+;
+; extern char *CStrCat(char *dst, const char *src)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CStrCat
+	ENDIF
+
+;
+; extern StringPtr PStrCat(StringPtr dst, ConstStr255Param src)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PStrCat
+	ENDIF
+
+;
+; extern char *CStrNCat(char *dst, const char *src, UInt32 max)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CStrNCat
+	ENDIF
+
+;
+; extern StringPtr PStrNCat(StringPtr dst, ConstStr255Param src, UInt32 max)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PStrNCat
+	ENDIF
+
+;
+; extern void PStrToCStr(char *dst, ConstStr255Param src)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PStrToCStr
+	ENDIF
+
+;
+; extern void CStrToPStr(Str255 dst, const char *src)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CStrToPStr
+	ENDIF
+
+;
+; extern SInt16 CStrCmp(const char *s1, const char *s2)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CStrCmp
+	ENDIF
+
+;
+; extern SInt16 PStrCmp(ConstStr255Param str1, ConstStr255Param str2)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PStrCmp
+	ENDIF
+
+;
+; extern SInt16 CStrNCmp(const char *s1, const char *s2, UInt32 max)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CStrNCmp
+	ENDIF
+
+;
+; extern SInt16 PStrNCmp(ConstStr255Param str1, ConstStr255Param str2, UInt32 max)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PStrNCmp
+	ENDIF
+
+;
+; extern UInt32 CStrLen(const char *src)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CStrLen
+	ENDIF
+
+;
+; extern UInt32 PStrLen(ConstStr255Param src)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PStrLen
+	ENDIF
+
+;
+; extern OSStatus DeviceProbe(void *theSrc, void *theDest, UInt32 AccessType)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeviceProbe
+	ENDIF
+
+;
+; extern OSStatus DelayForHardware(AbsoluteTime absoluteTime)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DelayForHardware
+	ENDIF
+
+
+
+; ******************************************************************
+; *
+; * 		Was in Interrupts.h 
+; *
+; *****************************************************************
+
+;   Interrupt types  
+
+
+; typedef long 							InterruptMemberNumber
+
+InterruptSetMember		RECORD 0
+setID					 ds.l	1				; offset: $0 (0)
+member					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+kISTChipInterruptSource			EQU		0
+kISTOutputDMAInterruptSource	EQU		1
+kISTInputDMAInterruptSource		EQU		2
+kISTPropertyMemberCount			EQU		3
+ISTProperty				RECORD 0
+elements				 ds.b	3 * InterruptSetMember.sizeof
+sizeof					 EQU *					; size:   $18 (24)
+						ENDR
+
+
+; typedef long 							InterruptReturnValue
+
+
+kFirstMemberNumber				EQU		1
+kIsrIsComplete					EQU		0
+kIsrIsNotComplete				EQU		-1
+kMemberNumberParent				EQU		-2
+; typedef Boolean 						InterruptSourceState
+
+
+kSourceWasEnabled				EQU		1
+kSourceWasDisabled				EQU		0
+
+
+kReturnToParentWhenComplete		EQU		$00000001
+kReturnToParentWhenNotComplete	EQU		$00000002
+; typedef OptionBits 					InterruptSetOptions
+
+;   Interrupt Services  
+;
+; extern OSStatus CreateInterruptSet(InterruptSetID parentSet, InterruptMemberNumber parentMember, InterruptMemberNumber setSize, InterruptSetID *setID, InterruptSetOptions options)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CreateInterruptSet
+	ENDIF
+
+
+;
+; extern OSStatus InstallInterruptFunctions(InterruptSetID setID, InterruptMemberNumber member, void *refCon, InterruptHandler handlerFunction, InterruptEnabler enableFunction, InterruptDisabler disableFunction)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InstallInterruptFunctions
+	ENDIF
+
+
+;
+; extern OSStatus GetInterruptFunctions(InterruptSetID setID, InterruptMemberNumber member, void **refCon, InterruptHandler *handlerFunction, InterruptEnabler *enableFunction, InterruptDisabler *disableFunction)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetInterruptFunctions
+	ENDIF
+
+;
+; extern OSStatus ChangeInterruptSetOptions(InterruptSetID setID, InterruptSetOptions options)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ChangeInterruptSetOptions
+	ENDIF
+
+;
+; extern OSStatus GetInterruptSetOptions(InterruptSetID setID, InterruptSetOptions *options)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetInterruptSetOptions
+	ENDIF
+
+
+
+	ENDIF ; __DRIVERSERVICES__ 
+

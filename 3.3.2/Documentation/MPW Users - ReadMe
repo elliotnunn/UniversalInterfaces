@@ -1,0 +1,121 @@
+#
+# 	File:		MPW Users - ReadMe
+# 
+# 	Copyright:	© 1998-2000 by Apple Computer, Inc. All rights reserved.
+# 
+# 	Version:	Universal Interfaces 3.3.1, March 16, 2000
+#
+# 	Usage: 		Run this file in MPW.  It will generate the commands needed
+#				to update the running MPW to the latest Universal Interfaces.
+#
+#
+#	Note:		The Universal Interfaces is not a complete MPW development release.
+#				It only contains the headers and libraries which are in "universal"∂
+#				format and are implemented in the Mac OS.  
+#
+#				The MPW development environment comes with a number of MPW specific
+#				headers and libraries (e.g. CursorCtl.h, Disassembler.h, etc.) that
+#				are _not_ part of this Universal Interfaces package.  You can either
+#				wait for the next release of MPW which will integrate the 3.3.1
+#				Universal Interfaces, or run the script below to merge the 3.3.1
+#				Universal Interfaces into the MPW set.
+#
+#				You cannot just drag the CIncludes and replace MPW's ! ! !
+#
+#
+
+
+set exit 0
+
+If "{CIncludes}"
+	If "{CIncludes}" =~ /(≈:)®1Interfaces:CIncludes:/
+		Set InterfacesAndLibrariesDir "{®1}"
+	End
+End
+
+If !`Exists "{InterfacesAndLibrariesDir}"`
+	If "{ShellDirectory}"
+		If `Exists "{ShellDirectory}Interfaces:CIncludes:"`
+			Set InterfacesAndLibrariesDir "{ShellDirectory}"
+		Else If `Exists "{ShellDirectory}:Interfaces&Libraries:CIncludes:"`
+			If "{ShellDirectory}" =~ /(≈:)®1IMPW:/
+				Set InterfacesAndLibrariesDir "{®1}Interfaces&Libraries:"
+			End
+		End
+	End
+End
+
+If (!"{InterfacesAndLibrariesDir}") || (!`Exists "{InterfacesAndLibrariesDir}"`)
+	Echo "### Error: Could not find Interfaces&Libraries. Try setting ∂{CIncludes∂}" >dev:stderr
+	Exit 1
+End
+
+
+Set ThisScript `files "{0}" -f`
+If "{ThisScript}" =~ /(≈:)®1Documentation:MPW Users - ReadMe/
+	Set UI "{®1}"
+Else
+	Echo "### Error: Unable to parse root directory for Interfaces & Libraries source." >dev:stderr
+	Exit 1
+End
+
+If (!`Exists "{UI}Universal:"`)
+	Echo "### Error: Script "{0}" not in Interfaces&Libraries folder" >dev:stderr
+	Exit 1
+End
+
+Begin
+	BackUp -from "{UI}Universal:Interfaces:" 					-to "{InterfacesAndLibrariesDir}Interfaces:" -r -a					|| ()
+	BackUp -from "{UI}Universal:Interfaces:ComponentIncludes:" 	-to "{InterfacesAndLibrariesDir}Interfaces:CIncludes:" -r -a		|| ()
+	BackUp -from "{UI}Universal:Libraries:StubLibraries:" 		-to "{InterfacesAndLibrariesDir}Libraries:SharedLibraries:" -r -a 	|| ()
+	BackUp -from "{UI}Universal:Libraries:Classic68kLibraries:" -to "{InterfacesAndLibrariesDir}Libraries:Libraries:" -r -a			|| ()
+	BackUp -from "{UI}Universal:Libraries:PPCLibraries:" 		-to "{InterfacesAndLibrariesDir}Libraries:PPCLibraries:" -r -a		|| ()
+End | StreamEdit ∂
+	-e '/≈.MW.c.o/ Delete' ∂
+	-e '/≈.SC.c.o/ Delete' ∂
+	#
+
+For folder in AIncludes CIncludes PInterfaces
+	Echo "Delete -y -i ∂"{InterfacesAndLibrariesDir}∂"Interfaces:{folder}:CoreFoundation:"
+End
+
+
+Echo ""
+Echo "### !!! PAY ATTENTION HERE !!! ###"
+Echo "#"
+Echo "# The following Delete command is intended to delete interface and library files"
+Echo "# that are currently considered to be obsolete. You may have a different opinion,"
+Echo "# especially if you still use the file to build your product(s). Please review"
+Echo "# the list of files thoroughly to determine if you really wish for the file to"
+Echo "# be removed from your system. THERE IS NO 'UNDO' AVAILABLE (unless you've"
+Echo "# been a good engineer and performed a backup recently...)."
+Echo "#"
+Echo "# CONSIDER YOURSELF WARNED!"
+Echo "#"
+Echo ""
+Echo "Delete -i -y ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:AIncludes:GoggleSprocket.a∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:CIncludes:GoggleSprocket.h∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:CIncludes:GoggleSprocketDevices.h∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:CIncludes:TelephoneTools.h∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:CIncludes:TelOther601.h∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:PInterfaces:GoggleSprocket.p∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:PInterfaces:TelephoneTools.p∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:RIncludes:CTBTypes.r∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:RIncludes:GXPrintingResEquates.r∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:RIncludes:GXPrintingResTypes.r∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:RIncludes:InstallerTypes.r∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:RIncludes:OCE.r∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Interfaces:RIncludes:osiz.r∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:SharedLibraries:AbstractCMPlugin∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:SharedLibraries:ControllerCore∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:SharedLibraries:GoggleSprocketLib∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:SharedLibraries:PCCardLib∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:SharedLibraries:QD3DCustomElementsLib∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:SharedLibraries:QuickDraw3DAcceleratorLib∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:Libraries:StdCompressionGlue.o∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:Libraries:TelMgrGlue.o∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:Libraries:QTVR.MW.c.o∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:Libraries:QTVR.SC.c.o∂" ∂∂"
+Echo ∂t"∂"{InterfacesAndLibrariesDir}Libraries:PPCLibraries:TelephoneLib.xcoff∂" ∂∂"
+Echo ∂t"#"

@@ -1,0 +1,51 @@
+;
+;	File:		CMScriptingPlugin.a
+;
+;	Contains:	ColorSync Scripting Plugin API
+;
+;	Version:	Technology:	ColorSync 2.5
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__CMSCRIPTINGPLUGIN__') = 'UNDEFINED' THEN
+__CMSCRIPTINGPLUGIN__ SET 1
+
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+	IF &TYPE('__CMAPPLICATION__') = 'UNDEFINED' THEN
+	include 'CMApplication.a'
+	ENDIF
+	IF &TYPE('__CODEFRAGMENTS__') = 'UNDEFINED' THEN
+	include 'CodeFragments.a'
+	ENDIF
+
+
+
+
+															; ColorSync Scripting AppleEvent Errors 
+cmspInvalidImageFile			EQU		-4220				; Plugin cannot handle this image file type 
+cmspInvalidImageSpace			EQU		-4221				; Plugin cannot create an image file of this colorspace 
+cmspInvalidProfileEmbed			EQU		-4222				; Specific invalid profile errors 
+cmspInvalidProfileSource		EQU		-4223
+cmspInvalidProfileDest			EQU		-4224
+cmspInvalidProfileProof			EQU		-4225
+cmspInvalidProfileLink			EQU		-4226
+
+; *** embedFlags field  ***
+;  reserved for future use: currently 0 
+
+; *** matchFlags field  ***
+
+cmspFavorEmbeddedMask			EQU		$00000001			; if bit 0 is 0 then use srcProf profile, if 1 then use profile embedded in image if present
+
+	ENDIF ; __CMSCRIPTINGPLUGIN__ 
+

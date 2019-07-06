@@ -1,0 +1,1894 @@
+;
+;	File:		Controls.a
+;
+;	Contains:	Control Manager interfaces
+;
+;	Version:	Technology:	Mac OS 8.6
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1985-1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__CONTROLS__') = 'UNDEFINED' THEN
+__CONTROLS__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__MENUS__') = 'UNDEFINED' THEN
+	include 'Menus.a'
+	ENDIF
+	IF &TYPE('__TEXTEDIT__') = 'UNDEFINED' THEN
+	include 'TextEdit.a'
+	ENDIF
+	IF &TYPE('__DRAG__') = 'UNDEFINED' THEN
+	include 'Drag.a'
+	ENDIF
+	IF &TYPE('__ICONS__') = 'UNDEFINED' THEN
+	include 'Icons.a'
+	ENDIF
+	IF &TYPE('__COLLECTIONS__') = 'UNDEFINED' THEN
+	include 'Collections.a'
+	ENDIF
+
+
+
+_ControlDispatch				EQU		$AA73
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Gestalt																							
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+gestaltControlMgrAttr			EQU		'cntl'
+gestaltControlMgrPresent		EQU		$00000001
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Resource Types																					
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+kControlDefProcType				EQU		'CDEF'
+kControlTemplateResourceType	EQU		'CNTL'
+kControlColorTableResourceType	EQU		'cctb'
+kControlDefProcResourceType		EQU		'CDEF'
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Format of a ‘CNTL’ resource																		
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+ControlTemplate			RECORD 0
+controlRect				 ds		Rect			; offset: $0 (0)
+controlValue			 ds.w	1				; offset: $8 (8)
+controlVisible			 ds.b	1				; offset: $A (10)
+fill					 ds.b	1				; offset: $B (11)
+controlMaximum			 ds.w	1				; offset: $C (12)
+controlMinimum			 ds.w	1				; offset: $E (14)
+controlDefProcID		 ds.w	1				; offset: $10 (16)
+controlReference		 ds.l	1				; offset: $12 (18)
+controlTitle			 ds		Str255			; offset: $16 (22)
+sizeof					 EQU *					; size:   $116 (278)
+						ENDR
+; typedef struct ControlTemplate *		ControlTemplatePtr
+
+; typedef ControlTemplatePtr *			ControlTemplateHandle
+
+
+
+	IF ¬ TARGET_OS_MAC THEN
+
+;  —————————————————————————————————————————————————————————————————————————————————————————————————————————
+;   • NON-MAC COMPATIBILITY CODES (QuickTime 3.0)
+;  —————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+
+; typedef UInt32 						ControlNotification
+
+
+controlNotifyNothing			EQU		'nada'				; No (null) notification
+controlNotifyClick				EQU		'clik'				; Control was clicked
+controlNotifyFocus				EQU		'focu'				; Control got keyboard focus
+controlNotifyKey				EQU		'key '				; Control got a keypress
+; typedef UInt32 						ControlCapabilities
+
+
+kControlCanAutoInvalidate		EQU		$00000001			; Control component automatically invalidates areas left behind after hide/move operation.
+;  procID's for our added "controls"
+
+staticTextProc					EQU		256					; static text
+editTextProc					EQU		272					; editable text
+iconProc						EQU		288					; icon
+userItemProc					EQU		304					; user drawn item
+pictItemProc					EQU		320					; pict
+	ENDIF
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• ControlRef																						
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+	IF ¬ OPAQUE_TOOLBOX_STRUCTS THEN
+
+
+; typedef ControlRecord *				ControlPtr
+
+; typedef ControlPtr *					ControlRef
+
+	ELSE
+
+
+	ENDIF
+;  ControlHandle is obsolete. Use ControlRef.
+; typedef ControlRef 					ControlHandle
+
+; typedef SInt16 						ControlPartCode
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+;  • Control ActionProcPtr																				
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• ControlRecord																						
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+	IF ¬ OPAQUE_TOOLBOX_STRUCTS THEN
+ControlRecord			RECORD 0
+nextControl				 ds.l	1				; offset: $0 (0)
+contrlOwner				 ds.l	1				; offset: $4 (4)
+contrlRect				 ds		Rect			; offset: $8 (8)
+contrlVis				 ds.b	1				; offset: $10 (16)
+contrlHilite			 ds.b	1				; offset: $11 (17)
+contrlValue				 ds.w	1				; offset: $12 (18)
+contrlMin				 ds.w	1				; offset: $14 (20)
+contrlMax				 ds.w	1				; offset: $16 (22)
+contrlDefProc			 ds.l	1				; offset: $18 (24)
+contrlData				 ds.l	1				; offset: $1C (28)
+contrlAction			 ds.l	1				; offset: $20 (32)
+contrlRfCon				 ds.l	1				; offset: $24 (36)
+contrlTitle				 ds		Str255			; offset: $28 (40)
+sizeof					 EQU *					; size:   $128 (296)
+						ENDR
+	ENDIF
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+;  • Control ActionProcPtr : Epilogue																	
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Color Table																				
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+cFrameColor						EQU		0
+cBodyColor						EQU		1
+cTextColor						EQU		2
+cThumbColor						EQU		3
+kNumberCtlCTabEntries			EQU		4
+CtlCTab					RECORD 0
+ccSeed					 ds.l	1				; offset: $0 (0)
+ccRider					 ds.w	1				; offset: $4 (4)
+ctSize					 ds.w	1				; offset: $6 (6)
+ctTable					 ds.b	4 * ColorSpec.sizeof ; offset: $8 (8)
+sizeof					 EQU *					; size:   $28 (40)
+						ENDR
+; typedef struct CtlCTab *				CCTabPtr
+
+; typedef CCTabPtr *					CCTabHandle
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Auxiliary Control Record																			
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+	IF ¬ OPAQUE_TOOLBOX_STRUCTS THEN
+AuxCtlRec				RECORD 0
+acNext					 ds.l	1				; offset: $0 (0)
+acOwner					 ds.l	1				; offset: $4 (4)
+acCTable				 ds.l	1				; offset: $8 (8)
+acFlags					 ds.w	1				; offset: $C (12)
+acReserved				 ds.l	1				; offset: $E (14)
+acRefCon				 ds.l	1				; offset: $12 (18)
+sizeof					 EQU *					; size:   $16 (22)
+						ENDR
+; typedef struct AuxCtlRec *			AuxCtlPtr
+
+; typedef AuxCtlPtr *					AuxCtlHandle
+
+	ENDIF
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Errors are in the range -30580 .. -30599															
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+errMessageNotSupported			EQU		-30580
+errDataNotSupported				EQU		-30581
+errControlDoesntSupportFocus	EQU		-30582
+errWindowDoesntSupportFocus		EQU		-30583
+errUnknownControl				EQU		-30584
+errCouldntSetFocus				EQU		-30585
+errNoRootControl				EQU		-30586
+errRootAlreadyExists			EQU		-30587
+errInvalidPartCode				EQU		-30588
+errControlsAlreadyExist			EQU		-30589
+errControlIsNotEmbedder			EQU		-30590
+errDataSizeMismatch				EQU		-30591
+errControlHiddenOrDisabled		EQU		-30592
+errWindowRegionCodeInvalid		EQU		-30593
+errCantEmbedIntoSelf			EQU		-30594
+errCantEmbedRoot				EQU		-30595
+errItemNotControl				EQU		-30596
+controlInvalidDataVersionErr	EQU		-30597
+controlPropertyInvalid			EQU		-5603
+controlPropertyNotFoundErr		EQU		-5604
+controlHandleInvalidErr			EQU		-30599
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Variants																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+; typedef SInt16 						ControlVariant
+
+
+kControlNoVariant				EQU		0					; No variant
+kControlUsesOwningWindowsFontVariant EQU $08				; Control uses owning windows font to display text
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Part Codes																
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  Basic part codes 
+
+kControlNoPart					EQU		0
+kControlIndicatorPart			EQU		129
+kControlDisabledPart			EQU		254
+kControlInactivePart			EQU		255
+;  Use this constant in Get/SetControlData when the data referred to is not			
+;  specific to a part, but rather the entire control, e.g. the list handle of a 	
+;  list box control.																
+
+kControlEntireControl			EQU		0
+;  	Meta-Parts																			
+; 																						
+;  	If you haven't guessed from looking at other toolbox headers. We like the word 		
+; 	'meta'. It's cool. So here's one more for you. A meta-part is a part used in a call	
+;  	to the GetControlRegion API. These parts are parts that might be defined by a		
+; 	control, but should not be returned from calls like TestControl, et al. They define	
+;  	a region of a control, presently the structure and the content region. The content	
+;  	region is only defined by controls that can embed other controls. It is the area	
+;  	that embedded content can live.														
+; 																						
+; 	Along with these parts, you can also pass in normal part codes to get the regions	
+;  	of the parts. Not all controls fully support this at the time this was written.		
+
+kControlStructureMetaPart		EQU		-1
+kControlContentMetaPart			EQU		-2
+;  focusing part codes 
+
+kControlFocusNoPart				EQU		0					; tells control to clear its focus
+kControlFocusNextPart			EQU		-1					; tells control to focus on the next part
+kControlFocusPrevPart			EQU		-2					; tells control to focus on the previous part
+; typedef SInt16 						ControlFocusPart
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Collection Tags																			
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	These are standard tags that you will find in a flattened Control's Collection.						
+; 																										
+; 	All tags at ID zero in a flattened Control's Collection is reserved for Control Manager use.		
+; 	Custom control definitions should use other IDs.													
+; 																										
+; 	Most of these tags are interpreted when you call CreateCustomControl; the Control Manager will		
+; 	put value in the right place before calling the Control Definition with the initialization message. 
+; 	Other tags are only interpreted when calling UnflattenControl.										
+
+kControlCollectionTagBounds		EQU		'boun'				; Rect - the bounding rectangle
+kControlCollectionTagValue		EQU		'valu'				; SInt32 - the value
+kControlCollectionTagMinimum	EQU		'min '				; SInt32 - the minimum
+kControlCollectionTagMaximum	EQU		'max '				; SInt32 - the maximum
+kControlCollectionTagViewSize	EQU		'view'				; SInt32 - the view size
+kControlCollectionTagVisibility	EQU		'visi'				; Boolean - the visible state
+kControlCollectionTagRefCon		EQU		'refc'				; SInt32 - the refCon
+kControlCollectionTagTitle		EQU		'titl'				; arbitrarily sized character array - the title
+; 	The following are additional tags which are only interpreted by UnflattenControl. 
+
+kControlCollectionTagSubControls EQU	'subc'				; data for all of a control's subcontrols
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Image Content																				
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+kControlContentTextOnly			EQU		0
+kControlNoContent				EQU		0
+kControlContentIconSuiteRes		EQU		1
+kControlContentCIconRes			EQU		2
+kControlContentPictRes			EQU		3
+kControlContentICONRes			EQU		4
+kControlContentIconSuiteHandle	EQU		129
+kControlContentCIconHandle		EQU		130
+kControlContentPictHandle		EQU		131
+kControlContentIconRef			EQU		132
+kControlContentICON				EQU		133
+; typedef SInt16 						ControlContentType
+
+ControlButtonContentInfo RECORD 0
+contentType				 ds.w	1				; offset: $0 (0)
+resID					 ds.w	1				; offset: $2 (2)
+						 ORG 2
+cIconHandle				 ds.l	1				; offset: $2 (2)
+						 ORG 2
+iconSuite				 ds.l	1				; offset: $2 (2)
+						 ORG 2
+iconRef					 ds.l	1				; offset: $2 (2)
+						 ORG 2
+picture					 ds.l	1				; offset: $2 (2)
+						 ORG 2
+ICONHandle				 ds.l	1				; offset: $2 (2)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct ControlButtonContentInfo * ControlButtonContentInfoPtr
+
+ControlImageContentInfo	RECORD 0
+f						 ds		ControlButtonContentInfo
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+
+
+; typedef struct ControlButtonContentInfo * ControlImageContentInfoPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Key Script Behavior																		
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+kControlKeyScriptBehaviorAllowAnyScript EQU 'any '			; leaves the current keyboard alone and allows user to change the keyboard.
+kControlKeyScriptBehaviorPrefersRoman EQU 'prmn'			; switches the keyboard to roman, but allows them to change it as desired.
+kControlKeyScriptBehaviorRequiresRoman EQU 'rrmn'			; switches the keyboard to roman and prevents the user from changing it.
+; typedef UInt32 						ControlKeyScriptBehavior
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Font Style																				
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+;  	SPECIAL FONT USAGE NOTES: You can specify the font to use for many control types.
+;	The constants below are meta-font numbers which you can use to set a particular
+;	control's font usage. There are essentially two modes you can use: 1) default,
+;	which is essentially the same as it always has been, i.e. it uses the system font, unless
+;	directed to use the window font via a control variant. 2) you can specify to use
+;	the big or small system font in a generic manner. The Big system font is the font
+;	used in menus, etc. Chicago has filled that role for some time now. Small system
+;	font is currently Geneva 10. The meta-font number implies the size and style.
+;
+;	NOTE:		Not all font attributes are used by all controls. Most, in fact, ignore
+;				the fore and back color (Static Text is the only one that does, for
+;				backwards compatibility). Also size, face, and addFontSize are ignored
+;				when using the meta-font numbering.
+;
+
+;  Meta-font numbering - see note above 
+
+kControlFontBigSystemFont		EQU		-1					; force to big system font
+kControlFontSmallSystemFont		EQU		-2					; force to small system font
+kControlFontSmallBoldSystemFont	EQU		-3					; force to small bold system font
+kControlFontViewSystemFont		EQU		-4					; force to views system font (DataBrowser control only)
+;  Add these masks together to set the flags field of a ControlFontStyleRec	
+;  They specify which fields to apply to the text. It is important to make	
+;  sure that you specify only the fields that you wish to set.				
+
+kControlUseFontMask				EQU		$0001
+kControlUseFaceMask				EQU		$0002
+kControlUseSizeMask				EQU		$0004
+kControlUseForeColorMask		EQU		$0008
+kControlUseBackColorMask		EQU		$0010
+kControlUseModeMask				EQU		$0020
+kControlUseJustMask				EQU		$0040
+kControlUseAllMask				EQU		$00FF
+kControlAddFontSizeMask			EQU		$0100
+;  AddToMetaFont indicates that we want to start with a standard system		
+;  font, but then we'd like to add the other attributes. Normally, the meta	
+;  font ignores all other flags 											
+
+kControlAddToMetaFontMask		EQU		$0200				; Available in Appearance 1.1 or later
+ControlFontStyleRec		RECORD 0
+flags					 ds.w	1				; offset: $0 (0)
+font					 ds.w	1				; offset: $2 (2)
+size					 ds.w	1				; offset: $4 (4)
+style					 ds.w	1				; offset: $6 (6)
+mode					 ds.w	1				; offset: $8 (8)
+just					 ds.w	1				; offset: $A (10)
+foreColor				 ds		RGBColor		; offset: $C (12)
+backColor				 ds		RGBColor		; offset: $12 (18)
+sizeof					 EQU *					; size:   $18 (24)
+						ENDR
+; typedef struct ControlFontStyleRec *	ControlFontStylePtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Click Activation Results																			
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	These are for use with GetControlClickActivation. The enumerated values should be pretty			
+; 	self-explanatory, but just in case:																	
+; 	• Activate/DoNotActivate indicates whether or not to change the owning window's z-ordering before	
+; 		processing the click. If activation is requested, you may also want to immediately redraw the	
+; 		newly exposed portion of the window.															
+; 	• Ignore/Handle Click indicates whether or not to call an appropriate click handling API (like		
+; 		HandleControlClick) in respose to the event.													
+
+kDoNotActivateAndIgnoreClick	EQU		0					; probably never used. here for completeness.
+kDoNotActivateAndHandleClick	EQU		1					; let the control handle the click while the window is still in the background.
+kActivateAndIgnoreClick			EQU		2					; control doesn't want to respond directly to the click, but window should still be brought forward.
+kActivateAndHandleClick			EQU		3					; control wants to respond to the click, but only after the window has been activated.
+; typedef UInt32 						ClickActivationResult
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Common data tags for Get/SetControlData															
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+kControlFontStyleTag			EQU		'font'
+kControlKeyFilterTag			EQU		'fltr'
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Feature Bits																				
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+															; Control feature bits - returned by GetControlFeatures 
+kControlSupportsGhosting		EQU		$01
+kControlSupportsEmbedding		EQU		$02
+kControlSupportsFocus			EQU		$04
+kControlWantsIdle				EQU		$08
+kControlWantsActivate			EQU		$10
+kControlHandlesTracking			EQU		$20
+kControlSupportsDataAccess		EQU		$40
+kControlHasSpecialBackground	EQU		$80
+kControlGetsFocusOnClick		EQU		$0100
+kControlSupportsCalcBestRect	EQU		$0200
+kControlSupportsLiveFeedback	EQU		$0400
+kControlHasRadioBehavior		EQU		$0800				; Available in Appearance 1.0.1 or later
+kControlSupportsDragAndDrop		EQU		$1000				; Available in Carbon
+kControlAutoToggles				EQU		$4000				; Available in Appearance 1.1 or later
+kControlSupportsGetRegion		EQU		$00020000			; Available in Appearance 1.1 or later
+kControlSupportsFlattening		EQU		$00080000			; Available in Carbon
+kControlSupportsSetCursor		EQU		$00100000			; Available in Carbon
+kControlSupportsContextualMenus	EQU		$00200000			; Available in Carbon
+kControlSupportsClickActivation	EQU		$00400000			; Available in Carbon
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Messages																					
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+drawCntl						EQU		0
+testCntl						EQU		1
+calcCRgns						EQU		2
+initCntl						EQU		3
+dispCntl						EQU		4
+posCntl							EQU		5
+thumbCntl						EQU		6
+dragCntl						EQU		7
+autoTrack						EQU		8
+calcCntlRgn						EQU		10
+calcThumbRgn					EQU		11
+drawThumbOutline				EQU		12
+kControlMsgDrawGhost			EQU		13
+kControlMsgCalcBestRect			EQU		14					; Calculate best fitting rectangle for control
+kControlMsgHandleTracking		EQU		15
+kControlMsgFocus				EQU		16					; param indicates action.
+kControlMsgKeyDown				EQU		17
+kControlMsgIdle					EQU		18
+kControlMsgGetFeatures			EQU		19
+kControlMsgSetData				EQU		20
+kControlMsgGetData				EQU		21
+kControlMsgActivate				EQU		22
+kControlMsgSetUpBackground		EQU		23
+kControlMsgCalcValueFromPos		EQU		26
+kControlMsgTestNewMsgSupport	EQU		27					; See if this control supports new messaging
+kControlMsgSubValueChanged		EQU		25					; Available in Appearance 1.0.1 or later
+kControlMsgSubControlAdded		EQU		28					; Available in Appearance 1.0.1 or later
+kControlMsgSubControlRemoved	EQU		29					; Available in Appearance 1.0.1 or later
+kControlMsgApplyTextColor		EQU		30					; Available in Appearance 1.1 or later
+kControlMsgGetRegion			EQU		31					; Available in Appearance 1.1 or later
+kControlMsgFlatten				EQU		32					; Available in Carbon. Param is Collection.
+kControlMsgSetCursor			EQU		33					; Available in Carbon. Param is ControlSetCursorRec
+kControlMsgDragEnter			EQU		38					; Available in Carbon. Param is DragRef, result is boolean indicating acceptibility of drag.
+kControlMsgDragLeave			EQU		39					; Available in Carbon. As above.
+kControlMsgDragWithin			EQU		40					; Available in Carbon. As above.
+kControlMsgDragReceive			EQU		41					; Available in Carbon. Param is DragRef, result is OSStatus indicating success/failure.
+kControlMsgDisplayDebugInfo		EQU		46					; Available in Carbon on X.
+kControlMsgContextualMenuClick	EQU		47					; Available in Carbon. Param is ControlContextualMenuClickRec
+kControlMsgGetClickActivation	EQU		48					; Available in Carbon. Param is ControlClickActivationRec
+; typedef SInt16 						ControlDefProcMessage
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Constants for drawCntl message (passed in param)									
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kDrawControlEntireControl		EQU		0
+kDrawControlIndicatorOnly		EQU		129
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Constants for dragCntl message (passed in param)									
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kDragControlEntireControl		EQU		0
+kDragControlIndicator			EQU		1
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Drag Constraint Structure for thumbCntl message (passed in param)					
+; ——————————————————————————————————————————————————————————————————————————————————————
+IndicatorDragConstraint	RECORD 0
+limitRect				 ds		Rect			; offset: $0 (0)
+slopRect				 ds		Rect			; offset: $8 (8)
+axis					 ds.w	1				; offset: $10 (16)
+sizeof					 EQU *					; size:   $12 (18)
+						ENDR
+; typedef struct IndicatorDragConstraint * IndicatorDragConstraintPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  	CDEF should return as result of kControlMsgTestNewMsgSupport						
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kControlSupportsNewMessages		EQU		' ok '
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  	This structure is passed into a CDEF when called with the kControlMsgHandleTracking	
+; 	message 																			
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlTrackingRec		RECORD 0
+startPt					 ds		Point			; offset: $0 (0)
+modifiers				 ds.w	1				; offset: $4 (4)
+action					 ds.l	1				; offset: $6 (6)
+sizeof					 EQU *					; size:   $A (10)
+						ENDR
+; typedef struct ControlTrackingRec *	ControlTrackingPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  This structure is passed into a CDEF when called with the kControlMsgKeyDown message 
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlKeyDownRec		RECORD 0
+modifiers				 ds.w	1				; offset: $0 (0)
+keyCode					 ds.w	1				; offset: $2 (2)
+charCode				 ds.w	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct ControlKeyDownRec *	ControlKeyDownPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  This structure is passed into a CDEF when called with the kControlMsgGetData or		
+;  kControlMsgSetData message 															
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlDataAccessRec	RECORD 0
+tag						 ds.l	1				; offset: $0 (0)
+part					 ds.l	1				; offset: $4 (4)
+size					 ds.l	1				; offset: $8 (8)
+dataPtr					 ds.l	1				; offset: $C (12)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+; typedef struct ControlDataAccessRec *	ControlDataAccessPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  This structure is passed into a CDEF when called with the kControlCalcBestRect msg 	
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlCalcSizeRec		RECORD 0
+height					 ds.w	1				; offset: $0 (0)
+width					 ds.w	1				; offset: $2 (2)
+baseLine				 ds.w	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct ControlCalcSizeRec *	ControlCalcSizePtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  This structure is passed into a CDEF when called with the kControlMsgSetUpBackground 
+;  message is sent																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlBackgroundRec	RECORD 0
+depth					 ds.w	1				; offset: $0 (0)
+colorDevice				 ds.b	1				; offset: $2 (2)
+						 ORG 4
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; typedef struct ControlBackgroundRec *	ControlBackgroundPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  This structure is passed into a CDEF when called with the kControlMsgApplyTextColor	
+;  message is sent																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlApplyTextColorRec RECORD 0
+depth					 ds.w	1				; offset: $0 (0)
+colorDevice				 ds.b	1				; offset: $2 (2)
+active					 ds.b	1				; offset: $3 (3)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; typedef struct ControlApplyTextColorRec * ControlApplyTextColorPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  This structure is passed into a CDEF when called with the kControlMsgGetRegion		
+;  message is sent																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlGetRegionRec		RECORD 0
+region					 ds.l	1				; offset: $0 (0)
+part					 ds.w	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct ControlGetRegionRec *	ControlGetRegionPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  This structure is passed into a CDEF when the kControlMsgSetCursor message is sent	
+;  Only sent on Carbon																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlSetCursorRec		RECORD 0
+localPoint				 ds		Point			; offset: $0 (0)
+modifiers				 ds.w	1				; offset: $4 (4)
+cursorWasSet			 ds.b	1				; offset: $6 (6)		;  your CDEF must set this to true if you set the cursor, or false otherwise
+						 ORG 8
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct ControlSetCursorRec *	ControlSetCursorPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  This structure is passed into a CDEF when the kControlMsgContextualMenuClick message 
+;  is sent																				
+;  Only sent on Carbon																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlContextualMenuClickRec RECORD 0
+localPoint				 ds		Point			; offset: $0 (0)
+menuDisplayed			 ds.b	1				; offset: $4 (4)		;  your CDEF must set this to true if you displayed a menu, or false otherwise
+						 ORG 6
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct ControlContextualMenuClickRec * ControlContextualMenuClickPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  This structure is passed into a CDEF when the kControlMsgGetClickActivation message	
+;  is sent																				
+;  Only sent on Carbon																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlClickActivationRec RECORD 0
+localPoint				 ds		Point			; offset: $0 (0)
+modifiers				 ds.w	1				; offset: $4 (4)
+result					 ds.l	1				; offset: $6 (6)		;  your CDEF must pass the desired result back
+sizeof					 EQU *					; size:   $A (10)
+						ENDR
+; typedef struct ControlClickActivationRec * ControlClickActivationPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• ‘CDEF’ entrypoint																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	Control Key Filter																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  Certain controls can have a keyfilter attached to them.								
+;  Definition of a key filter for intercepting and possibly changing keystrokes			
+;  which are destined for a control.													
+;  Key Filter Result Codes 															
+;  The filter proc should return one of the two constants below. If					
+;  kKeyFilterBlockKey is returned, the key is blocked and never makes it to the		
+;  control. If kKeyFilterPassKey is returned, the control receives the keystroke.	
+
+kControlKeyFilterBlockKey		EQU		0
+kControlKeyFilterPassKey		EQU		1
+; typedef SInt16 						ControlKeyFilterResult
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  	• DragGrayRgn Constatns																
+; 																						
+;    For DragGrayRgnUPP used in TrackControl() 											
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+noConstraint					EQU		0
+hAxisOnly						EQU		1
+vAxisOnly						EQU		2
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Creation/Deletion/Persistence												
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	CreateCustomControl is only available as part of Carbon								
+
+kControlDefProcPtr				EQU		0					; raw proc-ptr based access
+; typedef UInt32 						ControlDefType
+
+ControlDefSpec			RECORD 0
+defType					 ds.l	1				; offset: $0 (0)
+defProc					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+;
+; pascal OSStatus CreateCustomControl(WindowRef owningWindow, const Rect *contBounds, const ControlDefSpec *def, Collection initData, ControlRef *outControl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CreateCustomControl
+	ENDIF
+
+;
+; pascal ControlRef NewControl(WindowPtr owningWindow, const Rect *boundsRect, ConstStr255Param controlTitle, Boolean initiallyVisible, SInt16 initialValue, SInt16 minimumValue, SInt16 maximumValue, SInt16 procID, SInt32 controlReference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_NewControl:	OPWORD	$A954
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewControl
+	ENDIF
+
+;
+; pascal ControlRef GetNewControl(SInt16 resourceID, WindowPtr owningWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetNewControl:	OPWORD	$A9BE
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetNewControl
+	ENDIF
+
+;
+; pascal void DisposeControl(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DisposeControl:	OPWORD	$A955
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisposeControl
+	ENDIF
+
+;
+; pascal void KillControls(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_KillControls:	OPWORD	$A956
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION KillControls
+	ENDIF
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal OSStatus FlattenControl(ControlRef control, Boolean flattenSubControls, Collection collection)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FlattenControl
+	ENDIF
+
+;
+; pascal OSStatus UnflattenControl(WindowRef window, Collection collection, ControlRef *outControl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UnflattenControl
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Definition Registration													
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	In GetNewControl on Carbon, the Control Manager needs to know how to map the procID	
+; 	to a ControlDefSpec. With RegisterControlDefinition, your application can inform	
+; 	the Control Manager which ControlDefSpec to call when it sees a request to use a	
+; 	'CDEF' of a particular resource ID.													
+; 																						
+; 	Since custom control definitions receive their initialization data in a Collection,	
+; 	you must also provide a procedure to convert the bounds, min, max, and other fields	
+; 	from the 'CNTL' resource into a Collection. If you don't provide a conversion proc,	
+; 	your control will receive an empty collection when it is sent the initialization	
+; 	message.																				
+; 	If you want the value, min, visibility, etc. to be given to the control, you must	
+; 	add the appropriate tagged data to the collection. See the Control Collection Tags	
+; 	above.																				
+; 	RegisterControlDefinition is only available as part of Carbon						
+;
+; pascal OSStatus RegisterControlDefinition(SInt16 CDEFResID, const ControlDefSpec *def, ControlCNTLToCollectionUPP conversionProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RegisterControlDefinition
+	ENDIF
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Visible State																
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void HiliteControl(ControlRef theControl, ControlPartCode hiliteState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_HiliteControl:	OPWORD	$A95D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HiliteControl
+	ENDIF
+
+;
+; pascal void ShowControl(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ShowControl:	OPWORD	$A957
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ShowControl
+	ENDIF
+
+;
+; pascal void HideControl(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_HideControl:	OPWORD	$A958
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HideControl
+	ENDIF
+
+
+;  following state routines available only with Appearance 1.0 and later
+;
+; pascal Boolean IsControlActive(ControlRef inControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IsControlActive
+			move.w              #$0005,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsControlActive
+	ENDIF
+
+;
+; pascal Boolean IsControlVisible(ControlRef inControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IsControlVisible
+			move.w              #$0006,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsControlVisible
+	ENDIF
+
+;
+; pascal OSErr ActivateControl(ControlRef inControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ActivateControl
+			move.w              #$0007,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ActivateControl
+	ENDIF
+
+;
+; pascal OSErr DeactivateControl(ControlRef inControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DeactivateControl
+			move.w              #$0008,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeactivateControl
+	ENDIF
+
+;
+; pascal OSErr SetControlVisibility(ControlRef inControl, Boolean inIsVisible, Boolean inDoDraw)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetControlVisibility
+			move.w              #$001E,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlVisibility
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Imaging																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void DrawControls(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DrawControls:	OPWORD	$A969
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawControls
+	ENDIF
+
+;
+; pascal void Draw1Control(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_Draw1Control:	OPWORD	$A96D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Draw1Control
+	ENDIF
+
+
+;
+; pascal void UpdateControls(WindowPtr theWindow, RgnHandle updateRegion)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_UpdateControls:	OPWORD	$A953
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UpdateControls
+	ENDIF
+
+
+;  following imaging routines available only with Appearance 1.0 and later
+;
+; pascal OSErr GetBestControlRect(ControlRef inControl, Rect *outRect, SInt16 *outBaseLineOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetBestControlRect
+			move.w              #$001B,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetBestControlRect
+	ENDIF
+
+;
+; pascal OSErr SetControlFontStyle(ControlRef inControl, const ControlFontStyleRec *inStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetControlFontStyle
+			move.w              #$001C,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlFontStyle
+	ENDIF
+
+;
+; pascal void DrawControlInCurrentPort(ControlRef inControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawControlInCurrentPort
+			move.w              #$0018,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawControlInCurrentPort
+	ENDIF
+
+;
+; pascal OSErr SetUpControlBackground(ControlRef inControl, SInt16 inDepth, Boolean inIsColorDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetUpControlBackground
+			move.w              #$001D,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetUpControlBackground
+	ENDIF
+
+;  SetUpControlTextColor is available in Appearance 1.1 or later.
+;
+; pascal OSErr SetUpControlTextColor(ControlRef inControl, SInt16 inDepth, Boolean inIsColorDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetUpControlTextColor
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Mousing																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 
+;	NOTE ON CONTROL ACTION PROCS
+;
+;	When using the TrackControl() call when tracking an indicator, the actionProc parameter
+;	(type ControlActionUPP) should be replaced by a parameter of type DragGrayRgnUPP
+;	(see Quickdraw.h).
+;
+;	If, however, you are using the live feedback variants of scroll bars or sliders, you
+;	can pass a ControlActionUPP in when tracking the indicator as well. This functionality
+;	is available in Appearance 1.0 or later.
+;
+
+;
+; pascal ControlPartCode TrackControl(ControlRef theControl, Point startPoint, ControlActionUPP actionProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_TrackControl:	OPWORD	$A968
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TrackControl
+	ENDIF
+
+;
+; pascal void DragControl(ControlRef theControl, Point startPoint, const Rect *limitRect, const Rect *slopRect, DragConstraint axis)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DragControl:	OPWORD	$A967
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DragControl
+	ENDIF
+
+;
+; pascal ControlPartCode TestControl(ControlRef theControl, Point testPoint)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_TestControl:	OPWORD	$A966
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TestControl
+	ENDIF
+
+;
+; pascal ControlPartCode FindControl(Point testPoint, WindowPtr theWindow, ControlRef *theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_FindControl:	OPWORD	$A96C
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindControl
+	ENDIF
+
+;  The following mousing routines available only with Appearance 1.0 and later	
+; 																				
+;  HandleControlClick is preferable to TrackControl when running under			
+;  Appearance 1.0 as you can pass in modifiers, which some of the new controls	
+;  use, such as edit text and list boxes.										
+;
+; pascal ControlRef FindControlUnderMouse(Point inWhere, WindowPtr inWindow, SInt16 *outPart)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_FindControlUnderMouse
+			move.w              #$0009,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindControlUnderMouse
+	ENDIF
+
+;
+; pascal ControlPartCode HandleControlClick(ControlRef inControl, Point inWhere, EventModifiers inModifiers, ControlActionUPP inAction)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_HandleControlClick
+			move.w              #$000A,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HandleControlClick
+	ENDIF
+
+;  Contextual Menu support in the Control Manager is only available on Carbon.	
+;  If the control didn't display a contextual menu (possibly because the point	
+;  was in a	non-interesting part), the menuDisplayed output parameter will be	
+;  false. If the control did display a menu, menuDisplayed will be true.		
+;  This in on Carbon only														
+;
+; pascal OSStatus HandleControlContextualMenuClick(ControlRef inControl, Point inWhere, Boolean *menuDisplayed)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HandleControlContextualMenuClick
+	ENDIF
+
+;  Some complex controls (like Data Browser) require proper sequencing of		
+;  window activation and click processing. In some cases, the control might		
+;  want the window to be left inactive yet still handle the click, or vice-		
+;  versa. The GetControlClickActivation routine lets a control client ask the	
+;  control how it wishes to behave for a particular click.						
+;  This in on Carbon only.														
+;
+; pascal OSStatus GetControlClickActivation(ControlRef inControl, Point inWhere, EventModifiers inModifiers, ClickActivationResult *outResult)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlClickActivation
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Events (available only with Appearance 1.0 and later)						
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal SInt16 HandleControlKey(ControlRef inControl, SInt16 inKeyCode, SInt16 inCharCode, EventModifiers inModifiers)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_HandleControlKey
+			move.w              #$000B,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HandleControlKey
+	ENDIF
+
+;
+; pascal void IdleControls(WindowPtr inWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IdleControls
+			move.w              #$000C,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IdleControls
+	ENDIF
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Control Mouse Tracking (available with Carbon)										
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  The HandleControlSetCursor routine requests that a given control set the cursor to	
+;  something appropriate based on the mouse location.									
+;  If the control didn't want to set the cursor (because the point was in a				
+;  non-interesting part), the cursorWasSet output parameter will be false. If the		
+;  control did set the cursor, cursorWasSet will be true.								
+;  Carbon only.																			
+;
+; pascal OSStatus HandleControlSetCursor(ControlRef control, Point localPoint, EventModifiers modifiers, Boolean *cursorWasSet)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HandleControlSetCursor
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Positioning																
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void MoveControl(ControlRef theControl, SInt16 h, SInt16 v)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_MoveControl:	OPWORD	$A959
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MoveControl
+	ENDIF
+
+;
+; pascal void SizeControl(ControlRef theControl, SInt16 w, SInt16 h)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SizeControl:	OPWORD	$A95C
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SizeControl
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Title																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void SetControlTitle(ControlRef theControl, ConstStr255Param title)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetControlTitle:	OPWORD	$A95F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlTitle
+	ENDIF
+
+;
+; pascal void GetControlTitle(ControlRef theControl, Str255 title)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetControlTitle:	OPWORD	$A95E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlTitle
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Value																		
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal SInt16 GetControlValue(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetControlValue:	OPWORD	$A960
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlValue
+	ENDIF
+
+;
+; pascal void SetControlValue(ControlRef theControl, SInt16 newValue)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetControlValue:	OPWORD	$A963
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlValue
+	ENDIF
+
+;
+; pascal SInt16 GetControlMinimum(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetControlMinimum:	OPWORD	$A961
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlMinimum
+	ENDIF
+
+;
+; pascal void SetControlMinimum(ControlRef theControl, SInt16 newMinimum)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetControlMinimum:	OPWORD	$A964
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlMinimum
+	ENDIF
+
+;
+; pascal SInt16 GetControlMaximum(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetControlMaximum:	OPWORD	$A962
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlMaximum
+	ENDIF
+
+;
+; pascal void SetControlMaximum(ControlRef theControl, SInt16 newMaximum)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetControlMaximum:	OPWORD	$A965
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlMaximum
+	ENDIF
+
+
+;  proportional scrolling/32-bit value support is new with Appearance 1.1
+
+;
+; pascal SInt32 GetControlViewSize(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlViewSize
+	ENDIF
+
+;
+; pascal void SetControlViewSize(ControlRef theControl, SInt32 newViewSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlViewSize
+	ENDIF
+
+;
+; pascal SInt32 GetControl32BitValue(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControl32BitValue
+	ENDIF
+
+;
+; pascal void SetControl32BitValue(ControlRef theControl, SInt32 newValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControl32BitValue
+	ENDIF
+
+;
+; pascal SInt32 GetControl32BitMaximum(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControl32BitMaximum
+	ENDIF
+
+;
+; pascal void SetControl32BitMaximum(ControlRef theControl, SInt32 newMaximum)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControl32BitMaximum
+	ENDIF
+
+;
+; pascal SInt32 GetControl32BitMinimum(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControl32BitMinimum
+	ENDIF
+
+;
+; pascal void SetControl32BitMinimum(ControlRef theControl, SInt32 newMinimum)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControl32BitMinimum
+	ENDIF
+
+
+;   	IsValidControlHandle will tell you if the handle you pass in belongs to a control
+;  	the Control Manager knows about. It does not sanity check the data in the control.
+
+
+
+;
+; pascal Boolean IsValidControlHandle(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsValidControlHandle
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Control IDs																		
+;  Carbon only.																			
+; ——————————————————————————————————————————————————————————————————————————————————————
+ControlID				RECORD 0
+signature				 ds.l	1				; offset: $0 (0)
+id						 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+;
+; pascal OSStatus SetControlID(ControlRef inControl, const ControlID *inID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlID
+	ENDIF
+
+;
+; pascal OSStatus GetControlID(ControlRef inControl, ControlID *outID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlID
+	ENDIF
+
+;
+; pascal OSStatus GetControlByID(WindowRef inWindow, const ControlID *inID, ControlRef *outControl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlByID
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Properties																			
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kControlPropertyPersistent		EQU		$00000001			; whether this property gets saved when flattening the control
+;
+; pascal OSStatus GetControlProperty(ControlRef control, OSType propertyCreator, OSType propertyTag, UInt32 bufferSize, UInt32 *actualSize, void *propertyBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlProperty
+	ENDIF
+
+;
+; pascal OSStatus GetControlPropertySize(ControlRef control, OSType propertyCreator, OSType propertyTag, UInt32 *size)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlPropertySize
+	ENDIF
+
+;
+; pascal OSStatus SetControlProperty(ControlRef control, OSType propertyCreator, OSType propertyTag, UInt32 propertySize, void *propertyData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlProperty
+	ENDIF
+
+;
+; pascal OSStatus RemoveControlProperty(ControlRef control, OSType propertyCreator, OSType propertyTag)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RemoveControlProperty
+	ENDIF
+
+;
+; pascal OSStatus GetControlPropertyAttributes(ControlRef control, OSType propertyCreator, OSType propertyTag, UInt32 *attributes)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlPropertyAttributes
+	ENDIF
+
+;
+; pascal OSStatus ChangeControlPropertyAttributes(ControlRef control, OSType propertyCreator, OSType propertyTag, UInt32 attributesToSet, UInt32 attributesToClear)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ChangeControlPropertyAttributes
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Regions (Appearance 1.1 or later)											
+; 																						
+; 	See the discussion on meta-parts in this header for more information				
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal OSStatus GetControlRegion(ControlRef inControl, ControlPartCode inPart, RgnHandle outRegion)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlRegion
+	ENDIF
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Variant																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal ControlVariant GetControlVariant(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetControlVariant:	OPWORD	$A809
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlVariant
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Action																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void SetControlAction(ControlRef theControl, ControlActionUPP actionProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetControlAction:	OPWORD	$A96B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlAction
+	ENDIF
+
+;
+; pascal ControlActionUPP GetControlAction(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetControlAction:	OPWORD	$A96A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlAction
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Control Accessors																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void SetControlReference(ControlRef theControl, SInt32 data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetControlReference:	OPWORD	$A95B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlReference
+	ENDIF
+
+;
+; pascal SInt32 GetControlReference(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetControlReference:	OPWORD	$A95A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlReference
+	ENDIF
+
+	IF ¬ OPAQUE_TOOLBOX_STRUCTS THEN
+;
+; pascal Boolean GetAuxiliaryControlRecord(ControlRef theControl, AuxCtlHandle *acHndl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetAuxiliaryControlRecord:	OPWORD	$AA44
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetAuxiliaryControlRecord
+	ENDIF
+
+	ENDIF
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal void SetControlColor(ControlRef theControl, CCTabHandle newColorTable)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetControlColor:	OPWORD	$AA43
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlColor
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Hierarchy (Appearance 1.0 and later only)									
+; ——————————————————————————————————————————————————————————————————————————————————————
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal SInt32 SendControlMessage(ControlRef inControl, SInt16 inMessage, SInt32 inParam)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SendControlMessage
+			move.w              #$FFFE,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SendControlMessage
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+;
+; pascal OSErr DumpControlHierarchy(WindowPtr inWindow, const FSSpec *inDumpFile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DumpControlHierarchy
+			move.w              #$FFFF,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DumpControlHierarchy
+	ENDIF
+
+;
+; pascal OSErr CreateRootControl(WindowPtr inWindow, ControlRef *outControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CreateRootControl
+			move.w              #$0001,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CreateRootControl
+	ENDIF
+
+;
+; pascal OSErr GetRootControl(WindowPtr inWindow, ControlRef *outControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetRootControl
+			move.w              #$0002,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetRootControl
+	ENDIF
+
+;
+; pascal OSErr EmbedControl(ControlRef inControl, ControlRef inContainer)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_EmbedControl
+			move.w              #$0003,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION EmbedControl
+	ENDIF
+
+;
+; pascal OSErr AutoEmbedControl(ControlRef inControl, WindowPtr inWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AutoEmbedControl
+			move.w              #$0004,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AutoEmbedControl
+	ENDIF
+
+;
+; pascal OSErr GetSuperControl(ControlRef inControl, ControlRef *outParent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetSuperControl
+			move.w              #$0015,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetSuperControl
+	ENDIF
+
+;
+; pascal OSErr CountSubControls(ControlRef inControl, UInt16 *outNumChildren)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CountSubControls
+			move.w              #$0016,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CountSubControls
+	ENDIF
+
+;
+; pascal OSErr GetIndexedSubControl(ControlRef inControl, UInt16 inIndex, ControlRef *outSubControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetIndexedSubControl
+			move.w              #$0017,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetIndexedSubControl
+	ENDIF
+
+;
+; pascal OSErr SetControlSupervisor(ControlRef inControl, ControlRef inBoss)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetControlSupervisor
+			move.w              #$001A,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlSupervisor
+	ENDIF
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Keyboard Focus (available only with Appearance 1.0 and later)						
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal OSErr GetKeyboardFocus(WindowPtr inWindow, ControlRef *outControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetKeyboardFocus
+			move.w              #$000D,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetKeyboardFocus
+	ENDIF
+
+;
+; pascal OSErr SetKeyboardFocus(WindowPtr inWindow, ControlRef inControl, ControlFocusPart inPart)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetKeyboardFocus
+			move.w              #$000E,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetKeyboardFocus
+	ENDIF
+
+;
+; pascal OSErr AdvanceKeyboardFocus(WindowPtr inWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AdvanceKeyboardFocus
+			move.w              #$000F,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AdvanceKeyboardFocus
+	ENDIF
+
+;
+; pascal OSErr ReverseKeyboardFocus(WindowPtr inWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ReverseKeyboardFocus
+			move.w              #$0010,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ReverseKeyboardFocus
+	ENDIF
+
+;
+; pascal OSErr ClearKeyboardFocus(WindowPtr inWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ClearKeyboardFocus
+			move.w              #$0019,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ClearKeyboardFocus
+	ENDIF
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Data (available only with Appearance 1.0 and later)						
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+;
+; pascal OSErr GetControlFeatures(ControlRef inControl, UInt32 *outFeatures)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetControlFeatures
+			move.w              #$0011,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlFeatures
+	ENDIF
+
+;
+; pascal OSErr SetControlData(ControlRef inControl, ControlPartCode inPart, ResType inTagName, Size inSize, void *inData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetControlData
+			move.w              #$0012,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlData
+	ENDIF
+
+;
+; pascal OSErr GetControlData(ControlRef inControl, ControlPartCode inPart, ResType inTagName, Size inBufferSize, void *inBuffer, Size *outActualSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetControlData
+			move.w              #$0013,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlData
+	ENDIF
+
+;
+; pascal OSErr GetControlDataSize(ControlRef inControl, ControlPartCode inPart, ResType inTagName, Size *outMaxSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetControlDataSize
+			move.w              #$0014,D0
+			dc.w            	$AA73
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlDataSize
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Control Drag & Drop																
+; 		Carbon only.																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  some simple redefinitions of the messages found in the Drag header
+
+kDragTrackingEnterControl		EQU		2
+kDragTrackingInControl			EQU		3
+kDragTrackingLeaveControl		EQU		4
+;
+; pascal OSStatus HandleControlDragTracking(ControlRef inControl, DragTrackingMessage inMessage, DragReference inDrag, Boolean *outLikesDrag)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HandleControlDragTracking
+	ENDIF
+
+;
+; pascal OSStatus HandleControlDragReceive(ControlRef inControl, DragReference inDrag)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HandleControlDragReceive
+	ENDIF
+
+;
+; pascal OSStatus SetControlDragTrackingEnabled(ControlRef theControl, Boolean tracks)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlDragTrackingEnabled
+	ENDIF
+
+;
+; pascal OSStatus IsControlDragTrackingEnabled(ControlRef theControl, Boolean *tracks)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsControlDragTrackingEnabled
+	ENDIF
+
+;
+; pascal OSStatus SetAutomaticControlDragTrackingEnabledForWindow(WindowPtr theWindow, Boolean tracks)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetAutomaticControlDragTrackingEnabledForWindow
+	ENDIF
+
+;
+; pascal OSStatus IsAutomaticControlDragTrackingEnabledForWindow(WindowPtr theWindow, Boolean *tracks)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsAutomaticControlDragTrackingEnabledForWindow
+	ENDIF
+
+
+	IF ¬ TARGET_OS_MAC THEN
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• QuickTime 3.0 Win32/unix notification	mechanism									
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  Proc used to notify window that something happened to the control
+
+;   Proc used to prefilter events before handled by control.  A client of a control calls
+;   CTRLSetPreFilterProc() to have the control call this proc before handling the event.
+;   If the proc returns TRUE, the control can go ahead and handle the event.
+
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern long GetControlComponentInstance(ControlRef theControl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlComponentInstance
+	ENDIF
+
+;
+; extern ControlRef GetControlHandleFromCookie(long cookie)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlHandleFromCookie
+	ENDIF
+
+;
+; extern void SetControlDefProc(short resID, ControlDefProcPtr proc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlDefProc
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF
+	IF OLDROUTINENAMES THEN
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• OLDROUTINENAMES																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+useWFont						EQU		$08
+
+inThumb							EQU		129
+kNoHiliteControlPart			EQU		0
+kInIndicatorControlPart			EQU		129
+kReservedControlPart			EQU		254
+kControlInactiveControlPart		EQU		255
+
+	ENDIF	; OLDROUTINENAMES
+	IF ACCESSOR_CALLS_ARE_FUNCTIONS THEN
+;  Getters 
+;
+; pascal Rect *GetControlBounds(ControlRef control, Rect *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlBounds
+	ENDIF
+
+;
+; pascal Boolean IsControlHilited(ControlRef control)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsControlHilited
+	ENDIF
+
+;
+; pascal UInt16 GetControlHilite(ControlRef control)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlHilite
+	ENDIF
+
+;
+; pascal WindowPtr GetControlOwner(ControlRef control)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlOwner
+	ENDIF
+
+;
+; pascal Handle GetControlDataHandle(ControlRef control)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlDataHandle
+	ENDIF
+
+;
+; pascal MenuHandle GetControlPopupMenuHandle(ControlRef control)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlPopupMenuHandle
+	ENDIF
+
+;
+; pascal short GetControlPopupMenuID(ControlRef control)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetControlPopupMenuID
+	ENDIF
+
+;  Setters 
+;
+; pascal void SetControlDataHandle(ControlRef control, Handle dataHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlDataHandle
+	ENDIF
+
+;
+; pascal void SetControlBounds(ControlRef control, const Rect *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlBounds
+	ENDIF
+
+;
+; pascal void SetControlPopupMenuHandle(ControlRef control, MenuHandle popupMenu)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlPopupMenuHandle
+	ENDIF
+
+;
+; pascal void SetControlPopupMenuID(ControlRef control, short menuID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetControlPopupMenuID
+	ENDIF
+
+	ENDIF	; ACCESSOR_CALLS_ARE_FUNCTIONS
+	IF ¬ OPAQUE_TOOLBOX_STRUCTS ** ¬ ACCESSOR_CALLS_ARE_FUNCTIONS THEN
+	ENDIF
+
+	ENDIF ; __CONTROLS__ 
+

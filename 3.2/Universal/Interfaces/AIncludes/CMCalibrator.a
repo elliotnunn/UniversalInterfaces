@@ -1,0 +1,41 @@
+;
+;	File:		CMCalibrator.a
+;
+;	Contains:	ColorSync Calibration API
+;
+;	Version:	Technology:	ColorSync 2.5
+;				Release:	Universal Interfaces 3.2
+;
+;	Copyright:	© 1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__CMCALIBRATOR__') = 'UNDEFINED' THEN
+__CMCALIBRATOR__ SET 1
+
+	IF &TYPE('__CMAPPLICATION__') = 'UNDEFINED' THEN
+	include 'CMApplication.a'
+	ENDIF
+	IF &TYPE('__DISPLAYS__') = 'UNDEFINED' THEN
+	include 'Displays.a'
+	ENDIF
+	IF &TYPE('__ERRORS__') = 'UNDEFINED' THEN
+	include 'Errors.a'
+	ENDIF
+
+CalibratorInfo			RECORD 0
+displayID				 ds.l	1				; offset: $0 (0)
+profileLocation			 ds		CMProfileLocation ; offset: $4 (4)
+eventProc				 ds.l	1				; offset: $4C (76)
+reserved				 ds.l	1				; offset: $50 (80)
+flags					 ds.l	1				; offset: $54 (84)
+isGood					 ds.b	1				; offset: $58 (88)
+byteFiller				 ds.b	1				; offset: $59 (89)
+sizeof					 EQU *					; size:   $5A (90)
+						ENDR
+	ENDIF ; __CMCALIBRATOR__ 
+

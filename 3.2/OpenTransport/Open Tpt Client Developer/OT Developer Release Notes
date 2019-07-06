@@ -1,0 +1,426 @@
+
+Open Transport Developer Release Notes
+
+Revision 1.3
+9/19/97
+
+
+Comments and technical support questions should be directed to the Internet address 'devsupport@apple.com'.
+
+
+Overview
+
+This is a development release of Open Transport for AppleTalk and TCP/IP. 
+
+This release includes an AppleTalk Phase 2 stack containing PAP, ADSP, ATP, DDP and below. It includes a TCP/IP stack containing TCP, UDP, IP and a DNR. More information on the particular capabilities of these two stacks are contained in documentation specific to AppleTalk or TCP/IP (see below).
+
+This document describes the changes of interest to client developers. You should also read the Open Tpt Release Notes to get information on changes that affect Open Transport users.
+
+What this release contains
+
+This release includes  
+• an Installer that will install Open Transport 1.3 and Apple Shared Library Manager 2.0.1 onto your machine. 
+• an Open Transport SDK folder that contains header files, libraries, and documents and samples.
+
+
+WARNINGS
+
+See also the ReadMe file that accompanies Open Transport
+
+Development Information
+
+This developer kit was created using the pre-release MPW environment from E.T.O. #19.
+
+All of the samples have been updated to build with Code Warrior 11.
+
+IMPORTANT DEVELOPER WARNING!!!
+
+If you use any of the new APIs since OT 1.1, your product will not be compatible with the Open Transport 1.1 general release.  Be sure to test the version number (see known incompatibilities below!) before using the new APIs.
+
+Linking with Open Transport Libraries:
+
+For 68K Libraries:
+
+You should link with OpenTptUtils.o (for model far) or OpenTptUtils.n.o (for model near) if you are writing code that is only dealing with ports.  Linking with this file keeps the whole Open Transport environment from loading.
+
+If you're not sure, try linking with this file.  If you get unresolved symbols, then link with OpenTransport.o.
+
+If you are writing an application, also link with OpenTransportApp.o (for model far) or OpenTransportApp.n.o (for model near). If you are writing a stand-alone code resource, CFM fragment, or ASLM shared library, also link with OpenTransportExtn.o (for model far) or OpenTransportExtn.n.o (for model near).
+
+You should link with OpenTransport.o (for model far) or OpenTransport.n.o (for model near) if you are writing code that creates and uses endpoints, mappers or other providers.  If you are writing an application, also link with  OpenTransportApp.o (for model far) or OpenTransportApp.n.o (for model near). If you are writing a stand-alone code resource, CFM fragment, or ASLM shared library, also link with OpenTransportExtn.o (for model far) or OpenTransportExtn.n.o (for model near).
+
+You should link with OpenTptATalk.o (for model far) or OpenTptATalk.n.o (for model near) if you are writing code that uses the AppleTalkServices provider.
+
+You should link with OpenTptInet.o (for model far) or OpenTptInet.n.o (for model near) if you are writing code that uses the InternetServices provider.
+
+In all cases, if you are NOT writing an appliction, but are writing a stand-alone code resource, CFM fragment, or ASLM shared library, also link with OpenTransportApp.o (for model far) or OpenTransportExtn.n.o (for model near).
+
+If you are writing code that uses ASLM, then you should link with the ASLM libraries first, then the Open Transport libraries, ignoring any duplicate symbol definitions that occur between them.
+
+For PPC Libraries:
+
+You should link with OpenTransportUtilLib and OpenTptUtilsPPC.o if you are writing code that is only dealing with ports.
+Linking with this file keeps the whole Open Transport environment from loading.  If you're not sure, try linking with this file.
+If you get unresolved symbols, then link with OpenTransportLib and OpenTransportPPC.o.
+
+If you are writing an application, also link with OpenTptUtilsAppPPC.o. If you are writing a stand-alone code resource, CFM fragment, or ASLM shared library, link with OpenTptUtilsExtnPPC.o instead of OpenTptUtilsAppPPC.o.
+
+You should link with OpenTransportLib and OpenTransportPPC.o if you are writing code that creates and uses endpoints, mappers,  or other providers.
+If you are writing an application, also link with OpenTransportAppPPC.o. If you are writing a stand-alone code resource, CFM fragment, or ASLM shared library, link with OpenTransportExtnPPC.o instead of OpenTransportAppPPC.o.
+
+You should link with OpenTptATalkPPC.o and OpenTptAppleTalkLib if you are writing code that uses the AppleTalkServices provider, or AppleTalk utility routines
+
+You should link with OpenTptInetPPC.o and OpenTptInternetLib if you are writing code that uses the InternetServices provider, or TCP/IP utility routines.
+
+If you are writing code that uses ASLM, then you should link with the ASLM libraries first, then the Open Transport libraries, ignoring any duplicate symbol definitions that occur between them.
+
+Known bugs/incompatibilities
+
+• The 'otvr' gestalt erroneously returns 0x00008000 for the 1.1 version of Open Transport on System 7.1, 7.1.1 and 7.1.2.
+
+API changes in OT 1.1.1
+
+• The API OTUseSyncIdleEvents(EndpointRef ref, Boolean useEvents) has been added.  If you turn on using sync idle events, then your notifier will be called with a kOTSyncIdleEvent repeatedly while Open Transport is spinning waiting for a synchronous call to complete.  You may call YieldThread(), or do some other work during this sync idle event.  NOTE:  It is not legal to switch threads from inside a notification routine except in the case of a kOTSyncIdleEvent.
+
+• The API OTStreamUseSyncIdleEvents(StreamRef ref, Boolean useEvents) has been added.  It works the same as OTUseSyncIdleEvents, except that it works on streams instead of providers.
+
+• The APIs OTOpenProvider and OTAsyncOpenProvider were added to OpenTransport.h.
+
+• The #pragma aligns in the Open Transport header files have been updated so that they don't change the alignment settings for other header files.
+
+• The APIs OTEnterNotifier(ProviderRef) and OTLeaveNotifier(ProviderRef) have been added.  These routines effectively make Open Transport believe that you are inside the notifier of the specified provider, giving you all of the guarantees that go along with being inside the notifier.  These APIs can be effectively used to enter a "critical section" where you don't want to receive any of the standard XTI events (T_DATA, T_EXDATA, T_DISCONNECT, T_UDERR, T_ORDREL, T_GODATA, T_GOEXDATA, T_REQUEST, T_REPLY, or T_PASSCON).
+
+• The equate kInvalidPortRef was removed from OpenTransport.h.  It was flagged as "to be removed" in the 1.1 SDK, and it is now gone - use the kOTInvalidPortRef equate instead.
+
+• The APIs t_close, OTCloseProvider, and OTFreeMem are now dynamically linked to.  In earlier versions of Open Transport, they were in the object file that you linked with and called "private" functions with an extra parameter.  This is no longer needed.  However, the "private" functions still exist, so that existing code linked with the object files will still function correctly.
+
+• The gestalt bit equates in Open Transport.h have been renamed.  They now terminate with the suffix "Mask" or "Bit" so that it's clear what they represent.
+
+• The event "kOTYieldPortRequest" was added as an alias to the event "kOTClosePortRequest".
+
+• The file "OpenTptCommon.h" was added to the SDK.  It contains APIs and definitions that are shared between client and kernel code.
+
+• The file "OpenTptClient.h" was added to the SDK.  It contains client APIs and definitions that are only usable by native code.
+
+• The APIs for the old TStreamStateMachine and TStateMachine classes were converted over to "C" and moved from OpenTptClientClasses.h to OpenTptClient.h.  The actual definition of the state machine structure is now hidden except for the first few fields.  The APIs start with the prefix OTSM.  Only configurators should need to use these APIs
+
+• The TOTConfigurator class now only has 3 entry points - Configure, CreateStream, and HandleSystemEvent.
+
+• The OTConfiguration structure definition is now private.  For a while, old code based on the actual definition of the structure will continue to work, but you should convert over to the new APIs in OpenTptClient.h.  These APIs start with the prefix OTCfig.  Only configurators should need to use these APIs.
+
+• The APIs OTRemoveStreamFromProvider was added and the OTCloseProvider call was made robust enough to handle closing a provider that has had it's STREAM removed.
+
+• The APIs OTCreateStream and OTAsyncCreateStream were added to OpenTptClient.h.  These APIs allow clients to create "raw" streams, but use the OTConfiguration infrastructure for providers to do the proper plumbing.
+
+• The API to the state machine "GetMessage" call was incorrect.  The original API had an OTFlags parameter, which should have been an OTFlags* parameter.  This has been fixed.
+
+ • "C" APIs were created for the configurator.  They allow you to create a configurator object from "C" and write all your configurator code in "C".
+
+• The API OTInstallStreamNotifier was renamed to OTStreamInstallNotifier to be consistent.  The API OTStreamRemoveNotifier was added.
+ 
+• In OpenTransport.h, we no longer define the Unix error codes unless the equate OTUNIXERRORS is set to 1, or you are compiling STREAM modules.  Clients don't normally need the Unix error code numbers.
+
+• A new API for servers has been introduced:
+	     OSStatus OTSetMemoryLimits(size_t growSize, size_t maxSize).
+      This will immediately add "growSize" bytes to the Open Transport kernel pool, and allow it to grow even more, if necessary, to "maxSize".  The client pool will be also have 10% of "growSize" added to it.  Setting a "growSize" of 0 will allow Open Transport to give back any unused memory, when possible.  All applications that make this call should call OTSetMemoryLimits(0, 0), when they are done.  This call use-counts the callers, and when all callers have "undone" their growth of the kernel pool, Open Transport will begin shrinking the kernel pool as contiguous memory becomes available to do so.
+      There is currently no prototype for this function in the Open Transport headers in an attempt to keep it from being abused.
+
+• The #ifndefs at the top of all of the header files were made consistent.  For instance, dlpi.h had #ifndef _SYS_DLPI_.  Now, it's __DLPI__.
+
+• OTEnterGate, OTLeaveGate, and OTInitGate were added to provide synchronization primitives for serializing data.  These functions can be used by both clients and modules, and are multi-processor safe.
+
+• kOTFireWireDevice, kOTFireWireBus, and kOTFibreChannelDevice constants were added.
+
+API changes in OT 1.3
+
+• Bumped up kInetInterfaceInfoVersion up to 3 to indicate extensions for single link multihoming.
+
+Changes in OT 1.1.1
+
+• Open Transport 1.1.1 for 68K is now built using Symantec C instead of CFront and MPW C.  All public APIs are still compatible, including C++ objects.
+
+• Some Timer debugging codes was left in the non-debug build.  This has been removed.
+
+• While our documentation states that protocols are free to change the buffer for AckSends(), we have decided based on developer feedback that it's probably more convenient to not allow this.  In 1.1.1 when using AckSends(), protocols will no longer modify the user buffer.
+
+• "Raw" datagram sends are now allowed to use AckSends().
+
+Bug Fixes since 1.1
+
+General - OT 1.1.1
+
+• The 'otvr' gestalt now returns the correct verion of Open Transport on System 7.1, 7.1.1, and 7.1.2.
+
+• A bug in the OTSetServerMode API would hang the system if 2 Megabytes of memory were not available from the system heap.
+
+• Fixed a crash/hang that occurred if a client made a synchronous/blocking call, and flow control occurred.
+
+• Fixed a bug where opening an endpoint using the "option" format [e.g. "DDP(Checksum=1)"] did not work.
+
+• Fixed a bug where OTOptionManagement calls were not putting the "worst" error code into the status field, but instead was normally just returning the error on the last option.
+
+• Fixed a bug in OTGetMessages, where, if the OTFlags* parameter was NULL, EINVAL was being returned instead of kEINVALErr.
+
+• Fixed a problem where attempting to use an OTData with one of the elements having an fLen of 0 caused the function you were using to return a kENOMEMErr.
+
+• Fixed a race condition where it was possible to get a T_DISCONNECT or T_ORDREL event, but attempting to receive the event either hung the machine, or returned no information, but would not clear the indication, effectively hanging the endpoint.
+
+• Fixed up the T_PASSCON logic so that a T_DATA event will not be received by the accepting endpoint prior to receiving the T_PASSCON event.
+
+• Fixed a memory leak when using OTSnd with AckSends() on, which occurred whenever flow control occurred.
+
+• PAPSample has been extensively reworked to properly handle status and messages from the printer, and to properly handle flow control (in it's previous incarnation, it only handle kOTFlowErr errors, and did not handle a positive number that was returned that was less than the number of bytes requested to be sent, which is also a flow error).
+
+• The 1.1.1 SDK should now be compatible with the 1.1 SDK.  Version prior to b7 had some compatibility problems.
+
+• A memory corruption problem whenever OTOptionManagement was called with options totalling more than 256 bytes was fixed.
+
+• Notification of a T_DISCONNECTCOMPLETE was supposed to return the original TCall* to the caller, but wasn't.  This has been fixed.
+
+• In prior releases of the 1.1.1 SDK, kEINVALErr was incorrectly set to -3220.  It has been change to -3221.
+
+General - OT 1.1.2
+
+• Fixed an infinite loop that could occur when an endpoint API is used and an unexpected event is pending.
+
+•Fixed a bug that could cause a crash if an error occurred while trying to open an async endpoint.
+
+•Fixed a problem that can cause pending T_MEMORYRELEASED events to be lost if they aren't handled before the endpoint is closed. Also, T_MEMORYRELEASED events no longer queue up behind other pending events.
+
+General - OT 1.2
+
+•Fixed a bug that caused buffers to be corrupted when no-copy sends are used. The data was sent properly, but the buffer was sometimes modified before the T_MEMORYRELEASED event arrived.
+
+•Fixed possible infinite loop if OT run's out of memory trying to process a message from a client.
+
+•Fixed a crash that can occur if you run out of memory while opening a provider.
+
+•Fixed a bug that can cause an endpoint to be stuck in the T_OUTREL state if it recieves a T_DISCONNECT while in the OTSndOrderlyDisconnect routine.
+
+General - OT 1.3
+
+• Fixed a bug in the option management handling the prevented you from setting DDP options when using an ADSP or ATP endpoints.
+
+• Fixed a crash that occurred when a 68k client running emulated on a PowerPC called OTUseSyncIdleEvents. This same crashed also occurred with CFM68k clients.
+
+• Fixed a bug that caused OTOpenEndpoint and OTAsyncOpenEndpoint to sometimes return garbage for the EndpointRef if there was an error, instead of returning NULL.
+
+• Fixed a memory leak in InitOpenTransport that occurred if it was called from an ASLM shared library.
+
+• Debugger Prefs fixes and improvements:
+   -The OT Debugger Prefs file is now installed into the Macsbug Preferences folder.
+   -Fixed up OTErrorsText
+   -Added modname and modnext macros.
+   -Added qname and dmsg macros.
+   -Fixed value for M_CTL in the MSGTypesText template.
+   -Fixed module_info so it is correct for PowerPC.
+   -Added module_info68k for displaying module_info on 68k machines.
+   -Made msgb::fNext of type msgb so you can quickly see all msgbs in the message chain.
+
+• Fixed some bugs with properly dealing with option strings that contain multiple options in them.
+
+• CFM68k is now officially supported. See the "Open Tpt CFM68K Dev. Note" for details. The following changes have been made since OT 1.2:
+   -The OT Installer has been modified to automatically install the CFM68k support.
+   -The OT CFM68k shared libraries no longer modify CurResFile before the application even has a chance to look at it.
+    -Merged the CFM68k support from OpenTransportLib.68k into OpenTransportLib. This only affects "Any System" installs. Do not drag install OpenTransportLib.68k or you may cause a crash.
+    -Stub libraries have been moved from the CFM68k Goodies folder to the "Open Tpt Client Developer:CFM68K Shared Libraries:" folder.
+
+• Fixed problems with the tilisten module that caused listening endpoints to go deaf.
+
+• Fixed a memory leak in the tilisten module.
+
+• Make OTConnect do sync idle events.
+
+• Changed OTCreatePCMCIAPortRef to OTCreatePCCardPortRef and fixed the bus reference it uses to kOTPCCardBus.
+
+•Added kOTNetbufIsRawMode enum for specifying TNetbufs that contain	raw mode data.
+
+• Fixed a bug in OTSndDisconnect that could cause corruption of the cookie parameter that gets passed with a T_MEMORYRELEASED event if a snd (ie. OTSnd) doing ack sends interrupts OTSndDisconect at just the right time. This is the bug fix that went into OT 1.2.1 to fix the crash that occurred when running AppleShare IP 5.0 and the AppleShare Mail Server at the same time.
+
+Backward-compatibility for AppleTalk - OT 1.1.1
+
+• Router down events are now properly handled.
+
+AppleTalk - OT 1.1.1
+
+• AppleTalk was erroneously using a short DDP header for multinode packets.  This caused reply packets to be sent to the primary ("user") node instead of to the multinode endpoint.   This also affects AppleTalk backward-compatibility. 
+
+• When doing NBP Confirms, NBP used to reply with the current zone name.  This has been changed to leave the zone name as "*".  This also affects the PConfirmName call using AppleTalk backward-compatibility.
+
+• Whenever opening an AppleTalkServices object failed, a small memory leak occurred.
+
+• Fixed a problem in ATP where, if a request comes in with a bitmap that does not have some of the lower bits set, ATP would not allow the user to reply to the request (it returned a kOTBadDataErr).  ATP now determines the upper bound to the size of the user reply by using the highest bit number set in the bitmap, rather than counting bits in the bitmap.
+
+• Fixed a problem in PAP, where printers that do not set EOM properly on status and open calls will work.
+
+• Fixed a problem in ADSP, where it was sending out large numbers of probe packets when it ran out of data to send.
+
+• Fixed a small memory leak in ATP if opening the endpoint failed.
+
+• Fixed a crash that occurs under heavy stress when delivering packets to multinodes.
+
+• Fixed a crash that occured if a OTResolveAddress call was made or an in-line non-DDP address format was used and the OTAddressType in the address structure was not one of the legal DDP address types.
+
+• Fixed a problem in ADSP, where, if the side accepting a connection changed the socket for the connection, OT ADSP would respond on the incorrect socket the first time, causing a 2 second delay in creating a connection.
+
+• Fixed a problem where the source address of multinode packets was being set to the user node instead of the multinode address.
+
+• An IOCTL (ADSP_IOC_FORWARDRESET) was added to ADSP to allow ADSP to do a forward reset.
+
+• Many changes were made to PAP and ADSP to get their behavior consistent with the documentation.
+
+AppleTalk - OT 1.2
+
+•Fixed an ADSP bug that caused it to drop any unsent data when OTSndOrderlyDisconnect was called.
+
+•Fixed an ADSP bug that caused a crash when multiple ADSP endpoints were bound to the same DDP socket, and the first ADSP endpoint that was bound is unbound or closed. This happens if you setup an ADSP endpoint as a listener, accept a call over a 2nd endpoint, and then unbind or close the listener endpoint.
+
+•Fixed an ADSP hang that would occur when a handoff attempt timed out. I.e
+if a listener received a connection request, handed it off to another
+endpoint, and then requestor failed to respond, ADSP would hang.
+
+•PAP would reject a bind to socket 0 if there was another bind to socket 0
+outstanding. This has been fixed.
+
+•Added an option to PAP, OPT_INTERVAL, to set the ATP retry interval.
+
+•Fixed a bug that would cause a PAP server to hang when trying to close a
+connection.
+
+AppleTalk - OT 1.3
+
+•Fixed PAP to cancel outstanding SendData requests when an orderly disconnect is initiated.
+
+•Fixed problems with the PAP server handling multiple sessions. Although more then 1 session could be opened to the server at a time, the server would only service one of the sessions. It will now service all of the open sessions in parallel.
+
+•Fixed PAP so it properly handles dealing with more then 64k transactions. It had a rollover problem when the sequence number reacheck 64k.
+
+•Fixed D3 register corruption on PowerPCs that occurred when calling any OT routine that results in data be sent out over a LocalTalk. This bug is most apparent if you have 68k code that calls PowerPC code that then calls an OT send routine (ie. OTSnd). Upon return to the 68k code the D3 register would have been corrupted.
+
+•Fixed the ATALK_IOC_FULLSELFSEND macro.
+
+Backward-compatibility for TCP/IP - OT 1.1.1
+
+• Fixed a problem where an MDEV returning an error from it's bind operation was ignored by Open Transport.
+
+• If the OpenResolver call failed, a bogus error code was returned to the client.
+
+• When a ShimTCPStatus call was made, the userDataPtr was erroneously cleared. 
+
+• Fixed a hang that occurred with applications that use the "NoCopy" receive feature of MacTCP.  This hang occurs if Open Transport becomes low on memory (normally due to extremely high volumes of network traffic).
+
+• Termination reasons were added to ASR notifications that were lacking them.
+
+TCP/IP - OT 1.1.1
+
+• The TCP close logic now waits for 10 times the estimated round trip time to free up resources (with a 1 second minimum) rather than for 4 minutes, which was the default in 1.1.
+
+• The "keep-alive" option now works as expected (the connection will shut down if the "keep-alive" dies).
+
+• StringToAddr now treats the character string "0.0.0.0" as an Internet address rather than as a domain name.
+
+• SOA records are no longer being corrupted in the reply to an OTInetQuery.
+
+• Fixed a problem where passing a 0-length name to OTLookupName for the DNR caused a crash.
+
+Links - OT 1.1.1
+
+• Support was added for the 115 KBaud and 230 KBaud modes for the serial TPI module, if the underlying .xIN/.xOUT driver supports it.
+
+• The serial module now supports doing option management calls prior to binding the endpoint.
+
+• Several bug fixes were made to the serial module to make it properly honor the XTI_RCVBUF and the SERIAL_OPT_RCVTIMEOUT options.
+
+• The Serial module will no longer open if the .xIn/.xOut driver is already open.
+
+• May changes were made to the serial to enhance performance.
+
+• The shim for .ENET, .TOKN, and .FDDI drivers was fixed to correctly handle full-length "raw" packets.
+
+TCP/IP - OT 1.3
+
+• Single link multihoming (also know as IP aliasing) is now supported. See the "Single Link Multihoming Note" in the "Open Tpt Client Developer:Documents:" folder for details.
+
+Links - OT 1.1.2
+
+•Fixed a memory leak in the serial module when the XTI_RCVBUF option failed.
+
+Links - OT 1.2
+
+•Added a fix to allow native LocalTalk DLPI drivers to stay registered.
+
+•The TPI8022 module no longer rejects AddMulticast options that don't
+contain a valid 802.3 multicast address. This change allows the module to
+be used over a Token Ring or FDDI driver.
+
+•The TPI8022 module will now properly handle 4 and 12 bytes options to enable raw mode. If a 4 byte raw mode TOption is sent by the client, then a 4 byte I_OTSetRawMode ioctl is sent to the driver. Likewise, a 12 byte TOption from the client will cause a 12 byte I_OTSetRawMode ioctl to be sent to the driver. You may have to try both before you are successfull since drivers based on the old DLPI template only support 4 bytes I_OTSetRawMode ioctls and drivers based on the new Mentat template only support 12 byte I_OTSetRawMode ioctls.
+
+•Fixed the TPI8022 module so it properly sets the ret.flags field to T_FAILURE or
+	T_SUCCESS, rather then always improperly setting it to T_NEGOTIATE.
+
+•Fixed the TPI8022 module so it properly sets the TOption::len field to 20 instead of 4 when option managment is used to turn pomiscuous mode on or off. This fixes the bug that caused only the first 4 bytes of the TOption to get set properly.
+
+•Fixed OTGetUserPortNameFromPortRef so it returns proper serial port names. It was returning names like "serialA" and "serialB"instead of "Modem Port" and "Printer Port".
+
+•Fixed a bug in the OT implementation of CRMInstall that caused serial ports to sometimes not be registered properly. This was most notably a problem with the Global Village Platinum Pro PC Card and the symptom was getting a "Serial port in use" error when try to connect with the PPP control panel.
+
+Links - OT 1.3
+
+•Fixed a bug in the TPI8022 module option management handling that prevents you from turning promiscuous mode on.
+
+•Make the TPI8022 module set the t_info_ack::TSDU_size field to kEnetTSDU, if the dl_mac_type is	DL_CSMACD or DL_ETHER and raw mode has been set. This fixes inconsistencies with ethernet drivers in raw mode, some of which return kEnetTSDU and some of which return kEnetTSDU-14. This also fixes the probelm with no being able to send a kEnetTSDU sized packet when using raw mode with some ethernet drivers.
+
+Other notes about this build.
+
+ASLM 2.0.1
+
+This build installs ASLM 2.0.1.  If you currently have a debugging version of ASLM installed, installing the non-debug version of Open Transport will replace your debug version of ASLM with the non-debug version..
+
+
+Debugger support
+
+The debug version of the installer will install Open Transport Debugger preferences into the "OT Debugger Prefs" file in the Macsbug Preferences folder. This is a changed from 1.2 and earlier which installed the debugger prefs into the Debugger Prefs file in the System Folder. These debugger prefs contain the ASLM debugger prefs plus Macsbug templates for virtually all structures used in the API. A Macsbug dcmd is installed also that can display strings for error messages. For example, typing “OTErr -3158” will tell you what error number -3158 is.
+
+If you install the debug version of OpenTransport, there are many internal debugger breaks. You must have macsbug installed, or else if a debugger break occurs, you'll get the "bomb" box. 
+
+You must use Macsbug 6.5.3 or later if you want to make use of the OT Debugger Prefs.
+
+There is mostly a pattern to the debugger messages that appear. Most messages have a leading 2-character code. The meanings are: 
+
+NB Nonfatal error. Dump all the registers and do a stack crawl and include the results in a bug report along with what you were doing at the time. Hit 'g' in Macsbug to continue.  The machine should not crash, but it might hang.
+
+FX Fatal error.  An error that is probably fatal to the machine, but is cause by an external component, and not Open Transport itself.
+
+NX Nonfatal error.  An error occurred caused by an external component, and not Open Transport itself.  Hit 'g' in Macsbug to continue.  The machine should not crash, but it might hang.
+
+UF User fatal err.  A client of Open Transport did something wrong that is probably fatal.  Reboot the machine.
+
+UE User nonfatal error.   A client of Open Transport did something wrong.  Hit 'g' in Macsbug to continue.  The machine should not crash or hang.
+
+IE Informative error.  An error occurred that should rarely happen.  Hit 'g' in Macsbug to continue.  The machine should not crash or hang.
+
+IN Informative break.  This is just an informational break.  Hit 'g' in Macsbug to continue.  The machine should not crash or hang.
+
+Documentation
+
+There is a "Document" folder which contains more documentation:
+
+• Open Transport Client Note - A reference document for programmers wishing to write software using the Open Transport APIs.
+• Open Tpt AppleTalk Dev. Note - Material specific to AppleTalk.
+• Open Tpt  Serial Dev. Note - Material specific to Serial endpoints.
+• Open Tpt TCP/IP Dev. Note - Material specific to TCP/IP.
+• Open Tpt 802.2 Dev. Note - Material specific to 802.2 datalinks like Ethernet and Token Ring.
+• Open Tpt Ethernet Dev. Not - Material specific to the Ethernet datalink.
+
+The installer
+
+The installer will Easy Install the Apple Shared Library Manager and Open Transport AppleTalk and TCP/IP version 1.3, as well as AppleTalk  and MacTCP compatibility.
+
+You can "undo" Open Transport installation by using the "Custom Remove" feature of the installer. 
+
+Sample Code
+
+There is a "Samples" folder which contains sample programs and source files.
+
+All of the client samples are now Metrowerks projects (built with CW 11).
+ 

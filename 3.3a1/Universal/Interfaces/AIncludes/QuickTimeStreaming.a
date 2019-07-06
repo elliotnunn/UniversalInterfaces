@@ -1,0 +1,1089 @@
+;
+;	File:		QuickTimeStreaming.a
+;
+;	Contains:	QuickTime interfaces
+;
+;	Version:	Technology:	
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1990-1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__QUICKTIMESTREAMING__') = 'UNDEFINED' THEN
+__QUICKTIMESTREAMING__ SET 1
+
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__COMPONENTS__') = 'UNDEFINED' THEN
+	include 'Components.a'
+	ENDIF
+	IF &TYPE('__MOVIES__') = 'UNDEFINED' THEN
+	include 'Movies.a'
+	ENDIF
+	IF &TYPE('__QUICKTIMECOMPONENTS__') = 'UNDEFINED' THEN
+	include 'QuickTimeComponents.a'
+	ENDIF
+
+
+gestaltQuickTimeStreamingVersion EQU	'qtst'
+
+gestaltQuickTimeStreamingFeatures EQU	'qtsf'
+
+kQTSInfiniteDuration			EQU		$7FFFFFFF
+kQTSUnknownDuration				EQU		$00000000
+kQTSNormalForwardRate			EQU		$00010000
+kQTSStoppedRate					EQU		$00000000
+QTSPresentationRecord	RECORD 0
+data					 ds.l	1				; offset: $0 (0) <-- really an array of length one
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; typedef struct QTSPresentationRecord * QTSPresentation
+
+QTSStreamRecord			RECORD 0
+data					 ds.l	1				; offset: $0 (0) <-- really an array of length one
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; typedef struct QTSStreamRecord *		QTSStream
+
+QTSEditEntry			RECORD 0
+presentationDuration	 ds		TimeValue64		; offset: $0 (0)
+streamStartTime			 ds		TimeValue64		; offset: $8 (8)
+streamRate				 ds.l	1				; offset: $10 (16)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+QTSEditList				RECORD 0
+numEdits				 ds.l	1				; offset: $0 (0)
+edits					 ds		QTSEditEntry	; offset: $4 (4) <-- really an array of length one
+sizeof					 EQU *					; size:   $18 (24)
+						ENDR
+; typedef struct QTSEditList *			QTSEditListPtr
+
+; typedef QTSEditListPtr *				QTSEditListHandle
+
+; -----------------------------------------
+;	Errors
+;-----------------------------------------
+
+
+qtsBadSelectorErr				EQU		-5400
+qtsBadStateErr					EQU		-5401
+qtsBadDataErr					EQU		-5402				; something is wrong with the data 
+qtsUnsupportedDataTypeErr		EQU		-5403
+qtsUnsupportedRateErr			EQU		-5404
+qtsUnsupportedFeatureErr		EQU		-5405
+qtsTooMuchDataErr				EQU		-5406
+qtsUnknownValueErr				EQU		-5407
+qtsTimeoutErr					EQU		-5408
+qtsConnectionFailedErr			EQU		-5420
+qtsAddressBusyErr				EQU		-5421
+; -----------------------------------------
+;	Get / Set Info
+;-----------------------------------------
+
+
+kQTSGetURLLink					EQU		'gull'				; QTSGetURLLinkRecord* 
+;  get and set 
+
+kQTSTargetBufferDurationInfo	EQU		'bufr'				; Fixed* in seconds; expected, not actual 
+kQTSDurationInfo				EQU		'dura'				; QTSDurationAtom* 
+kQTSSourceTrackIDInfo			EQU		'otid'				; UInt32* 
+kQTSSourceLayerInfo				EQU		'olyr'				; UInt16* 
+kQTSSourceLanguageInfo			EQU		'olng'				; UInt16* 
+kQTSSourceTrackFlagsInfo		EQU		'otfl'				; SInt32* 
+kQTSSourceDimensionsInfo		EQU		'odim'				; QTSDimensionParams* 
+kQTSSourceVolumesInfo			EQU		'ovol'				; QTSVolumesParams* 
+kQTSSourceMatrixInfo			EQU		'omat'				; MatrixRecord* 
+kQTSSourceClipRectInfo			EQU		'oclp'				; Rect* 
+kQTSSourceGraphicsModeInfo		EQU		'ogrm'				; QTSGraphicsModeParams* 
+kQTSSourceScaleInfo				EQU		'oscl'				; Point* 
+kQTSSourceBoundingRectInfo		EQU		'orct'				; Rect* 
+kQTSSourceUserDataInfo			EQU		'oudt'				; UserData 
+kQTSSourceInputMapInfo			EQU		'oimp'				; QTAtomContainer 
+;  get only 
+
+kQTSStatisticsInfo				EQU		'stat'				; QTSStatisticsParams* 
+kQTSMinStatusDimensionsInfo		EQU		'mstd'				; QTSDimensionParams* 
+kQTSNormalStatusDimensionsInfo	EQU		'nstd'				; QTSDimensionParams* 
+kQTSTotalDataRateInfo			EQU		'drtt'				; UInt32*, add to what's there 
+kQTSTotalDataRateInInfo			EQU		'drti'				; UInt32*, add to what's there 
+kQTSTotalDataRateOutInfo		EQU		'drto'				; UInt32*, add to what's there 
+kQTSDataRateHistoryInfo			EQU		'drth'				; QTSDataRateHistoryParams* 
+kQTSLostPercentInfo				EQU		'lpct'				; QTSLostPercentParams*, add to what's there 
+kQTSMediaTypeInfo				EQU		'mtyp'				; OSType* 
+kQTSNameInfo					EQU		'name'				; QTSNameParams* 
+kQTSSampleDescriptionInfo		EQU		'sdsc'				; SampleDescriptionHandle 
+kQTSCanHandleSendDataType		EQU		'chsd'				; QTSCanHandleSendDataTypeParams* 
+kQTSAnnotationsInfo				EQU		'meta'				; QTAtomContainer 
+
+kQTSTargetBufferDurationTimeScale EQU	1000
+
+QTSDataRateHistoryParams RECORD 0
+changeSeed				 ds.l	1				; offset: $0 (0)
+millisecondsBetweenElements  ds.l 1				; offset: $4 (4)
+numberOfIntervals		 ds.l	1				; offset: $8 (8)
+elements				 ds.l	1				; offset: $C (12)		;  in bits/sec; callee allocates; caller must dispose 
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+QTSCanHandleSendDataTypeParams RECORD 0
+modifierTypeOrInputID	 ds.l	1				; offset: $0 (0)
+isModifierType			 ds.b	1				; offset: $4 (4)
+returnedCanHandleSendDataType  ds.b 1			; offset: $5 (5)		;  callee sets to true if it can handle it
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+QTSNameParams			RECORD 0
+maxNameLength			 ds.l	1				; offset: $0 (0)
+requestedLanguage		 ds.l	1				; offset: $4 (4)
+returnedActualLanguage	 ds.l	1				; offset: $8 (8)
+returnedName			 ds.l	1				; offset: $C (12)		;  pascal string; caller supplies
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+QTSLostPercentParams	RECORD 0
+receivedPkts			 ds.l	1				; offset: $0 (0)
+lostPkts				 ds.l	1				; offset: $4 (4)
+percent					 ds.l	1				; offset: $8 (8)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+QTSDimensionParams		RECORD 0
+width					 ds.l	1				; offset: $0 (0)
+height					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+QTSVolumesParams		RECORD 0
+leftVolume				 ds.w	1				; offset: $0 (0)
+rightVolume				 ds.w	1				; offset: $2 (2)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+QTSGraphicsModeParams	RECORD 0
+graphicsMode			 ds.w	1				; offset: $0 (0)
+opColor					 ds		RGBColor		; offset: $2 (2)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+QTSGetURLLinkRecord		RECORD 0
+displayWhere			 ds		Point			; offset: $0 (0)
+returnedURLLink			 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; -----------------------------------------
+;	Characteristics
+;-----------------------------------------
+
+;  characteristics in Movies.h work here too 
+
+kQTSSupportsPerStreamControlCharacteristic EQU 'psct'
+QTSVideoParams			RECORD 0
+width					 ds.l	1				; offset: $0 (0)
+height					 ds.l	1				; offset: $4 (4)
+matrix					 ds		MatrixRecord	; offset: $8 (8)
+gWorld					 ds.l	1				; offset: $2C (44)
+gdHandle				 ds.l	1				; offset: $30 (48)
+clip					 ds.l	1				; offset: $34 (52)
+graphicsMode			 ds.w	1				; offset: $38 (56)
+opColor					 ds		RGBColor		; offset: $3A (58)
+sizeof					 EQU *					; size:   $40 (64)
+						ENDR
+QTSAudioParams			RECORD 0
+leftVolume				 ds.w	1				; offset: $0 (0)
+rightVolume				 ds.w	1				; offset: $2 (2)
+bassLevel				 ds.w	1				; offset: $4 (4)
+trebleLevel				 ds.w	1				; offset: $6 (6)
+frequencyBandsCount		 ds.w	1				; offset: $8 (8)
+frequencyBands			 ds.l	1				; offset: $A (10)
+levelMeteringEnabled	 ds.b	1				; offset: $E (14)
+						 ORG 16
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+QTSMediaParams			RECORD 0
+v						 ds		QTSVideoParams ; offset: $0 (0)
+a						 ds		QTSAudioParams ; offset: $40 (64)
+sizeof					 EQU *					; size:   $50 (80)
+						ENDR
+
+kQTSMustDraw					EQU		$08
+kQTSAtEnd						EQU		$10
+kQTSPreflightDraw				EQU		$20
+kQTSSyncDrawing					EQU		$40
+;  media task result flags 
+
+kQTSDidDraw						EQU		$01
+kQTSNeedsToDraw					EQU		$04
+kQTSDrawAgain					EQU		$08
+kQTSPartialDraw					EQU		$10
+; ============================================================================
+;		Notifications
+;============================================================================
+
+;  ------ notification types ------ 
+
+kQTSNullNotification			EQU		'null'				; NULL 
+kQTSErrorNotification			EQU		'err '				; QTSErrorParams*, optional 
+kQTSNewPresDetectedNotification	EQU		'newp'				; QTSNewPresDetectedParams* 
+kQTSPresBeginChangingNotification EQU	'prcb'				; NULL 
+kQTSPresDoneChangingNotification EQU	'prcd'				; NULL 
+kQTSPresentationChangedNotification EQU	'prch'				; NULL 
+kQTSNewStreamNotification		EQU		'stnw'				; QTSNewStreamParams* 
+kQTSStreamBeginChangingNotification EQU	'stcb'				; QTSStream 
+kQTSStreamDoneChangingNotification EQU	'stcd'				; QTSStream 
+kQTSStreamChangedNotification	EQU		'stch'				; QTSStreamChangedParams* 
+kQTSStreamGoneNotification		EQU		'stgn'				; QTSStreamGoneParams* 
+kQTSPreviewAckNotification		EQU		'pvak'				; QTSStream 
+kQTSPrerollAckNotification		EQU		'pack'				; QTSStream 
+kQTSStartAckNotification		EQU		'sack'				; QTSStream 
+kQTSStopAckNotification			EQU		'xack'				; QTSStream 
+kQTSStatusNotification			EQU		'stat'				; QTSStatusParams* 
+kQTSURLNotification				EQU		'url '				; QTSURLParams* 
+kQTSDurationNotification		EQU		'dura'				; QTSDurationAtom* 
+kQTSNewPresentationNotification	EQU		'nprs'				; QTSPresentation 
+kQTSPresentationGoneNotification EQU	'xprs'				; QTSPresentation 
+kQTSServerNameNotification		EQU		'snam'				; const char * 
+kQTSPresentationDoneNotification EQU	'pdon'				; NULL 
+kQTSBandwidthAlertNotification	EQU		'bwal'				; QTSBandwidthAlertParams* 
+kQTSAnnotationsChangedNotification EQU	'meta'				; NULL 
+
+;  flags for QTSErrorParams 
+
+kQTSFatalErrorFlag				EQU		$00000001
+QTSErrorParams			RECORD 0
+errorString				 ds.l	1				; offset: $0 (0)
+flags					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+QTSNewPresDetectedParams RECORD 0
+data					 ds.l	1				; offset: $0 (0)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+QTSNewStreamParams		RECORD 0
+stream					 ds.l	1				; offset: $0 (0)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+QTSStreamChangedParams	RECORD 0
+stream					 ds.l	1				; offset: $0 (0)
+mediaComponent			 ds.l	1				; offset: $4 (4)		;  could be NULL 
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+QTSStreamGoneParams		RECORD 0
+stream					 ds.l	1				; offset: $0 (0)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+QTSStatusParams			RECORD 0
+status					 ds.l	1				; offset: $0 (0)
+statusString			 ds.l	1				; offset: $4 (4)
+detailedStatus			 ds.l	1				; offset: $8 (8)
+detailedStatusString	 ds.l	1				; offset: $C (12)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+QTSInfoParams			RECORD 0
+infoType				 ds.l	1				; offset: $0 (0)
+infoParams				 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+QTSURLParams			RECORD 0
+urlLength				 ds.l	1				; offset: $0 (0)
+url						 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+kQTSBandwidthAlertNeedToStop	EQU		$01
+QTSBandwidthAlertParams	RECORD 0
+flags					 ds.l	1				; offset: $0 (0)
+reserved				 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; ============================================================================
+;		Presentation
+;============================================================================
+
+; -----------------------------------------
+;	 Flags
+;-----------------------------------------
+
+;  flags for NewPresentationFromData 
+
+kQTSAutoModeFlag				EQU		$00000001
+kQTSDontShowStatusFlag			EQU		$00000008
+kQTSSendMediaFlag				EQU		$00010000
+kQTSReceiveMediaFlag			EQU		$00020000
+QTSNewPresentationParams RECORD 0
+dataType				 ds.l	1				; offset: $0 (0)
+data					 ds.l	1				; offset: $4 (4)
+dataLength				 ds.l	1				; offset: $8 (8)
+editList				 ds.l	1				; offset: $C (12)
+flags					 ds.l	1				; offset: $10 (16)
+timeScale				 ds.l	1				; offset: $14 (20)		;  set to 0 for default timescale 
+mediaParams				 ds.l	1				; offset: $18 (24)
+notificationProc		 ds.l	1				; offset: $1C (28)
+notificationRefCon		 ds.l	1				; offset: $20 (32)
+sizeof					 EQU *					; size:   $24 (36)
+						ENDR
+QTSPresIdleParams		RECORD 0
+stream					 ds.l	1				; offset: $0 (0)
+movieTimeToDisplay		 ds		SInt64			; offset: $4 (4)
+flagsIn					 ds.l	1				; offset: $C (12)
+flagsOut				 ds.l	1				; offset: $10 (16)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+; -----------------------------------------
+;	Toolbox Init/Close
+;-----------------------------------------
+
+;  all "apps" must call this 
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern OSErr InitializeQTS(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitializeQTS
+	ENDIF
+
+;
+; extern OSErr TerminateQTS(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TerminateQTS
+	ENDIF
+
+; -----------------------------------------
+;	Presentation Functions
+;-----------------------------------------
+
+;
+; extern OSErr QTSNewPresentation(const QTSNewPresentationParams *inParams, QTSPresentation *outPresentation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSNewPresentation
+	ENDIF
+
+;
+; extern OSErr QTSDisposePresentation(QTSPresentation inPresentation, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSDisposePresentation
+	ENDIF
+
+;
+; extern void QTSPresIdle(QTSPresentation inPresentation, QTSPresIdleParams *ioParams)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresIdle
+	ENDIF
+
+;
+; extern OSErr QTSPresInvalidateRegion(QTSPresentation inPresentation, RgnHandle inRegion)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresInvalidateRegion
+	ENDIF
+
+; -----------------------------------------
+;	Presentation Configuration
+;-----------------------------------------
+
+;
+; extern OSErr QTSPresSetFlags(QTSPresentation inPresentation, SInt32 inFlags, SInt32 inFlagsMask)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetFlags
+	ENDIF
+
+;
+; extern OSErr QTSPresGetFlags(QTSPresentation inPresentation, SInt32 *outFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetFlags
+	ENDIF
+
+;
+; extern OSErr QTSPresGetTimeBase(QTSPresentation inPresentation, TimeBase *outTimeBase)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetTimeBase
+	ENDIF
+
+;
+; extern OSErr QTSPresGetTimeScale(QTSPresentation inPresentation, TimeScale *outTimeScale)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetTimeScale
+	ENDIF
+
+;
+; extern OSErr QTSPresSetInfo(QTSPresentation inPresentation, QTSStream inStream, OSType inSelector, void *ioParam)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetInfo
+	ENDIF
+
+;
+; extern OSErr QTSPresGetInfo(QTSPresentation inPresentation, QTSStream inStream, OSType inSelector, void *ioParam)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetInfo
+	ENDIF
+
+;
+; extern OSErr QTSPresHasCharacteristic(QTSPresentation inPresentation, QTSStream inStream, OSType inCharacteristic, Boolean *outHasIt)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresHasCharacteristic
+	ENDIF
+
+;
+; extern OSErr QTSPresSetNotificationProc(QTSPresentation inPresentation, QTSNotificationUPP inNotificationProc, void *inRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetNotificationProc
+	ENDIF
+
+;
+; extern OSErr QTSPresGetNotificationProc(QTSPresentation inPresentation, QTSNotificationUPP *outNotificationProc, void **outRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetNotificationProc
+	ENDIF
+
+; -----------------------------------------
+;	Presentation Control
+;-----------------------------------------
+
+;
+; extern OSErr QTSPresPreroll(QTSPresentation inPresentation, QTSStream inStream, UInt32 inTimeValue, Fixed inRate, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresPreroll
+	ENDIF
+
+;
+; extern OSErr QTSPresStart(QTSPresentation inPresentation, QTSStream inStream, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresStart
+	ENDIF
+
+;
+; extern OSErr QTSPresSkipTo(QTSPresentation inPresentation, UInt32 inTimeValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSkipTo
+	ENDIF
+
+;
+; extern OSErr QTSPresStop(QTSPresentation inPresentation, QTSStream inStream, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresStop
+	ENDIF
+
+; ============================================================================
+;		Streams
+;============================================================================
+
+; -----------------------------------------
+;	Stream Functions
+;-----------------------------------------
+
+;
+; extern OSErr QTSPresNewStream(QTSPresentation inPresentation, OSType inDataType, const void *inData, UInt32 inDataLength, SInt32 inFlags, QTSStream *outStream)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresNewStream
+	ENDIF
+
+;
+; extern OSErr QTSDisposeStream(QTSStream inStream, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSDisposeStream
+	ENDIF
+
+;
+; extern UInt32 QTSPresGetNumStreams(QTSPresentation inPresentation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetNumStreams
+	ENDIF
+
+;
+; extern QTSStream QTSPresGetIndStream(QTSPresentation inPresentation, UInt32 inIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetIndStream
+	ENDIF
+
+;
+; extern QTSPresentation QTSGetStreamPresentation(QTSStream inStream)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSGetStreamPresentation
+	ENDIF
+
+;
+; extern OSErr QTSPresSetPreferredRate(QTSPresentation inPresentation, Fixed inRate, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetPreferredRate
+	ENDIF
+
+;
+; extern OSErr QTSPresGetPreferredRate(QTSPresentation inPresentation, Fixed *outRate)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetPreferredRate
+	ENDIF
+
+;
+; extern OSErr QTSPresSetEnable(QTSPresentation inPresentation, QTSStream inStream, Boolean inEnableMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetEnable
+	ENDIF
+
+;
+; extern OSErr QTSPresGetEnable(QTSPresentation inPresentation, QTSStream inStream, Boolean *outEnableMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetEnable
+	ENDIF
+
+;
+; extern OSErr QTSPresSetPresenting(QTSPresentation inPresentation, QTSStream inStream, Boolean inPresentingMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetPresenting
+	ENDIF
+
+;
+; extern OSErr QTSPresGetPresenting(QTSPresentation inPresentation, QTSStream inStream, Boolean *outPresentingMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetPresenting
+	ENDIF
+
+;
+; extern OSErr QTSPresSetPlayHints(QTSPresentation inPresentation, QTSStream inStream, SInt32 inFlags, SInt32 inFlagsMask)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetPlayHints
+	ENDIF
+
+;
+; extern OSErr QTSPresGetPlayHints(QTSPresentation inPresentation, QTSStream inStream, SInt32 *outFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetPlayHints
+	ENDIF
+
+; -----------------------------------------
+;	Stream Spatial Functions
+;-----------------------------------------
+
+;
+; extern OSErr QTSPresSetGWorld(QTSPresentation inPresentation, QTSStream inStream, CGrafPtr inGWorld, GDHandle inGDHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetGWorld
+	ENDIF
+
+;
+; extern OSErr QTSPresGetGWorld(QTSPresentation inPresentation, QTSStream inStream, CGrafPtr *outGWorld, GDHandle *outGDHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetGWorld
+	ENDIF
+
+;
+; extern OSErr QTSPresSetClip(QTSPresentation inPresentation, QTSStream inStream, RgnHandle inClip)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetClip
+	ENDIF
+
+;
+; extern OSErr QTSPresGetClip(QTSPresentation inPresentation, QTSStream inStream, RgnHandle *outClip)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetClip
+	ENDIF
+
+;
+; extern OSErr QTSPresSetMatrix(QTSPresentation inPresentation, QTSStream inStream, const MatrixRecord *inMatrix)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetMatrix
+	ENDIF
+
+;
+; extern OSErr QTSPresGetMatrix(QTSPresentation inPresentation, QTSStream inStream, MatrixRecord *outMatrix)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetMatrix
+	ENDIF
+
+;
+; extern OSErr QTSPresSetDimensions(QTSPresentation inPresentation, QTSStream inStream, Fixed inWidth, Fixed inHeight)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetDimensions
+	ENDIF
+
+;
+; extern OSErr QTSPresGetDimensions(QTSPresentation inPresentation, QTSStream inStream, Fixed *outWidth, Fixed *outHeight)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetDimensions
+	ENDIF
+
+;
+; extern OSErr QTSPresSetGraphicsMode(QTSPresentation inPresentation, QTSStream inStream, short inMode, const RGBColor *inOpColor)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetGraphicsMode
+	ENDIF
+
+;
+; extern OSErr QTSPresGetGraphicsMode(QTSPresentation inPresentation, QTSStream inStream, short *outMode, RGBColor *outOpColor)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetGraphicsMode
+	ENDIF
+
+;
+; extern OSErr QTSPresGetPicture(QTSPresentation inPresentation, QTSStream inStream, PicHandle *outPicture)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetPicture
+	ENDIF
+
+; -----------------------------------------
+;	Stream Sound Functions
+;-----------------------------------------
+
+;
+; extern OSErr QTSPresSetVolumes(QTSPresentation inPresentation, QTSStream inStream, short inLeftVolume, short inRightVolume)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresSetVolumes
+	ENDIF
+
+;
+; extern OSErr QTSPresGetVolumes(QTSPresentation inPresentation, QTSStream inStream, short *outLeftVolume, short *outRightVolume)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSPresGetVolumes
+	ENDIF
+
+
+; ============================================================================
+;		Misc
+;============================================================================
+
+; -----------------------------------------
+;	Statistics Utilities
+;-----------------------------------------
+
+	ENDIF	; CALL_NOT_IN_CARBON
+QTSStatHelperRecord		RECORD 0
+data					 ds.l	1				; offset: $0 (0) <-- really an array of length one
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; typedef struct QTSStatHelperRecord *	QTSStatHelper
+
+
+kQTSInvalidStatHelper			EQU		0
+;  flags for QTSStatHelperNextParams 
+
+kQTSStatHelperReturnPascalStringsFlag EQU $00000001
+QTSStatHelperNextParams	RECORD 0
+flags					 ds.l	1				; offset: $0 (0)
+returnedStatisticsType	 ds.l	1				; offset: $4 (4)
+returnedStream			 ds.l	1				; offset: $8 (8)
+maxStatNameLength		 ds.l	1				; offset: $C (12)
+returnedStatName		 ds.l	1				; offset: $10 (16)		;  NULL if you don't want it
+maxStatStringLength		 ds.l	1				; offset: $14 (20)
+returnedStatString		 ds.l	1				; offset: $18 (24)		;  NULL if you don't want it
+maxStatUnitLength		 ds.l	1				; offset: $1C (28)
+returnedStatUnit		 ds.l	1				; offset: $20 (32)		;  NULL if you don't want it
+sizeof					 EQU *					; size:   $24 (36)
+						ENDR
+QTSStatisticsParams		RECORD 0
+statisticsType			 ds.l	1				; offset: $0 (0)
+container				 ds.l	1				; offset: $4 (4)
+parentAtom				 ds.l	1				; offset: $8 (8)
+flags					 ds.l	1				; offset: $C (12)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+;  general statistics types 
+
+kQTSAllStatisticsType			EQU		'all '
+kQTSShortStatisticsType			EQU		'shrt'
+kQTSSummaryStatisticsType		EQU		'summ'
+;  statistics flags 
+
+kQTSGetNameStatisticsFlag		EQU		$00000001
+kQTSDontGetDataStatisticsFlag	EQU		$00000002
+kQTSUpdateAtomsStatisticsFlag	EQU		$00000004
+kQTSGetUnitsStatisticsFlag		EQU		$00000008
+;  statistics atom types 
+
+kQTSStatisticsStreamAtomType	EQU		'strm'
+kQTSStatisticsNameAtomType		EQU		'name'				; chars only, no length or terminator 
+kQTSStatisticsDataFormatAtomType EQU	'frmt'				; OSType 
+kQTSStatisticsDataAtomType		EQU		'data'
+kQTSStatisticsUnitsAtomType		EQU		'unit'				; OSType 
+kQTSStatisticsUnitsNameAtomType	EQU		'unin'				; chars only, no length or terminator 
+;  statistics data formats 
+
+kQTSStatisticsSInt32DataFormat	EQU		'si32'
+kQTSStatisticsUInt32DataFormat	EQU		'ui32'
+kQTSStatisticsSInt16DataFormat	EQU		'si16'
+kQTSStatisticsUInt16DataFormat	EQU		'ui16'
+kQTSStatisticsFixedDataFormat	EQU		'fixd'
+kQTSStatisticsStringDataFormat	EQU		'strg'
+kQTSStatisticsOSTypeDataFormat	EQU		'ostp'
+;  statistics units types 
+
+kQTSStatisticsNoUnitsType		EQU		0
+kQTSStatisticsPercentUnitsType	EQU		'pcnt'
+kQTSStatisticsBitsPerSecUnitsType EQU	'bps '
+kQTSStatisticsFramesPerSecUnitsType EQU	'fps '
+;  specific statistics types 
+
+kQTSTotalDataRateStat			EQU		'drtt'
+kQTSTotalDataRateInStat			EQU		'drti'
+kQTSTotalDataRateOutStat		EQU		'drto'
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern OSErr QTSNewStatHelper(QTSPresentation inPresentation, QTSStream inStream, OSType inStatType, SInt32 inFlags, QTSStatHelper *outStatHelper)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSNewStatHelper
+	ENDIF
+
+;
+; extern OSErr QTSDisposeStatHelper(QTSStatHelper inStatHelper)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSDisposeStatHelper
+	ENDIF
+
+;
+; extern OSErr QTSStatHelperGetStats(QTSStatHelper inStatHelper)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSStatHelperGetStats
+	ENDIF
+
+;
+; extern OSErr QTSStatHelperResetIter(QTSStatHelper inStatHelper)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSStatHelperResetIter
+	ENDIF
+
+;
+; extern Boolean QTSStatHelperNext(QTSStatHelper inStatHelper, QTSStatHelperNextParams *ioParams)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSStatHelperNext
+	ENDIF
+
+;
+; extern UInt32 QTSStatHelperGetNumStats(QTSStatHelper inStatHelper)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSStatHelperGetNumStats
+	ENDIF
+
+;  used by components to put statistics into the atom container 
+;
+; extern OSErr QTSGetOrMakeStatAtomForStream(QTAtomContainer inContainer, QTSStream inStream, QTAtom *outParentAtom)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSGetOrMakeStatAtomForStream
+	ENDIF
+
+;
+; extern OSErr QTSInsertStatistic(QTAtomContainer inContainer, QTAtom inParentAtom, OSType inStatType, void *inStatData, UInt32 inStatDataLength, OSType inStatDataFormat, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSInsertStatistic
+	ENDIF
+
+;
+; extern OSErr QTSInsertStatisticName(QTAtomContainer inContainer, QTAtom inParentAtom, OSType inStatType, const char *inStatName, UInt32 inStatNameLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSInsertStatisticName
+	ENDIF
+
+;
+; extern OSErr QTSInsertStatisticUnits(QTAtomContainer inContainer, QTAtom inParentAtom, OSType inStatType, OSType inUnitsType, const char *inUnitsName, UInt32 inUnitsNameLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSInsertStatisticUnits
+	ENDIF
+
+; ============================================================================
+;		Data Formats
+;============================================================================
+
+; -----------------------------------------
+;	Data Types
+;-----------------------------------------
+
+;  universal data types 
+	ENDIF	; CALL_NOT_IN_CARBON
+
+kQTSNullDataType				EQU		'NULL'
+kQTSUnknownDataType				EQU		'huh?'
+kQTSAtomContainerDataType		EQU		'qtac'				; QTAtomContainer 
+kQTSAtomDataType				EQU		'qtat'				; QTSAtomContainerDataStruct* 
+kQTSAliasDataType				EQU		'alis'
+kQTSFileDataType				EQU		'fspc'
+;  these data types are specific to presentations 
+
+kQTSRTSPDataType				EQU		'rtsp'
+kQTSSDPDataType					EQU		'sdp '
+; -----------------------------------------
+;	Atom IDs
+;-----------------------------------------
+
+
+kQTSPresentationAID				EQU		'pres'
+kQTSPresentationHeaderAID		EQU		'phdr'				; QTSPresentationHeaderAtom 
+kQTSMediaStreamAID				EQU		'mstr'
+kQTSMediaStreamHeaderAID		EQU		'mshd'				; QTSMediaStreamHeaderAtom 
+kQTSMediaDescriptionTextAID		EQU		'mdes'				; text, no length 
+kQTSClipRectAID					EQU		'clip'				; QTSClipRectAtom 
+kQTSDurationAID					EQU		'dura'				; QTSDurationAtom 
+kQTSBufferTimeAID				EQU		'bufr'				; QTSBufferTimeAtom 
+QTSAtomContainerDataStruct RECORD 0
+container				 ds.l	1				; offset: $0 (0)
+parentAtom				 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+;  flags for QTSPresentationHeaderAtom 
+
+kQTSPresHeaderTypeIsData		EQU		$00000100
+kQTSPresHeaderDataIsHandle		EQU		$00000200
+QTSPresentationHeaderAtom RECORD 0
+versionAndFlags			 ds.l	1				; offset: $0 (0)
+conductorOrDataType		 ds.l	1				; offset: $4 (4)
+dataAtomType			 ds.l	1				; offset: $8 (8)		;  where the data really is
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+QTSMediaStreamHeaderAtom RECORD 0
+versionAndFlags			 ds.l	1				; offset: $0 (0)
+mediaTransportType		 ds.l	1				; offset: $4 (4)
+mediaTransportDataAID	 ds.l	1				; offset: $8 (8)		;  where the data really is
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+QTSBufferTimeAtom		RECORD 0
+versionAndFlags			 ds.l	1				; offset: $0 (0)
+bufferTime				 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+QTSDurationAtom			RECORD 0
+versionAndFlags			 ds.l	1				; offset: $0 (0)
+timeScale				 ds.l	1				; offset: $4 (4)
+duration				 ds		TimeValue64		; offset: $8 (8)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+QTSClipRectAtom			RECORD 0
+versionAndFlags			 ds.l	1				; offset: $0 (0)
+clipRect				 ds		Rect			; offset: $4 (4)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+
+kQTSEmptyEditStreamStartTime	EQU		-1
+
+; typedef UInt32 						QTSStatus
+
+
+kQTSNullStatus					EQU		0
+kQTSUninitializedStatus			EQU		1
+kQTSConnectingStatus			EQU		2
+kQTSOpeningConnectionDetailedStatus EQU	3
+kQTSMadeConnectionDetailedStatus EQU	4
+kQTSNegotiatingStatus			EQU		5
+kQTSGettingDescriptionDetailedStatus EQU 6
+kQTSGotDescriptionDetailedStatus EQU	7
+kQTSSentSetupCmdDetailedStatus	EQU		8
+kQTSReceivedSetupResponseDetailedStatus EQU 9
+kQTSSentPlayCmdDetailedStatus	EQU		10
+kQTSReceivedPlayResponseDetailedStatus EQU 11
+kQTSBufferingStatus				EQU		12
+kQTSPlayingStatus				EQU		13
+kQTSPausedStatus				EQU		14
+kQTSWaitingDisconnectStatus		EQU		100
+; -----------------------------------------
+;	QuickTime Preferences Types
+;-----------------------------------------
+
+
+kQTSConnectionPrefsType			EQU		'stcm'				; root atom that all other atoms are contained in
+kQTSNotUsedForProxyPrefsType	EQU		'nopr'				; 		comma-delimited list of URLs that are never used for proxies
+kQTSConnectionMethodPrefsType	EQU		'mthd'				; 		connection method (OSType that matches one of the following three)
+kQTSDirectConnectPrefsType		EQU		'drct'				;		used if direct connect (QTSDirectConnectPrefsRecord)
+kQTSRTSPProxyPrefsType			EQU		'rtsp'				;		used if RTSP Proxy (QTSProxyPrefsRecord)
+kQTSSOCKSPrefsType				EQU		'sock'				;		used if SOCKS Proxy (QTSProxyPrefsRecord)
+QTSDirectConnectPrefsRecord RECORD 0
+tcpPortID				 ds.l	1				; offset: $0 (0)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+QTSProxyPrefsRecord		RECORD 0
+serverNameStr			 ds		Str255			; offset: $0 (0)
+portID					 ds.l	1				; offset: $100 (256)
+sizeof					 EQU *					; size:   $104 (260)
+						ENDR
+
+
+; ============================================================================
+;		Memory Management Services
+;============================================================================
+
+
+;   These routines allocate normal pointers and handles,
+;   but do the correct checking, etc.
+;   Dispose using the normal DisposePtr and DisposeHandle
+;   Call these routines for one time memory allocations.
+;   You do not need to set any hints to use these calls.
+
+
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern Ptr QTSNewPtr(UInt32 inByteCount, SInt32 inFlags, SInt32 *outFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSNewPtr
+	ENDIF
+
+;
+; extern Handle QTSNewHandle(UInt32 inByteCount, SInt32 inFlags, SInt32 *outFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSNewHandle
+	ENDIF
+
+;  flags in
+	ENDIF	; CALL_NOT_IN_CARBON
+
+kQTSMemAllocClearMem			EQU		$00000001
+kQTSMemAllocDontUseTempMem		EQU		$00000002
+kQTSMemAllocTryTempMemFirst		EQU		$00000004
+kQTSMemAllocDontUseSystemMem	EQU		$00000008
+kQTSMemAllocTrySystemMemFirst	EQU		$00000010
+kQTSMemAllocHoldMemory			EQU		$00001000
+kQTSMemAllocIsInterruptTime		EQU		$01010000			; currently not supported for alloc
+;  flags out
+
+kQTSMemAllocAllocatedInTempMem	EQU		$00000001
+kQTSMemAllocAllocatedInSystemMem EQU	$00000002
+
+
+
+;   These routines are for buffers that will be recirculated
+;   you must use QTReleaseMemPtr instead of DisposePtr
+;   QTSReleaseMemPtr can be used at interrupt time
+;   but QTSAllocMemPtr currently cannot 
+
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern QTSMemPtr QTSAllocMemPtr(UInt32 inByteCount, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSAllocMemPtr
+	ENDIF
+
+;
+; extern void QTSReleaseMemPtr(QTSMemPtr inMemPtr, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSReleaseMemPtr
+	ENDIF
+
+
+; ============================================================================
+;		Buffer Management Services
+;============================================================================
+
+	ENDIF	; CALL_NOT_IN_CARBON
+QTSStreamBuffer			RECORD 0
+reserved1				 ds.l	1				; offset: $0 (0)
+reserved2				 ds.l	1				; offset: $4 (4)
+next					 ds.l	1				; offset: $8 (8)		;  next message block in a message 
+rptr					 ds.l	1				; offset: $C (12)		;  first byte with real data in the DataBuffer 
+wptr					 ds.l	1				; offset: $10 (16)		;  last+1 byte with real data in the DataBuffer 
+reserved3				 ds.l	1				; offset: $14 (20)
+metadata				 ds.l	4				; offset: $18 (24)		;  usage defined by message sender 
+flags					 ds.l	1				; offset: $28 (40)		;  reserved 
+sizeof					 EQU *					; size:   $2C (44)
+						ENDR
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern QTSStreamBuffer *QTSAllocBuffer(SInt32 size)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSAllocBuffer
+	ENDIF
+
+;
+; extern void QTSFreeMessage(QTSStreamBuffer *inStreamBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSFreeMessage
+	ENDIF
+
+;
+; extern QTSStreamBuffer *QTSDupMessage(QTSStreamBuffer *inStreamBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSDupMessage
+	ENDIF
+
+;
+; extern QTSStreamBuffer *QTSCopyMessage(QTSStreamBuffer *inStreamBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSCopyMessage
+	ENDIF
+
+;
+; extern QTSStreamBuffer *QTSFlattenMessage(QTSStreamBuffer *inStreamBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSFlattenMessage
+	ENDIF
+
+;
+; extern SInt32 QTSMessageLength(QTSStreamBuffer *inStreamBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSMessageLength
+	ENDIF
+
+
+; ============================================================================
+;		Misc
+;============================================================================
+
+;
+; extern Boolean QTSGetErrorString(SInt32 inErrorCode, UInt32 inMaxErrorStringLength, char *outErrorString, SInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSGetErrorString
+	ENDIF
+
+
+;  UPP call backs 
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF ; __QUICKTIMESTREAMING__ 
+

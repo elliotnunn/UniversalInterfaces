@@ -1,0 +1,942 @@
+;
+;	File:		Dialogs.a
+;
+;	Contains:	Dialog Manager interfaces.
+;
+;	Version:	Technology:	Mac OS 8.1
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1985-1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__DIALOGS__') = 'UNDEFINED' THEN
+__DIALOGS__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__MIXEDMODE__') = 'UNDEFINED' THEN
+	include 'MixedMode.a'
+	ENDIF
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+	include 'Events.a'
+	ENDIF
+	IF &TYPE('__MACWINDOWS__') = 'UNDEFINED' THEN
+	include 'MacWindows.a'
+	ENDIF
+	IF &TYPE('__TEXTEDIT__') = 'UNDEFINED' THEN
+	include 'TextEdit.a'
+	ENDIF
+	IF &TYPE('__CONTROLS__') = 'UNDEFINED' THEN
+	include 'Controls.a'
+	ENDIF
+
+
+															; errors & gestalt
+gestaltDialogMgrAttr			EQU		'dlog'
+gestaltDialogMgrPresent			EQU		$00000001
+dialogNoTimeoutErr				EQU		-5640
+
+
+															; new, more standard names for dialog item types
+kControlDialogItem				EQU		4
+kButtonDialogItem				EQU		4
+kCheckBoxDialogItem				EQU		5
+kRadioButtonDialogItem			EQU		6
+kResourceControlDialogItem		EQU		7
+kStaticTextDialogItem			EQU		8
+kEditTextDialogItem				EQU		16
+kIconDialogItem					EQU		32
+kPictureDialogItem				EQU		64
+kUserDialogItem					EQU		0
+kItemDisableBit					EQU		128
+
+															; old names for dialog item types
+ctrlItem						EQU		4
+btnCtrl							EQU		0
+chkCtrl							EQU		1
+radCtrl							EQU		2
+resCtrl							EQU		3
+statText						EQU		8
+editText						EQU		16
+iconItem						EQU		32
+picItem							EQU		64
+userItem						EQU		0
+itemDisable						EQU		128
+
+															; standard dialog item numbers
+kStdOkItemIndex					EQU		1
+kStdCancelItemIndex				EQU		2					; old names
+ok								EQU		1
+cancel							EQU		2
+
+															; standard icon resource id's 	
+kStopIcon						EQU		0
+kNoteIcon						EQU		1
+kCautionIcon					EQU		2					; old names
+stopIcon						EQU		0
+noteIcon						EQU		1
+cautionIcon						EQU		2
+
+
+
+	IF OLDROUTINENAMES THEN
+
+;   These constants lived briefly on ETO 16.  They suggest
+;   that there is only one index you can use for the OK 
+;   item, which is not true.  You can put the ok item 
+;   anywhere you want in the DITL.
+
+
+
+kOkItemIndex					EQU		1
+kCancelItemIndex				EQU		2
+	ENDIF	; OLDROUTINENAMES
+; 	Dialog Item List Manipulation Constants	
+; typedef SInt16 						DITLMethod
+
+
+overlayDITL						EQU		0
+appendDITLRight					EQU		1
+appendDITLBottom				EQU		2
+; typedef SInt16 						StageList
+
+;  DialogRef is obsolete. Use DialogPtr instead.
+; typedef DialogPtr 					DialogRef
+
+	IF ¬ OPAQUE_TOOLBOX_STRUCTS THEN
+DialogRecord			RECORD 0
+window					 ds		WindowRecord	; offset: $0 (0)
+items					 ds.l	1				; offset: $9C (156)
+textH					 ds.l	1				; offset: $A0 (160)
+editField				 ds.w	1				; offset: $A4 (164)
+editOpen				 ds.w	1				; offset: $A6 (166)
+aDefItem				 ds.w	1				; offset: $A8 (168)
+sizeof					 EQU *					; size:   $AA (170)
+						ENDR
+; typedef struct DialogRecord *			DialogPeek
+
+	ENDIF
+DialogTemplate			RECORD 0
+boundsRect				 ds		Rect			; offset: $0 (0)
+procID					 ds.w	1				; offset: $8 (8)
+visible					 ds.b	1				; offset: $A (10)
+filler1					 ds.b	1				; offset: $B (11)
+goAwayFlag				 ds.b	1				; offset: $C (12)
+filler2					 ds.b	1				; offset: $D (13)
+refCon					 ds.l	1				; offset: $E (14)
+itemsID					 ds.w	1				; offset: $12 (18)
+title					 ds		Str255			; offset: $14 (20)
+sizeof					 EQU *					; size:   $114 (276)
+						ENDR
+; typedef struct DialogTemplate *		DialogTPtr
+
+; typedef DialogTPtr *					DialogTHndl
+
+AlertTemplate			RECORD 0
+boundsRect				 ds		Rect			; offset: $0 (0)
+itemsID					 ds.w	1				; offset: $8 (8)
+stages					 ds.w	1				; offset: $A (10)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+; typedef struct AlertTemplate *		AlertTPtr
+
+; typedef AlertTPtr *					AlertTHndl
+
+;  new type abstractions for the dialog manager 
+; typedef SInt16 						DialogItemIndexZeroBased
+
+; typedef SInt16 						DialogItemIndex
+
+; typedef SInt16 						DialogItemType
+
+;  dialog manager callbacks 
+	IF CALL_NOT_IN_CARBON THEN
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+	ENDIF	; CALL_NOT_IN_CARBON
+
+	IF ¬ TARGET_OS_MAC THEN
+;  QuickTime 3.0 
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal void SetModelessDialogCallbackProc(DialogPtr theDialog, QTModelessCallbackProcPtr callbackProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetModelessDialogCallbackProc
+	ENDIF
+
+;
+; pascal OSErr GetDialogControlNotificationProc(void *theProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogControlNotificationProc
+	ENDIF
+
+;
+; pascal void SetDialogMovableModal(DialogPtr theDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDialogMovableModal
+	ENDIF
+
+;
+; pascal void *GetDialogParent(DialogPtr theDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogParent
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF
+
+;  —————————————————————————————————————————————————————————————————————————————————————————————————————————
+;  	• Following types are valid with Appearance 1.0 and later
+;  —————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+
+
+															; Alert types to pass into StandardAlert 
+kAlertStopAlert					EQU		0
+kAlertNoteAlert					EQU		1
+kAlertCautionAlert				EQU		2
+kAlertPlainAlert				EQU		3
+; typedef SInt16 						AlertType
+
+
+kAlertDefaultOKText				EQU		-1					; "OK"
+kAlertDefaultCancelText			EQU		-1					; "Cancel"
+kAlertDefaultOtherText			EQU		-1					; "Don't Save"
+;  StandardAlert alert button numbers 
+
+kAlertStdAlertOKButton			EQU		1
+kAlertStdAlertCancelButton		EQU		2
+kAlertStdAlertOtherButton		EQU		3
+kAlertStdAlertHelpButton		EQU		4
+
+															; Dialog Flags for use in NewFeaturesDialog or dlgx resource 
+kDialogFlagsUseThemeBackground	EQU		$01
+kDialogFlagsUseControlHierarchy	EQU		$02
+kDialogFlagsHandleMovableModal	EQU		$04
+kDialogFlagsUseThemeControls	EQU		$08
+
+															; Alert Flags for use in alrx resource 
+kAlertFlagsUseThemeBackground	EQU		$01
+kAlertFlagsUseControlHierarchy	EQU		$02
+kAlertFlagsAlertIsMovable		EQU		$04
+kAlertFlagsUseThemeControls		EQU		$08
+;  For dftb resource 
+
+kDialogFontNoFontStyle			EQU		0
+kDialogFontUseFontMask			EQU		$0001
+kDialogFontUseFaceMask			EQU		$0002
+kDialogFontUseSizeMask			EQU		$0004
+kDialogFontUseForeColorMask		EQU		$0008
+kDialogFontUseBackColorMask		EQU		$0010
+kDialogFontUseModeMask			EQU		$0020
+kDialogFontUseJustMask			EQU		$0040
+kDialogFontUseAllMask			EQU		$00FF
+kDialogFontAddFontSizeMask		EQU		$0100
+kDialogFontUseFontNameMask		EQU		$0200
+kDialogFontAddToMetaFontMask	EQU		$0400
+AlertStdAlertParamRec	RECORD 0
+movable					 ds.b	1				; offset: $0 (0)		;  Make alert movable modal 
+helpButton				 ds.b	1				; offset: $1 (1)		;  Is there a help button? 
+filterProc				 ds.l	1				; offset: $2 (2)		;  Event filter 
+defaultText				 ds.l	1				; offset: $6 (6)		;  Text for button in OK position 
+cancelText				 ds.l	1				; offset: $A (10)		;  Text for button in cancel position 
+otherText				 ds.l	1				; offset: $E (14)		;  Text for button in left position 
+defaultButton			 ds.w	1				; offset: $12 (18)		;  Which button behaves as the default 
+cancelButton			 ds.w	1				; offset: $14 (20)		;  Which one behaves as cancel (can be 0) 
+position				 ds.w	1				; offset: $16 (22)		;  Position (kWindowDefaultPosition in this case 
+;  equals kWindowAlertPositionParentWindowScreen) 
+sizeof					 EQU *					; size:   $18 (24)
+						ENDR
+; typedef struct AlertStdAlertParamRec * AlertStdAlertParamPtr
+
+;  ——— end Appearance 1.0 or later stuff
+
+
+; 
+;	NOTE: Code running under MultiFinder or System 7.0 or newer
+;	should always pass NULL to InitDialogs.
+;
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal void InitDialogs(void *ignored)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InitDialogs:	OPWORD	$A97B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitDialogs
+	ENDIF
+
+;
+; pascal void ErrorSound(SoundUPP soundProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ErrorSound:	OPWORD	$A98C
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ErrorSound
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+;
+; pascal DialogPtr NewDialog(void *dStorage, const Rect *boundsRect, ConstStr255Param title, Boolean visible, SInt16 procID, WindowPtr behind, Boolean goAwayFlag, SInt32 refCon, Handle items)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_NewDialog:	OPWORD	$A97D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewDialog
+	ENDIF
+
+;
+; pascal DialogPtr GetNewDialog(SInt16 dialogID, void *dStorage, WindowPtr behind)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetNewDialog:	OPWORD	$A97C
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetNewDialog
+	ENDIF
+
+;
+; pascal DialogPtr NewColorDialog(void *dStorage, const Rect *boundsRect, ConstStr255Param title, Boolean visible, SInt16 procID, WindowPtr behind, Boolean goAwayFlag, SInt32 refCon, Handle items)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_NewColorDialog:	OPWORD	$AA4B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewColorDialog
+	ENDIF
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal void CloseDialog(DialogPtr theDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CloseDialog:	OPWORD	$A982
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CloseDialog
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+;
+; pascal void DisposeDialog(DialogPtr theDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DisposeDialog:	OPWORD	$A983
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisposeDialog
+	ENDIF
+
+;
+; pascal void ModalDialog(ModalFilterUPP modalFilter, DialogItemIndex *itemHit)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ModalDialog:	OPWORD	$A991
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ModalDialog
+	ENDIF
+
+;
+; pascal Boolean IsDialogEvent(const EventRecord *theEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_IsDialogEvent:	OPWORD	$A97F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsDialogEvent
+	ENDIF
+
+;
+; pascal Boolean DialogSelect(const EventRecord *theEvent, DialogPtr *theDialog, DialogItemIndex *itemHit)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DialogSelect:	OPWORD	$A980
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DialogSelect
+	ENDIF
+
+;
+; pascal void DrawDialog(DialogPtr theDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DrawDialog:	OPWORD	$A981
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawDialog
+	ENDIF
+
+;
+; pascal void UpdateDialog(DialogPtr theDialog, RgnHandle updateRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_UpdateDialog:	OPWORD	$A978
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UpdateDialog
+	ENDIF
+
+;
+; pascal void HideDialogItem(DialogPtr theDialog, DialogItemIndex itemNo)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_HideDialogItem:	OPWORD	$A827
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HideDialogItem
+	ENDIF
+
+;
+; pascal void ShowDialogItem(DialogPtr theDialog, DialogItemIndex itemNo)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ShowDialogItem:	OPWORD	$A828
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ShowDialogItem
+	ENDIF
+
+;
+; pascal DialogItemIndexZeroBased FindDialogItem(DialogPtr theDialog, Point thePt)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_FindDialogItem:	OPWORD	$A984
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindDialogItem
+	ENDIF
+
+;
+; pascal DialogItemIndex Alert(SInt16 alertID, ModalFilterUPP modalFilter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_Alert:	OPWORD	$A985
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Alert
+	ENDIF
+
+;
+; pascal DialogItemIndex StopAlert(SInt16 alertID, ModalFilterUPP modalFilter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_StopAlert:	OPWORD	$A986
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION StopAlert
+	ENDIF
+
+;
+; pascal DialogItemIndex NoteAlert(SInt16 alertID, ModalFilterUPP modalFilter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_NoteAlert:	OPWORD	$A987
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NoteAlert
+	ENDIF
+
+;
+; pascal DialogItemIndex CautionAlert(SInt16 alertID, ModalFilterUPP modalFilter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CautionAlert:	OPWORD	$A988
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CautionAlert
+	ENDIF
+
+;
+; pascal void GetDialogItem(DialogPtr theDialog, DialogItemIndex itemNo, DialogItemType *itemType, Handle *item, Rect *box)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetDialogItem:	OPWORD	$A98D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogItem
+	ENDIF
+
+;
+; pascal void SetDialogItem(DialogPtr theDialog, DialogItemIndex itemNo, DialogItemType itemType, Handle item, const Rect *box)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetDialogItem:	OPWORD	$A98E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDialogItem
+	ENDIF
+
+;
+; pascal void ParamText(ConstStr255Param param0, ConstStr255Param param1, ConstStr255Param param2, ConstStr255Param param3)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ParamText:	OPWORD	$A98B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ParamText
+	ENDIF
+
+;
+; pascal void SelectDialogItemText(DialogPtr theDialog, DialogItemIndex itemNo, SInt16 strtSel, SInt16 endSel)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SelectDialogItemText:	OPWORD	$A97E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SelectDialogItemText
+	ENDIF
+
+;
+; pascal void GetDialogItemText(Handle item, Str255 text)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetDialogItemText:	OPWORD	$A990
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogItemText
+	ENDIF
+
+;
+; pascal void SetDialogItemText(Handle item, ConstStr255Param text)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetDialogItemText:	OPWORD	$A98F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDialogItemText
+	ENDIF
+
+;
+; pascal SInt16 GetAlertStage(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetAlertStage        &dest=(sp)
+			move.w            $0A9A,&dest
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetAlertStage
+	ENDIF
+
+;
+; pascal void SetDialogFont(SInt16 fontNum)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetDialogFont        &src=(sp)+
+			move.w            &src,$0AFA
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDialogFont
+	ENDIF
+
+;
+; pascal void ResetAlertStage(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ResetAlertStage
+			clr.w               $0A9A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ResetAlertStage
+	ENDIF
+
+;  APIs in Carbon
+;
+; pascal void GetParamText(StringPtr param0, StringPtr param1, StringPtr param2, StringPtr param3)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetParamText
+	ENDIF
+
+
+;
+; pascal void AppendDITL(DialogPtr theDialog, Handle theHandle, DITLMethod method)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AppendDITL
+	ENDIF
+
+;
+; pascal DialogItemIndex CountDITL(DialogPtr theDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CountDITL
+	ENDIF
+
+;
+; pascal void ShortenDITL(DialogPtr theDialog, DialogItemIndex numberItems)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ShortenDITL
+	ENDIF
+
+;
+; pascal OSStatus InsertDialogItem(DialogPtr theDialog, DialogItemIndex afterItem, DialogItemType itemType, Handle itemHandle, const Rect *box)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InsertDialogItem
+	ENDIF
+
+;
+; pascal OSStatus RemoveDialogItems(DialogPtr theDialog, DialogItemIndex itemNo, DialogItemIndex amountToRemove, Boolean disposeItemData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RemoveDialogItems
+	ENDIF
+
+;
+; pascal OSErr GetStdFilterProc(ModalFilterUPP *theProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetStdFilterProc
+			move.w              #$0203,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetStdFilterProc
+	ENDIF
+
+;
+; pascal OSErr SetDialogDefaultItem(DialogPtr theDialog, DialogItemIndex newItem)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetDialogDefaultItem
+			move.w              #$0304,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDialogDefaultItem
+	ENDIF
+
+;
+; pascal OSErr SetDialogCancelItem(DialogPtr theDialog, DialogItemIndex newItem)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetDialogCancelItem
+			move.w              #$0305,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDialogCancelItem
+	ENDIF
+
+;
+; pascal OSErr SetDialogTracksCursor(DialogPtr theDialog, Boolean tracks)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetDialogTracksCursor
+			move.w              #$0306,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDialogTracksCursor
+	ENDIF
+
+
+
+
+;  —————————————————————————————————————————————————————————————————————————————————————————————————————————
+;  	• Appearance Dialog Routines (available only with Appearance 1.0 and later)
+;  —————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+
+
+;
+; pascal DialogPtr NewFeaturesDialog(void *inStorage, const Rect *inBoundsRect, ConstStr255Param inTitle, Boolean inIsVisible, SInt16 inProcID, WindowPtr inBehind, Boolean inGoAwayFlag, SInt32 inRefCon, Handle inItemListHandle, UInt32 inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NewFeaturesDialog
+			move.w              #$110C,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewFeaturesDialog
+	ENDIF
+
+;
+; pascal OSErr AutoSizeDialog(DialogPtr inDialog)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AutoSizeDialog
+			move.w              #$020D,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AutoSizeDialog
+	ENDIF
+
+
+;   A quick note about the constness of AlertStdAlertParamRec:
+;   Even though the inAlertParam parameter is marked const here, the Dialog Manager had
+;   a chance of modifying it on systems prior to 8.7.
+
+
+;
+; pascal OSErr StandardAlert(AlertType inAlertType, ConstStr255Param inError, ConstStr255Param inExplanation, const AlertStdAlertParamRec *inAlertParam, SInt16 *outItemHit)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_StandardAlert
+			move.w              #$090E,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION StandardAlert
+	ENDIF
+
+;
+; pascal OSErr GetDialogItemAsControl(DialogPtr inDialog, SInt16 inItemNo, ControlHandle *outControl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetDialogItemAsControl
+			move.w              #$050F,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogItemAsControl
+	ENDIF
+
+;
+; pascal OSErr MoveDialogItem(DialogPtr inDialog, SInt16 inItemNo, SInt16 inHoriz, SInt16 inVert)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MoveDialogItem
+			move.w              #$0510,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MoveDialogItem
+	ENDIF
+
+;
+; pascal OSErr SizeDialogItem(DialogPtr inDialog, SInt16 inItemNo, SInt16 inWidth, SInt16 inHeight)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SizeDialogItem
+			move.w              #$0511,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SizeDialogItem
+	ENDIF
+
+;
+; pascal OSErr AppendDialogItemList(DialogPtr dialog, SInt16 ditlID, DITLMethod method)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AppendDialogItemList
+			move.w              #$0412,D0
+			dc.w            	$AA68
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AppendDialogItemList
+	ENDIF
+
+
+;  —————————————————————————————————————————————————————————————————————————————————————————————————————————
+;  	• Dialog Routines available only with Appearance 1.1 and later
+;  —————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+
+
+;
+; pascal OSStatus SetDialogTimeout(DialogPtr inDialog, SInt16 inButtonToPress, UInt32 inSecondsToWait)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDialogTimeout
+	ENDIF
+
+;
+; pascal OSStatus GetDialogTimeout(DialogPtr inDialog, SInt16 *outButtonToPress, UInt32 *outSecondsToWait, UInt32 *outSecondsRemaining)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogTimeout
+	ENDIF
+
+;
+; pascal OSStatus SetModalDialogEventMask(DialogPtr inDialog, EventMask inMask)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetModalDialogEventMask
+	ENDIF
+
+;
+; pascal OSStatus GetModalDialogEventMask(DialogPtr inDialog, EventMask *outMask)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetModalDialogEventMask
+	ENDIF
+
+	IF OLDROUTINENAMES THEN
+
+	ENDIF	; OLDROUTINENAMES
+; 
+;	*****************************************************************************
+;	*                                                                           *
+;	* The conditional STRICT_DIALOGS has been removed from this interface file. *
+;	* The accessor macros to a DialogRecord are no longer necessary.            *
+;	*                                                                           *
+;	* All ≈Ref Types have reverted to their original Handle and Ptr Types.      *
+;	*                                                                           *
+;	*****************************************************************************
+;
+;	Details:
+;	The original purpose of the STRICT_ conditionals and accessor macros was to
+;	help ease the transition to Copland.  Shared data structures are difficult
+;	to coordinate in a preemptive multitasking OS.  By hiding the fields in a
+;	WindowRecord and other data structures, we would begin the migration to the
+;	discipline wherein system data structures are completely hidden from
+;	applications.
+;	
+;	After many design reviews, we finally concluded that with this sort of
+;	migration, the system could never tell when an application was no longer
+;	peeking at a WindowRecord, and thus the data structure might never become
+;	system owned.  Additionally, there were many other limitations in the
+;	classic toolbox that were begging to be addressed.  The final decision was
+;	to leave the traditional toolbox as a compatibility mode.
+;	
+;	We also decided to use the Handle and Ptr based types in the function
+;	declarations.  For example, NewWindow now returns a WindowPtr rather than a
+;	WindowRef.  The Ref types are still defined in the header files, so all
+;	existing code will still compile exactly as it did before.  There are
+;	several reasons why we chose to do this:
+;	
+;	- The importance of backwards compatibility makes it unfeasible for us to
+;	enforce real opaque references in the implementation anytime in the
+;	foreseeable future.  Therefore, any opaque data types (e.g. WindowRef,
+;	ControlRef, etc.) in the documentation and header files would always be a
+;	fake veneer of opacity.
+;	
+;	- There exists a significant base of books and sample code that neophyte
+;	Macintosh developers use to learn how to program the Macintosh.  These
+;	books and sample code all use direct data access.  Introducing opaque data
+;	types at this point would confuse neophyte programmers more than it would
+;	help them.
+;	
+;	- Direct data structure access is used by nearly all Macintosh developers. 
+;	Changing the interfaces to reflect a false opacity would not provide any
+;	benefit to these developers.
+;	
+;	- Accessor functions are useful in and of themselves as convenience
+;	functions, without being tied to opaque data types.  We will complete and
+;	document the Windows and Dialogs accessor functions in an upcoming release
+;	of the interfaces.
+;
+
+	IF ¬ OPAQUE_TOOLBOX_STRUCTS ** ¬ ACCESSOR_CALLS_ARE_FUNCTIONS THEN
+	ENDIF
+	IF ACCESSOR_CALLS_ARE_FUNCTIONS THEN
+;  Getters 
+;
+; pascal WindowPtr GetDialogWindow(DialogPtr dialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogWindow
+	ENDIF
+
+;
+; pascal TEHandle GetDialogTextEditHandle(DialogPtr dialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogTextEditHandle
+	ENDIF
+
+;
+; pascal SInt16 GetDialogDefaultItem(DialogPtr dialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogDefaultItem
+	ENDIF
+
+;
+; pascal SInt16 GetDialogCancelItem(DialogPtr dialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogCancelItem
+	ENDIF
+
+;
+; pascal SInt16 GetDialogKeyboardFocusItem(DialogPtr dialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogKeyboardFocusItem
+	ENDIF
+
+;  Setters 
+;  Utilities 
+;
+; pascal void SetPortDialogPort(DialogPtr dialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetPortDialogPort
+	ENDIF
+
+;
+; pascal CGrafPtr GetDialogPort(DialogPtr dialog)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogPort
+	ENDIF
+
+;  To prevent upward dependencies, GetDialogFromWindow() is defined here instead of MacWindows.i 
+;
+; pascal DialogPtr GetDialogFromWindow(WindowPtr window)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDialogFromWindow
+	ENDIF
+
+	ENDIF	; ACCESSOR_CALLS_ARE_FUNCTIONS
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal void CouldDialog(SInt16 dialogID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CouldDialog:	OPWORD	$A979
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CouldDialog
+	ENDIF
+
+;
+; pascal void FreeDialog(SInt16 dialogID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_FreeDialog:	OPWORD	$A97A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FreeDialog
+	ENDIF
+
+;
+; pascal void CouldAlert(SInt16 alertID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CouldAlert:	OPWORD	$A989
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CouldAlert
+	ENDIF
+
+;
+; pascal void FreeAlert(SInt16 alertID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_FreeAlert:	OPWORD	$A98A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FreeAlert
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+
+
+
+	IF ¬ TARGET_OS_MAC THEN
+	ENDIF
+
+
+
+
+	ENDIF ; __DIALOGS__ 
+

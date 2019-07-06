@@ -1,0 +1,333 @@
+;
+;	File:		QD3DShader.a
+;
+;	Contains:	QuickDraw 3D Shader / Color Routines							
+;
+;	Version:	Technology:	Quickdraw 3D 1.5.4
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1995-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__QD3DSHADER__') = 'UNDEFINED' THEN
+__QD3DSHADER__ SET 1
+
+	IF &TYPE('__QD3D__') = 'UNDEFINED' THEN
+	include 'QD3D.a'
+	ENDIF
+
+; ******************************************************************************
+; **																			 **
+; **								RGB Color routines							 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3ColorRGB *Q3ColorRGB_Set(TQ3ColorRGB *color, float r, float g, float b)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3ColorRGB_Set
+	ENDIF
+
+;
+; extern TQ3ColorARGB *Q3ColorARGB_Set(TQ3ColorARGB *color, float a, float r, float g, float b)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3ColorARGB_Set
+	ENDIF
+
+;
+; extern TQ3ColorRGB *Q3ColorRGB_Add(const TQ3ColorRGB *c1, const TQ3ColorRGB *c2, TQ3ColorRGB *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3ColorRGB_Add
+	ENDIF
+
+;
+; extern TQ3ColorRGB *Q3ColorRGB_Subtract(const TQ3ColorRGB *c1, const TQ3ColorRGB *c2, TQ3ColorRGB *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3ColorRGB_Subtract
+	ENDIF
+
+;
+; extern TQ3ColorRGB *Q3ColorRGB_Scale(const TQ3ColorRGB *color, float scale, TQ3ColorRGB *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3ColorRGB_Scale
+	ENDIF
+
+;
+; extern TQ3ColorRGB *Q3ColorRGB_Clamp(const TQ3ColorRGB *color, TQ3ColorRGB *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3ColorRGB_Clamp
+	ENDIF
+
+;
+; extern TQ3ColorRGB *Q3ColorRGB_Lerp(const TQ3ColorRGB *first, const TQ3ColorRGB *last, float alpha, TQ3ColorRGB *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3ColorRGB_Lerp
+	ENDIF
+
+;
+; extern TQ3ColorRGB *Q3ColorRGB_Accumulate(const TQ3ColorRGB *src, TQ3ColorRGB *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3ColorRGB_Accumulate
+	ENDIF
+
+;
+; extern float *Q3ColorRGB_Luminance(const TQ3ColorRGB *color, float *luminance)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3ColorRGB_Luminance
+	ENDIF
+
+; ******************************************************************************
+; **																			 **
+; **								Shader Types								 **
+; **																			 **
+; ****************************************************************************
+
+
+; typedef long							TQ3ShaderUVBoundary
+kQ3ShaderUVBoundaryWrap			EQU		0
+kQ3ShaderUVBoundaryClamp		EQU		1
+
+; ******************************************************************************
+; **																			 **
+; **								Shader Routines								 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3ObjectType Q3Shader_GetType(TQ3ShaderObject shader)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Shader_GetType
+	ENDIF
+
+;
+; extern TQ3Status Q3Shader_Submit(TQ3ShaderObject shader, TQ3ViewObject view)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Shader_Submit
+	ENDIF
+
+;
+; extern TQ3Status Q3Shader_SetUVTransform(TQ3ShaderObject shader, const TQ3Matrix3x3 *uvTransform)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Shader_SetUVTransform
+	ENDIF
+
+;
+; extern TQ3Status Q3Shader_GetUVTransform(TQ3ShaderObject shader, TQ3Matrix3x3 *uvTransform)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Shader_GetUVTransform
+	ENDIF
+
+;
+; extern TQ3Status Q3Shader_SetUBoundary(TQ3ShaderObject shader, TQ3ShaderUVBoundary uBoundary)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Shader_SetUBoundary
+	ENDIF
+
+;
+; extern TQ3Status Q3Shader_SetVBoundary(TQ3ShaderObject shader, TQ3ShaderUVBoundary vBoundary)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Shader_SetVBoundary
+	ENDIF
+
+;
+; extern TQ3Status Q3Shader_GetUBoundary(TQ3ShaderObject shader, TQ3ShaderUVBoundary *uBoundary)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Shader_GetUBoundary
+	ENDIF
+
+;
+; extern TQ3Status Q3Shader_GetVBoundary(TQ3ShaderObject shader, TQ3ShaderUVBoundary *vBoundary)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Shader_GetVBoundary
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **							Illumination Shader	Classes						 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3ObjectType Q3IlluminationShader_GetType(TQ3ShaderObject shader)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3IlluminationShader_GetType
+	ENDIF
+
+;
+; extern TQ3ShaderObject Q3PhongIllumination_New(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PhongIllumination_New
+	ENDIF
+
+;
+; extern TQ3ShaderObject Q3LambertIllumination_New(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3LambertIllumination_New
+	ENDIF
+
+;
+; extern TQ3ShaderObject Q3NULLIllumination_New(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3NULLIllumination_New
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **								 Surface Shader								 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3ObjectType Q3SurfaceShader_GetType(TQ3SurfaceShaderObject shader)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SurfaceShader_GetType
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **								Texture Shader								 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3ShaderObject Q3TextureShader_New(TQ3TextureObject texture)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3TextureShader_New
+	ENDIF
+
+;
+; extern TQ3Status Q3TextureShader_GetTexture(TQ3ShaderObject shader, TQ3TextureObject *texture)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3TextureShader_GetTexture
+	ENDIF
+
+;
+; extern TQ3Status Q3TextureShader_SetTexture(TQ3ShaderObject shader, TQ3TextureObject texture)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3TextureShader_SetTexture
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **								Texture Objects								 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3ObjectType Q3Texture_GetType(TQ3TextureObject texture)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Texture_GetType
+	ENDIF
+
+;
+; extern TQ3Status Q3Texture_GetWidth(TQ3TextureObject texture, unsigned long *width)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Texture_GetWidth
+	ENDIF
+
+;
+; extern TQ3Status Q3Texture_GetHeight(TQ3TextureObject texture, unsigned long *height)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Texture_GetHeight
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **								Pixmap Texture							     **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3TextureObject Q3PixmapTexture_New(const TQ3StoragePixmap *pixmap)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PixmapTexture_New
+	ENDIF
+
+;
+; extern TQ3Status Q3PixmapTexture_GetPixmap(TQ3TextureObject texture, TQ3StoragePixmap *pixmap)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PixmapTexture_GetPixmap
+	ENDIF
+
+;
+; extern TQ3Status Q3PixmapTexture_SetPixmap(TQ3TextureObject texture, const TQ3StoragePixmap *pixmap)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PixmapTexture_SetPixmap
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **								Mipmap Texture							     **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3TextureObject Q3MipmapTexture_New(const TQ3Mipmap *mipmap)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3MipmapTexture_New
+	ENDIF
+
+;
+; extern TQ3Status Q3MipmapTexture_GetMipmap(TQ3TextureObject texture, TQ3Mipmap *mipmap)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3MipmapTexture_GetMipmap
+	ENDIF
+
+;
+; extern TQ3Status Q3MipmapTexture_SetMipmap(TQ3TextureObject texture, const TQ3Mipmap *mipmap)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3MipmapTexture_SetMipmap
+	ENDIF
+
+
+
+
+
+	ENDIF ; __QD3DSHADER__ 
+

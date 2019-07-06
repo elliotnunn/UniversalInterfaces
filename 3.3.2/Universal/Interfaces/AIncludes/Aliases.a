@@ -1,0 +1,259 @@
+;
+;    File:       Aliases.a
+;
+;    Contains:   Alias Manager Interfaces.
+;
+;    Version:    Technology: Mac OS 8.1
+;                Release:    Universal Interfaces 3.3.2
+;
+;    Copyright:  © 1989-2000 by Apple Computer, Inc., all rights reserved
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__ALIASES__') = 'UNDEFINED' THEN
+__ALIASES__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+
+
+rAliasType						EQU		'alis'				; Aliases are stored as resources of this type 
+
+															; define alias resolution action rules mask 
+kARMMountVol					EQU		$00000001			; mount the volume automatically 
+kARMNoUI						EQU		$00000002			; no user interface allowed during resolution 
+kARMMultVols					EQU		$00000008			; search on multiple volumes 
+kARMSearch						EQU		$00000100			; search quickly 
+kARMSearchMore					EQU		$00000200			; search further 
+kARMSearchRelFirst				EQU		$00000400			; search target on a relative path first 
+
+															; define alias record information types 
+asiZoneName						EQU		-3					; get zone name 
+asiServerName					EQU		-2					; get server name 
+asiVolumeName					EQU		-1					; get volume name 
+asiAliasName					EQU		0					; get aliased file/folder/volume name 
+asiParentName					EQU		1					; get parent folder name 
+;  ResolveAliasFileWithMountFlags options 
+
+kResolveAliasFileNoUI			EQU		$00000001			; no user interaction during resolution 
+;  define the alias record that will be the blackbox for the caller 
+AliasRecord				RECORD 0
+userType				 ds.l	1				; offset: $0 (0)		;  appl stored type like creator type 
+aliasSize				 ds.w	1				; offset: $4 (4)		;  alias record size in bytes, for appl usage 
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct AliasRecord *			AliasPtr
+
+; typedef AliasPtr *					AliasHandle
+
+;  alias record information type 
+; typedef short 						AliasInfoType
+
+;   create a new alias between fromFile-target and return alias record handle  
+;
+; pascal OSErr NewAlias(const FSSpec *fromFile, const FSSpec *target, AliasHandle *alias)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NewAlias
+			moveq           	#2,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewAlias
+	ENDIF
+
+;  create a minimal new alias for a target and return alias record handle 
+;
+; pascal OSErr NewAliasMinimal(const FSSpec *target, AliasHandle *alias)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NewAliasMinimal
+			moveq           	#8,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewAliasMinimal
+	ENDIF
+
+;  create a minimal new alias from a target fullpath (optional zone and server name) and return alias record handle  
+;
+; pascal OSErr NewAliasMinimalFromFullPath(short fullPathLength, const void *fullPath, ConstStr32Param zoneName, ConstStr31Param serverName, AliasHandle *alias)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NewAliasMinimalFromFullPath
+			moveq           	#9,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewAliasMinimalFromFullPath
+	ENDIF
+
+;  given an alias handle and fromFile, resolve the alias, update the alias record and return aliased filename and wasChanged flag. 
+;
+; pascal OSErr ResolveAlias(const FSSpec *fromFile, AliasHandle alias, FSSpec *target, Boolean *wasChanged)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ResolveAlias
+			moveq           	#3,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ResolveAlias
+	ENDIF
+
+;  given an alias handle and an index specifying requested alias information type, return the information from alias record as a string. 
+;
+; pascal OSErr GetAliasInfo(AliasHandle alias, AliasInfoType index, Str63 theString)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetAliasInfo
+			moveq           	#7,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetAliasInfo
+	ENDIF
+
+
+;
+; pascal OSErr IsAliasFile(const FSSpec *fileFSSpec, Boolean *aliasFileFlag, Boolean *folderFlag)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IsAliasFile
+			moveq           	#42,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsAliasFile
+	ENDIF
+
+;
+; pascal OSErr ResolveAliasWithMountFlags(const FSSpec *fromFile, AliasHandle alias, FSSpec *target, Boolean *wasChanged, unsigned long mountFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ResolveAliasWithMountFlags
+			moveq           	#43,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ResolveAliasWithMountFlags
+	ENDIF
+
+;  
+;  Given a file spec, return target file spec if input file spec is an alias.
+;  It resolves the entire alias chain or one step of the chain.  It returns
+;  info about whether the target is a folder or file; and whether the input
+;  file spec was an alias or not. 
+;
+
+;
+; pascal OSErr ResolveAliasFile(FSSpec *theSpec, Boolean resolveAliasChains, Boolean *targetIsFolder, Boolean *wasAliased)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ResolveAliasFile
+			moveq           	#12,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ResolveAliasFile
+	ENDIF
+
+
+;
+; pascal OSErr ResolveAliasFileWithMountFlags(FSSpec *theSpec, Boolean resolveAliasChains, Boolean *targetIsFolder, Boolean *wasAliased, unsigned long mountFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ResolveAliasFileWithMountFlags
+			moveq           	#41,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ResolveAliasFileWithMountFlags
+	ENDIF
+
+;
+; pascal OSErr FollowFinderAlias(const FSSpec *fromFile, AliasHandle alias, Boolean logon, FSSpec *target, Boolean *wasChanged)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_FollowFinderAlias
+			moveq           	#15,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FollowFinderAlias
+	ENDIF
+
+;  
+;   Low Level Routines 
+;
+
+;  given a fromFile-target pair and an alias handle, update the lias record pointed to by alias handle to represent target as the new alias. 
+;
+; pascal OSErr UpdateAlias(const FSSpec *fromFile, const FSSpec *target, AliasHandle alias, Boolean *wasChanged)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_UpdateAlias
+			moveq           	#6,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UpdateAlias
+	ENDIF
+
+
+
+;   Given an alias handle and fromFile, match the alias and return aliased filename(s) and needsUpdate flag 
+;
+; pascal OSErr MatchAlias(const FSSpec *fromFile, unsigned long rulesMask, AliasHandle alias, short *aliasCount, FSSpecArrayPtr aliasList, Boolean *needsUpdate, AliasFilterUPP aliasFilter, void *yourDataPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MatchAlias
+			moveq           	#5,D0
+			dc.w            	$A823
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MatchAlias
+	ENDIF
+
+
+
+;  The follow two calls are for Carbon only.  They allow tools and background apps to have
+;    AliasMgr functionality without ever having to deal with UI 
+;
+; pascal OSErr ResolveAliasFileWithMountFlagsNoUI(FSSpec *theSpec, Boolean resolveAliasChains, Boolean *targetIsFolder, Boolean *wasAliased, unsigned long mountFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ResolveAliasFileWithMountFlagsNoUI
+	ENDIF
+
+;
+; pascal OSErr MatchAliasNoUI(const FSSpec *fromFile, unsigned long rulesMask, AliasHandle alias, short *aliasCount, FSSpecArrayPtr aliasList, Boolean *needsUpdate, AliasFilterUPP aliasFilter, void *yourDataPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MatchAliasNoUI
+	ENDIF
+
+
+
+	ENDIF ; __ALIASES__ 
+

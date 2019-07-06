@@ -1,0 +1,281 @@
+;
+;	File:		CFURL.a
+;
+;	Contains:	CoreFoundation urls
+;
+;	Version:	Technology:	Mac OS X
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__COREFOUNDATION_CFURL__') = 'UNDEFINED' THEN
+__COREFOUNDATION_CFURL__ SET 1
+
+	IF &TYPE('___COREFOUNDATION_CFBASE__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFBase.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFDATA__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFData.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFSTRING__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFString.a'
+	ENDIF
+
+
+; typedef long							CFURLPathStyle
+kCFURLPOSIXPathStyle			EQU		0
+kCFURLHFSPathStyle				EQU		1
+kCFURLWindowsPathStyle			EQU		2
+
+
+;
+; extern CFTypeID CFURLGetTypeID(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLGetTypeID
+	ENDIF
+
+;  encoding will be used both to interpret the bytes of URLBytes, and to 
+;  interpret any percent-escapes within the bytes. 
+;
+; extern CFURLRef CFURLCreateWithBytes(CFAllocatorRef allocator, const UInt8 *URLBytes, CFIndex length, CFStringEncoding encoding, CFURLRef baseURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCreateWithBytes
+	ENDIF
+
+;  Escapes any character that is not 7-bit ASCII with the byte-code 
+;  for the given encoding.  If escapeWhitespace is true, whitespace 
+;  characters (' ', '\t', '\r', '\n') will be escaped also (desirable 
+;  if embedding the URL into a larger text stream like HTML) 
+;
+; extern CFDataRef CFURLCreateData(CFAllocatorRef allocator, CFURLRef url, CFStringEncoding encoding, Boolean escapeWhitespace)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCreateData
+	ENDIF
+
+;  Any escape sequences in URLString will be interpreted via UTF-8. 
+;
+; extern CFURLRef CFURLCreateWithString(CFAllocatorRef allocator, CFStringRef URLString, CFURLRef baseURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCreateWithString
+	ENDIF
+
+;  filePath should be the URL's path expressed as a path of the type 
+;  fsType.  If filePath is not absolute, the resulting URL will be 
+;  considered relative to the current working directory (evaluated 
+;  at creation time).  isDirectory determines whether filePath is 
+;  treated as a directory path when resolving against relative path 
+;  components 
+;
+; extern CFURLRef CFURLCreateWithFileSystemPath(CFAllocatorRef allocator, CFStringRef filePath, CFURLPathStyle pathStyle, Boolean isDirectory)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCreateWithFileSystemPath
+	ENDIF
+
+;  Returns the URL's path in a form suitable for file system use. 
+;  The path has been fully processed for the file system type requested 
+;  by fsType.  If resolveAgainstBase is TRUE, then the URL's path is first 
+;  resolved against that of its base URL (if a base URL exists) before being returned. 
+;
+; extern CFStringRef CFURLCreateStringWithFileSystemPath(CFAllocatorRef allocator, CFURLRef anURL, CFURLPathStyle pathStyle, Boolean resolveAgainstBase)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCreateStringWithFileSystemPath
+	ENDIF
+
+;  Creates a new URL by resolving the relative portion of relativeURL against its base. 
+;
+; extern CFURLRef CFURLCopyAbsoluteURL(CFURLRef relativeURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyAbsoluteURL
+	ENDIF
+
+;  Returns the URL's string. 
+;
+; extern CFStringRef CFURLGetString(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLGetString
+	ENDIF
+
+;  Returns the base URL if it exists 
+;
+; extern CFURLRef CFURLGetBaseURL(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLGetBaseURL
+	ENDIF
+
+;  All URLs can be broken into two pieces - the scheme (preceding the first colon) and the resource 
+;  specifier (following the first colon).  Most URLs are also "standard" URLs conforming to RFC 1808 
+;  (available from www.w3c.org).  This category includes URLs of the file, http, https, and ftp 
+;  schemes, to name a few.  Standard URLs start the resource specifier with two slashes ("//"), and 
+;  can be broken into 4 distinct pieces - the scheme, the net location, the path, and further 
+;  resource specifiers (typically an optional parameter, query, and/or fragment).  The net location 
+;  appears immediately following the two slashes and goes up to the next slash; it's format is 
+;  scheme-specific, but is usually composed of some or all of a username, password, host name, and 
+;  port.  The path is a series of path components separated by slashes; if the net location is 
+;  present, the path always begins with a slash.  Standard URLs can be relative to another URL, in 
+;  which case at least the scheme and possibly other pieces as well come from the base URL (see RFC 
+;  1808 for precise details when resolving a relative URL against its base).  The full URL is therefore 
+;  <scheme> "://" <net location> <path, always starting with a slash> <additional resource specifiers> 
+;  If a given CFURL can be decomposed (that is, conforms to RFC 1808), you can ask for each of the four 
+;  basic pieces (scheme, net location, path, and resource specifer) separately, as well as for its base 
+;  URL.  The basic pieces are returned with any percent escape sequences still in place (although note 
+;  that the scheme may not legally include any percent escapes); this is to allow the caller to distinguish 
+;  between percent sequences that may have syntactic meaning if replaced by the character being escaped 
+;  (for instance, a '/' in a path component).  Since only the individual schemes know which characters 
+;  are syntactically significant, CFURL cannot safely replace any percent escape sequences.  However, 
+;  you can use CFStringCreateReplacingPercentEscapes() to create a new string with the percent escapes 
+;  removed.  The first argument is the original string containing percent escapes; the second argument 
+;  is a string containing any characters that, if escaped in the original string, should NOT be replaced. 
+;  Note that this function may return the original string (retained) if the original string contains no 
+;  escape sequences to be processed. 
+;  If a given CFURL can not be decomposed, you can ask for its scheme and its resource specifier; asking 
+;  it for its net location or path will return NULL. 
+;  All of the methods discussed above do not require an autorelease pool to be in place. 
+;  To get more refined information about the components of a decomposable CFURL, you may ask for more 
+;  specific pieces of the URL, expressed with the percent escapes removed.  These functions require an 
+;  autorelease pool to be in place, as they will return an autoreleased CFString.  They are 
+;  CFURLHostName(), CFURLPortNumber() (actually returns an Int32; does not use the autorelease pool), 
+;  CFURLUserName(), CFURLPassword(), CFURLQuery(), CFURLParameters(), and CFURLFragment().  Because the 
+;  parameters, query, and fragment of an URL may contain scheme-specific syntaxes, these methods take a 
+;  second argument, giving a list of characters which should NOT be replaced if percent escaped.  For 
+;  instance, the ftp parameter syntax gives simple key-value pairs as "<key>=<value>;"  Clearly if a key 
+;  or value includes either '=' or ';', it must be escaped to avoid corrupting the meaning of the 
+;  parameters, so the caller may request the parameter string as 
+;  CFStringRef myParams = CFURLParameters(ftpURL, CFSTR("=;%")); 
+;  requesting that all percent escape sequences be replaced by the represented characters, except for escaped 
+;  '=', '%' or ';' characters.  If you are not interested in any escape sequences being left in, pass NULL for the 
+;  second argument. 
+;  Returns TRUE if anURL conforms to RFC 1808 
+;
+; extern Boolean CFURLCanBeDecomposed(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCanBeDecomposed
+	ENDIF
+
+;  The next several methods leave any percent escape sequences intact 
+;
+; extern CFStringRef CFURLCopyScheme(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyScheme
+	ENDIF
+
+;  NULL if CFURLCanBeDecomposed(anURL) is FALSE 
+;
+; extern CFStringRef CFURLCopyNetLocation(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyNetLocation
+	ENDIF
+
+;  NULL if CFURLCanBeDecomposed(anURL) is FALSE; also does not resolve 
+;  the URL against its base.  See also CFCreateAbsoluteURL() and 
+;  CFStringCreateFileSystemPathFromURL() 
+;
+; extern CFStringRef CFURLCopyPath(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyPath
+	ENDIF
+
+;  Returns whether anURL's path represents a directory 
+;  (TRUE returned) or a simple file (FALSE returned) 
+;
+; extern Boolean CFURLHasDirectoryPath(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLHasDirectoryPath
+	ENDIF
+
+;  Any additional resource specifiers after the path.  For URLs 
+;  that cannot be decomposed, this is everything except the scheme itself. 
+;
+; extern CFStringRef CFURLCopyResourceSpecifier(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyResourceSpecifier
+	ENDIF
+
+;
+; extern CFStringRef CFURLCopyHostName(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyHostName
+	ENDIF
+
+;
+; extern SInt32 CFURLGetPortNumber(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLGetPortNumber
+	ENDIF
+
+;  Returns -1 if no port number is specified 
+;
+; extern CFStringRef CFURLCopyUserName(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyUserName
+	ENDIF
+
+;
+; extern CFStringRef CFURLCopyPassword(CFURLRef anURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyPassword
+	ENDIF
+
+;  These remove all percent escape sequences except those for 
+;  characters in charactersToLeaveEscaped.  If charactersToLeaveEscaped 
+;  is empty (""), all percent escape sequences are replaced by their 
+;  corresponding characters.  If charactersToLeaveEscaped is NULL, 
+;  then no escape sequences are removed at all 
+;
+; extern CFStringRef CFURLCopyParameterString(CFURLRef anURL, CFStringRef charactersToLeaveEscaped)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyParameterString
+	ENDIF
+
+;
+; extern CFStringRef CFURLCopyQueryString(CFURLRef anURL, CFStringRef charactersToLeaveEscaped)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyQueryString
+	ENDIF
+
+;
+; extern CFStringRef CFURLCopyFragment(CFURLRef anURL, CFStringRef charactersToLeaveEscaped)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCopyFragment
+	ENDIF
+
+;  Returns a string with any percent escape sequences that do NOT 
+;  correspond to characters in charactersToLeaveEscaped with their 
+;  equivalent.  Returns NULL on failure (if an invalid percent sequence 
+;  is encountered), or the original string itself if no characters need to be replaced. 
+;
+; extern CFStringRef CFURLCreateStringByReplacingPercentEscapes(CFAllocatorRef allocator, CFStringRef originalString, CFStringRef charactersToLeaveEscaped)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFURLCreateStringByReplacingPercentEscapes
+	ENDIF
+
+	ENDIF ; __COREFOUNDATION_CFURL__ 
+

@@ -1,0 +1,274 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.3
+Date:    October 27, 1999
+Author:  Nick Kledzik
+
+
+=================
+Important Notice
+=================
+
+This is a pre-release set of headers and libraries that
+integrates Sonata (Mac OS 9) and Carbon development.
+
+See ReadMe files for how to install into MPW or CodeWarrior.
+
+
+==========================================
+Notes on Carbon development
+==========================================
+
+-	In order to build a Carbon application, you must set 
+	TARGET_API_MAC_CARBON to true, either on the command 
+	line (e.g. -d TARGET_API_MAC_CARBON=1) or in a 
+	prefix file (e.g. #define TARGET_API_MAC_CARBON 1).
+
+-	The conditionals forCarbon and TARGET_CARBON are deprecated.
+	They will no longer be used in any Universal Interfaces.
+	If you have been using either of these in your source code,
+	you can continue to use them if you set them up (that is
+	ConditionalMacros.h will no longer set them), or update
+	your source code to use the TARGET_API_MAC_≈ conditionals.
+
+-	You must link against CarbonLib and no other
+	Mac OS shared libraries.
+
+-	In Carbon a UPP is opaque and may not be a pointer to
+	a MixedMode RoutineDescriptor.  You cannot call
+	DisposeRoutineDescriptor on them.  Instead, the headers
+	contain new Dispose≈UPP routines for each UPP type.
+	For pre-Carbon development, the Dispose≈UPP routines
+	macro to a call to DisposeRoutineDescriptor. For Pascal
+	users you need to link with PascalPreCarbonUPPGlue.o
+	
+-	In Carbon, many toolbox structures are opaque, including
+	GrafPtrs and WindowPtrs.  You cannot access fields with 
+	them.  Instead you must use new accessor routines.  For
+	instance, use GetPortTextFont(thePort) instead of
+	thePort->txFont.  For pre-Carbon development, the accessor
+	routines are available by linking with PreCarbon.o.
+	
+-	Beginning in 3.3, all functions that are not in CarbonLib
+	are conditionalized with #if CALL_NOT_IN_CARBON, so you
+	will get a compile time error instead of a link time error
+	if you try to use a toolbox API that is not in Carbon.
+
+-	A couple of functions in LowMem.h have been changed from
+    macros to function prototypes.  These are functions which
+	were missing from the original InterfaceLib, but added 
+	to InterfaceLib in Mac OS 8.5.  In you want to use these 
+	functions on a pre-8.5 systems, you must either write your 
+	own macros to override the function prototypes or write
+	your own implementation of the functions.
+
+==========================================
+Notes on CoreFoundation Framework
+==========================================
+
+-	There is now a subfolder in CIncludes called CoreFoundation.
+	We are experimenting with changing the CIncludes folder from
+	a flat directory to a two level directory with CIncludes
+	containing grouping (or framework) directories in which
+	are the individual header files.
+
+-	If you want to directly use some of the CoreFoundation API's
+	your source code should:
+	
+		#include <CoreFoundation/CoreFoundation.h>
+	
+	Assuming, your compiler interprets '/' as a path separator,
+	which the latest Metrowerks, MrC, and gcc/egcs compilers do.
+		
+
+==================================================
+Notes on OpenTransport
+==================================================
+
+-	The OpenTransport headers have been reorganized as follows:
+	
+		OpenTptAppleTalk.h	--> OpenTransportProviders.h
+		OpenTptClient.h		--> OpenTransportProtocol.h
+		OpenTptCommon.h		--> OpenTransportProtocol.h
+		OpenTptConfig.h		--> OpenTransportProtocol.h
+		OpenTptDevLinks.h	--> OpenTransportProviders.h
+		OpenTptInternet.h	--> OpenTransportProviders.h
+		OpenTptISDN.h		--> OpenTransportProviders.h
+		OpenTptLinks.h		--> OpenTransportProviders.h
+		OpenTptModule.h		--> OpenTransportKernel.h
+		OpenTptPCISupport.h	--> OpenTransportKernel.h
+		OpenTptSerial.h		--> OpenTransportProviders.h
+		OpenTptXTI.h		--> OpenTransportUNIX.r
+		OTSharedLibs.h		--> OpenTransportProtocol.h
+		OTDebug.h			--> OpenTransport.h
+		OTConfig.r			--> OpenTransportProtocol.r
+		cred.h				--> OpenTransportProtocol.h
+		dlpi.h				--> OpenTransportProtocol.h
+		miioccom.h			--> OpenTransportProtocol.h
+		mistream.h			--> OpenTransportProtocol.h/OpenTransportKernel.h
+		modnames.h			--> OpenTransportProtocol.h
+		strlog.h			--> OpenTransportProtocol.h/OpenTransportKernel.h
+		stropts.h			--> OpenTransportProtocol.h/OpenTransportUNIX.h
+		strstat.h			--> OpenTransportProtocol.h
+		tihdr.h				--> OpenTransportProtocol.h
+
+	You can continue to #include to old names in your source code.
+
+-	When developing a Carbon application that uses OpenTransport, be 
+	sure to #define OTCARBONAPPLICATION, otherwise you will need
+	to use the ≈InContext variant of functions. 
+
+-	The common OpenTransport libraries have been integrated into 
+	the 3.3 Universal Interfaces.  You will still need the 
+	OT SDK for: debug libraries, 68k libraries, or module development
+	libraries.
+
+	
+==================================================
+Other Notes
+==================================================
+
+-	The file Controls.h has been split into two files:
+	Controls.h and ControlDefinitions.h.  If you have source
+	code that previously compiled with an #include of
+	Controls.h you may have to add a #include of ControlDefinitions.h
+
+-	The contents of Errors.h has been moved to MacErrors.h and
+	Errors.h just includes MacErrors.h.  This will enable
+	the 3.3 Universal Interfaces to be included along with the 
+	latest Win32 SDK which also has an errors.h file.
+	
+
+==================================================
+New files since Universal Interfaces 3.2
+==================================================
+
+-	New .h/.a/.p files:
+
+		AVLTree.h
+		ControlDefinitions.h
+		CoreFoundation/CFArray.h
+		CoreFoundation/CFBag.h
+		CoreFoundation/CFBase.h
+		CoreFoundation/CFBundle.h
+		CoreFoundation/CFCharacterSet.h
+		CoreFoundation/CFData.h
+		CoreFoundation/CFDate.h
+		CoreFoundation/CFDictionary.h
+		CoreFoundation/CFNumber.h
+		CoreFoundation/CFPlugin.h
+		CoreFoundation/CFPreferences.h
+		CoreFoundation/CFPropertyList.h
+		CoreFoundation/CFSet.h
+		CoreFoundation/CFString.h
+		CoreFoundation/CFStringEncodingExt.h
+		CoreFoundation/CFTimeZone.h
+		CoreFoundation/CFURL.i
+		CoreFoundation/CFURLAccess.i
+		CoreFoundation/CoreFoundation.h
+		CryptoMessageSyntax.h
+		Debugging.h
+		DesktopPrinting.h
+		FileSigning.h
+		FontSync.h
+		HID.h
+		HTMLRendering.h
+		IAExtractor.h
+		Keychain.h
+		LanguageAnalysis.h
+		MacErrors.h
+		MacHelp.h
+		MacLocales.h
+		MacTextEditor.h
+		NetworkSetup.h
+		NSL.h
+		OpenTptAppleTalk.h
+		OpenTptClient.h
+		OpenTptCommon.h
+		OpenTptConfig.h
+		OpenTptDevLinks.h
+		OpenTptGlobalNew.h
+		OpenTptInternet.h
+		OpenTptISDN.h
+		OpenTptLinks.h
+		OpenTptModule.h
+		OpenTptPCISupport.h
+		OpenTptSerial.h
+		OpenTptXTI.h
+		OpenTransport.h
+		OpenTransportKernel.h
+		OpenTransportProtocol.h
+		OpenTransportProviders.h
+		OpenTransportUNIX.h
+		PMApplication.h
+		QTSMovie.ih
+		QTStreamingComponents.h
+		QuickTimeStreaming.h
+		URLAccess.h
+		USB.h
+		UTCUtils.h
+
+
+-	New .r files
+
+		AVComponents.r
+		ControlDefinitions.r
+		DesktopPrinting.r
+		NetworkSetup.r
+		OpenTransport.r
+		OpenTransportKernel.r
+		OpenTransportProtocol.r
+		OpenTransportProviders.r
+
+
+- New 68k .o files:
+
+		Navigation.far.o
+		Navigation.o
+
+
+- New PowerPC .o files:
+
+		OpenTptATalkPPC.o
+		OpenTptInetPPC.o
+		OpenTptMiscUtilsPPC.o
+		OpenTransportAppPPC.o
+		OpenTransportExtnPPC.o
+		PreCarbon.o
+		PascalPreCarbonUPPGlue.o
+
+
+- New stub libraries
+
+		CarbonLib
+		CSScriptingLib
+		DebugLib
+		DictionaryMgrLib
+		FileSigningLib
+		FontSyncLib
+		HIDLib
+		HTMLRenderingLib
+		ISpDeferLib
+		KeychainLib
+		LocalesLib
+		MPLibrary
+		NetworkSetup
+		NSLPPCLib
+		OpenTptAppleTalkLib
+		OpenTptInternetLib
+		OpenTransportLib
+		QuickDrawText
+		QTStreaming
+		Textension
+		UnicodeUtilitiesCoreLib
+		UTCUtils
+
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+
+

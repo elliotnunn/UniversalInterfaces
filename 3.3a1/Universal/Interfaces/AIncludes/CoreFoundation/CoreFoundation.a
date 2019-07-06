@@ -1,0 +1,75 @@
+;
+;	File:		CoreFoundation.a
+;
+;	Contains:	CoreFoundation master header
+;
+;	Version:	Technology:	Mac OS X
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__COREFOUNDATION_COREFOUNDATION__') = 'UNDEFINED' THEN
+__COREFOUNDATION_COREFOUNDATION__ SET 1
+
+	IF &TYPE('___COREFOUNDATION_CFBASE__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFBase.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFARRAY__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFArray.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFBAG__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFBag.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFBUNDLE__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFBundle.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFCHARACTERSET__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFCharacterSet.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFDATA__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFData.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFDATE__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFDate.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFDICTIONARY__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFDictionary.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFNUMBER__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFNumber.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFPLUGIN__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFPlugIn.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFPREFERENCES__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFPreferences.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFPROPERTYLIST__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFPropertyList.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFSET__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFSet.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFSTRING__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFString.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFSTRINGENCODINGEXT__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFStringEncodingExt.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFTIMEZONE__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFTimeZone.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFURL__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFURL.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFURLACCESS__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFURLAccess.a'
+	ENDIF
+	ENDIF ; __COREFOUNDATION_COREFOUNDATION__ 
+

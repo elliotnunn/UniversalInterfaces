@@ -1,0 +1,1204 @@
+;
+;	File:		ATSUnicode.a
+;
+;	Contains:	Public interfaces for Apple Type Services for Unicode Imaging
+;
+;	Version:	Technology:	Allegro
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1997-1999 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__ATSUNICODE__') = 'UNDEFINED' THEN
+__ATSUNICODE__ SET 1
+
+	IF &TYPE('__ATSLAYOUTTYPES__') = 'UNDEFINED' THEN
+	include 'ATSLayoutTypes.a'
+	ENDIF
+	IF &TYPE('__SFNTLAYOUTTYPES__') = 'UNDEFINED' THEN
+	include 'SFNTLayoutTypes.a'
+	ENDIF
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__MACMEMORY__') = 'UNDEFINED' THEN
+	include 'MacMemory.a'
+	ENDIF
+	IF &TYPE('__FONTS__') = 'UNDEFINED' THEN
+	include 'Fonts.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__TEXTCOMMON__') = 'UNDEFINED' THEN
+	include 'TextCommon.a'
+	ENDIF
+
+; ***********
+; 	Types	
+; ***********
+
+;   UniCharArrayHandle and UniCharArrayOffset are defined in the
+;   TextCommon interface file.
+
+
+
+
+;  	ATSUTextMeasurement is specific to ATSUI in that measurement
+;  	quantities are in fractional Fixed format instead of shorts
+;  	used in QuickDraw Text.  This provides exact outline metrics and
+;  	line specifications such as line width, ascent, descent, and so on.  
+
+
+
+; typedef Fixed 						ATSUTextMeasurement
+
+
+;  	ATSUFontID indicates a particular font family and face.  
+;  	ATSUFontID's are not guaranteed to remain constant across 
+;  	reboots.  Clients should use the font's unique name to 
+;  	get a font token to store in documents which is 
+;  	guaranteed to remain constant across reboots. 
+
+
+; typedef FMFont 						ATSUFontID
+
+
+;  	ATSUFontFeatureType and ATSUFontFeatureSelector are used 
+;  	to identify font features.  
+
+
+; typedef UInt16 						ATSUFontFeatureType
+
+; typedef UInt16 						ATSUFontFeatureSelector
+
+
+;  	ATSUFontVariationAxis and ATSUFontVariationValue are used 
+;  	in connection with font variations.  
+
+
+; typedef FourCharCode 					ATSUFontVariationAxis
+
+; typedef Fixed 						ATSUFontVariationValue
+
+
+;  	ATSUTextLayout is used to store the attribute information 
+;  	associated with a contiguous block of UniChar's (UInt16's) 
+;  	in memory.  It's typed to be an opaque structure.  
+
+
+
+
+
+
+;  	ATSUStyle is used to store a set of individual attributes, 
+;  	font features, and font variations.  It's typed to be 
+;  	an opaque structure.  
+
+
+
+
+
+;  	ATSUAttributeTag is used to indicate the particular type 
+;  	of attribute under consideration:  font, size, color, 
+;  	and so on.  
+;  	Each style run may have at most one attribute with a 
+;  	given ATSUAttributeTag (i.e., a style run can't have 
+;  	more than one font or size) but may have none.  
+
+
+; typedef UInt32 						ATSUAttributeTag
+
+
+;  	ATSUAttributeValuePtr is used to provide generic access 
+;  	to storage of attribute values, which vary in size.
+
+
+; typedef void *						ATSUAttributeValuePtr
+
+
+;  	ATSUAttributeInfo is used to provide a tag/size pairing.  
+;  	This makes it possible to provide the client information   
+;  	about all the attributes for a given range of text.  This   
+;  	structure is only used to return to the client information   
+;  	about a complete set of attributes.  An array of   
+;  	ATSUAttributeInfos is passed as a parameter so that the   
+;  	client can find out what attributes are set and what their   
+;  	individual sizes are; with that information, they can then   
+;  	query about the values of the attributes they're interested   
+;  	in.  Because arrays of ATSUAttributeInfos are used as parameters   
+;  	to functions, they have to be of a fixed size, hence the   
+;  	value is not included in the structure.  
+
+
+ATSUAttributeInfo		RECORD 0
+fTag					 ds.l	1				; offset: $0 (0)
+fValueSize				 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+
+;  	ATSUCaret contains the complete information needed to render a
+;  	caret.  fX and fY is the position of one of the caret's ends
+;  	relative to the origin position of the line the caret belongs.
+;  	fDeltaX and fDeltaY is the position of the caret's other end.
+;  	Hence, to draw a caret, simply call MoveTo(fX, fY) followed by
+;  	LineTo(fDeltaX, fDeltaY) or equivalent.  The ATSUCaret will
+;  	contain the positions needed to draw carets on angled lines
+;  	and reflect angled carets and leading/trailing split caret
+;  	appearances.
+
+
+ATSUCaret				RECORD 0
+fX						 ds.l	1				; offset: $0 (0)
+fY						 ds.l	1				; offset: $4 (4)
+fDeltaX					 ds.l	1				; offset: $8 (8)
+fDeltaY					 ds.l	1				; offset: $C (12)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+
+;  	ATSUCursorMovementType currently can take three values 
+;  	(kATSUByCharacter, kATSUByCluster, and kATSUByWord) 
+;  	and is used to indicate how much to move the cursor.  
+
+
+; typedef UInt16 						ATSUCursorMovementType
+
+
+;  	ATSUVerticalCharacterType currently can take two values 
+;  	(kATSUStronglyVertical, and kATSUStronglyHorizontal) and 
+;  	is used to indicate whether text is to be laid out as 
+;  	vertical glyphs or horizontal glyphs.  
+
+
+; typedef UInt16 						ATSUVerticalCharacterType
+
+
+;  	ATSUStyleComparison is an enumeration with four values 
+;  	(kATUStyleUnequal, ATSUStyleContains, kATSUStyleEquals, 
+;  	and kATSUStyleContainedBy), and is used by ATSUCompareStyles() 
+;  	to indicate if the first style parameter contains as a 
+;  	proper subset, is equal to, or is contained by the second 
+;  	style parameter.
+
+
+; typedef UInt16 						ATSUStyleComparison
+
+
+;  	ATSUFontFallbackMethod type defines the type of heap or memory callback
+;  	method ATSUI is to follow iin all its permanent memory allocations for
+;  	it clients.
+
+
+; typedef UInt16 						ATSUFontFallbackMethod
+
+
+;  	ATSUMemoryCallbacks is a union struct that allows the ATSUI 
+;  	client to specify a specific heap for ATSUI use or allocation
+;  	callbacks of which ATSUI is to use each time ATSUI performs a
+;  	memory operation (alloc, grow, free).
+
+
+ATSUMemoryCallbacks		RECORD 0
+Alloc					 ds.l	1				; offset: $0 (0)
+Free					 ds.l	1				; offset: $4 (4)
+Grow					 ds.l	1				; offset: $8 (8)
+memoryRefCon			 ds.l	1				; offset: $C (12)
+						 ORG 0
+heapToUse				 ds.l	1				; offset: $0 (0)
+						 ORG 16
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+
+;  	ATSUHeapSpec provides allows the ATSUI client a means of
+;  	specifying the heap ATSUI should allocate it's dynamic memory
+;  	from or that ATSUI should use the memory callback provided by
+;  	the client.
+
+
+; typedef UInt16 						ATSUHeapSpec
+
+
+;  	ATSUMemorySetting is used to store the results from a ATSUSetMemoryAlloc
+;  	or a ATSUGetCurrentMemorySetting call.  It can also be used to change the
+;  	current ATSUMemorySetting by passing it into the ATSUSetCurrentMemorySetting
+;  	call.
+
+
+
+
+; ***************************************************
+; 	Gestalt selectors								
+; 		Move into Gestalt.i when they're stable!!!!	
+; ***************************************************
+
+gestaltATSUVersion				EQU		'uisv'
+gestaltATSUFeatures				EQU		'uisf'
+
+gestaltOriginalATSUVersion		EQU		$00010000			; ATSUI version 1.0
+gestaltATSUUpdate1				EQU		$00020000			; ATSUI version 1.1
+gestaltATSUUpdate2				EQU		$00030000			; ATSUI version 1.2
+
+gestaltATSUTrackingFeature		EQU		$00000001			; feature introduced in ATSUI version 1.1
+gestaltATSUMemoryFeature		EQU		$00000001			; feature introduced in ATSUI version 1.1
+gestaltATSUFallbacksFeature		EQU		$00000001			; feature introduced in ATSUI version 1.1
+gestaltATSUGlyphBoundsFeature	EQU		$00000001			; feature introduced in ATSUI version 1.1
+gestaltATSULineControlFeature	EQU		$00000001			; feature introduced in ATSUI version 1.1
+gestaltATSULayoutCreateAndCopyFeature EQU $00000001			; feature introduced in ATSUI version 1.1
+gestaltATSULayoutCacheClearFeature EQU	$00000001			; feature introduced in ATSUI version 1.1
+gestaltATSUTextLocatorUsageFeature EQU	$00000002			; feature introduced in ATSUI version 1.2
+; ***************
+; 	Error codes	
+; ***************
+
+kATSUInvalidTextLayoutErr		EQU		-8790				;	An attempt was made to use a ATSUTextLayout 
+															;	which hadn't been initialized or is otherwise 
+															;	in an invalid state. 
+kATSUInvalidStyleErr			EQU		-8791				;	An attempt was made to use a ATSUStyle which  
+															;	hadn't been properly allocated or is otherwise  
+															;	in an invalid state.  
+kATSUInvalidTextRangeErr		EQU		-8792				;	An attempt was made to extract information   
+															;	from or perform an operation on a ATSUTextLayout 
+															;	for a range of text not covered by the ATSUTextLayout.  
+kATSUFontsMatched				EQU		-8793				;	This is not an error code but is returned by    
+															;	ATSUMatchFontsToText() when changes need to    
+															;	be made to the fonts associated with the text.  
+kATSUFontsNotMatched			EQU		-8794				;	This value is returned by ATSUMatchFontsToText()    
+															;	when the text contains Unicode characters which    
+															;	cannot be represented by any installed font.  
+kATSUNoCorrespondingFontErr		EQU		-8795				;	This value is retrned by font ID conversion 
+															;	routines ATSUFONDtoFontID() and ATSUFontIDtoFOND() 
+															;	to indicate that the input font ID is valid but 
+															;	there is no conversion possible.  For example, 
+															;	data-fork fonts can only be used with ATSUI not 
+															;	the FontManager, and so converting an ATSUIFontID 
+															;	for such a font will fail.   
+kATSUInvalidFontErr				EQU		-8796				;	Used when an attempt was made to use an invalid font ID.
+kATSUInvalidAttributeValueErr	EQU		-8797				;	Used when an attempt was made to use an attribute with 
+															;	a bad or undefined value.  
+kATSUInvalidAttributeSizeErr	EQU		-8798				;	Used when an attempt was made to use an attribute with a 
+															;	bad size.  
+kATSUInvalidAttributeTagErr		EQU		-8799				;	Used when an attempt was made to use a tag value that
+															;	was not appropriate for the function call it was used.  
+kATSUInvalidCacheErr			EQU		-8800				;	Used when an attempt was made to read in style data 
+															;	from an invalid cache.  Either the format of the 
+															;	cached data doesn't match that used by Apple Type 
+															;	Services for Unicode™ Imaging, or the cached data 
+															;	is corrupt.  
+kATSUNotSetErr					EQU		-8801				;	Used when the client attempts to retrieve an attribute, 
+															;	font feature, or font variation from a style when it 
+															;	hadn't been set.  In such a case, the default value will
+															;	be returned for the attribute's value.
+kATSUNoStyleRunsAssignedErr		EQU		-8802				;	Used when an attempt was made to measure, highlight or draw
+															;	a ATSUTextLayout object that has no styleRuns associated with it.
+kATSUQuickDrawTextErr			EQU		-8803				;	Used when QuickDraw Text encounters an error rendering or measuring
+															;	a line of ATSUI text.
+kATSULowLevelErr				EQU		-8804				;	Used when an error was encountered within the low level ATS 
+															;	mechanism performing an operation requested by ATSUI.
+kATSUNoFontCmapAvailableErr		EQU		-8805				;	Used when no CMAP table can be accessed or synthesized for the 
+															;	font passed into a SetAttributes Font call.
+kATSUNoFontScalerAvailableErr	EQU		-8806				;	Used when no font scaler is available for the font passed
+															;	into a SetAttributes Font call.
+kATSUCoordinateOverflowErr		EQU		-8807				;	Used to indicate the coordinates provided to an ATSUI routine caused
+															;	a coordinate overflow (i.e. > 32K).
+kATSULineBreakInWord			EQU		-8808				;	This is not an error code but is returned by ATSUBreakLine to 
+															;	indicate that the returned offset is within a word since there was
+															;	only less than one word that could fit the requested width.
+kATSULastErr					EQU		-8809				;	The last ATSUI error code.
+; ******************************************************************************
+; 	ATSUI Attribute tags:  Apple reserves values 0 to 65,535 (0 to 0x0000FFFF) 
+; 	ATSUI clients may create their own tags with any other value               
+; ******************************************************************************
+; 	Line Control Attribute Tags 
+
+kATSULineWidthTag				EQU		1					;	Type:			ATSUTextMeasurement
+															;	Default value:	0
+kATSULineRotationTag			EQU		2					;	Type:			Fixed (fixed value in degrees in right-handed coordinate system)
+															;	Default value:	0
+kATSULineDirectionTag			EQU		3					;	Type:			Boolean; values 0 or 1 (see below for value identities)
+															;	Default value:	GetSysDirection() ? kATSURightToLeftBaseDirection : kATSULeftToRightBaseDirection
+kATSULineJustificationFactorTag	EQU		4					;	Type:			Fract between 0 and 1
+															;	Default value:	kATSUNoJustification
+kATSULineFlushFactorTag			EQU		5					;	Type:			Fract between 0 and 1 
+															;	Default value:	kATSUStartAlignment
+kATSULineBaselineValuesTag		EQU		6					;	Type:			BslnBaselineRecord
+															;	Default value:	All zeros.  Calculated from other style attributes (e.g., font and point size)
+kATSULineLayoutOptionsTag		EQU		7					;	Type:			UInt32
+															;	Default value:	kATSLineNoLayoutOptions - other options listed in ATSLayoutTypes.h
+kATSULineAscentTag				EQU		8					;	Type:			ATSUTextMeasurement
+															;	Default value:	kATSUseLineHeight
+kATSULineDescentTag				EQU		9					;	Type:			ATSUTextMeasurement
+															;	Default value:	kATSUseLineHeight
+kATSULineLanguageTag			EQU		10					;	Type:			RegionCode - region values listed in script.h interface file
+															;	Default value:	kTextRegionDontCare
+kATSULineTextLocatorTag			EQU		11					;	Type:			TextBreakLocatorRef
+															;	Default value:	NULL - set Region derived locator or the default Text Utilities locator
+kATSUMaxLineTag					EQU		12					;	This is just for convenience - the upper limit of the ATSUTextLayout attribute tags 
+; 	Run Style Attribute Tags 
+
+															; QuickDraw compatibility tags 
+kATSUQDBoldfaceTag				EQU		256					;	Type:			Boolean	
+															;	Default value:	false
+kATSUQDItalicTag				EQU		257					;	Type:			Boolean		
+															;	Default value:	false
+kATSUQDUnderlineTag				EQU		258					;	Type:			Boolean	
+															;	Default value:	false
+kATSUQDCondensedTag				EQU		259					;	Type:			Boolean	
+															;	Default value:	false
+kATSUQDExtendedTag				EQU		260					;	Type:			Boolean	
+															;	Default value:	false
+															; Common run tags 
+kATSUFontTag					EQU		261					;	Type:			ATSUFontID	
+															;	Default value:	GetScriptVariable( smSystemScript, smScriptAppFond )
+kATSUSizeTag					EQU		262					;	Type:			Fixed	
+															;	Default value:	GetScriptVariable( smSystemScript, smScriptAppFondSize )	
+kATSUColorTag					EQU		263					;	Type:			RGBColor	
+															;	Default value:	(0, 0, 0)
+															;	Less common run tags 
+kATSULanguageTag				EQU		264					;	Type:			RegionCode - region values listed in script.h interface file
+															;	Default value:	GetScriptManagerVariable( smRegionCode )
+kATSUVerticalCharacterTag		EQU		265					;	Type:			ATSUVerticalCharacterType	
+															;	Default value:	kATSUStronglyHorizontal
+kATSUImposeWidthTag				EQU		266					;	Type:			ATSUTextMeasurement
+															;	Default value:	all glyphs use their own font defined advance widths
+kATSUBeforeWithStreamShiftTag	EQU		267					;	Type:			Fixed
+															;	Default value:	0
+kATSUAfterWithStreamShiftTag	EQU		268					;	Type:			Fixed
+															;	Default value:	0
+kATSUCrossStreamShiftTag		EQU		269					;	Type:			Fixed
+															;	Default value:	0
+kATSUTrackingTag				EQU		270					;	Type:			Fixed
+															;	Default value:	kATSNoTracking
+kATSUHangingInhibitFactorTag	EQU		271					;	Type:			Fract between 0 and 1
+															;	Default value:	0
+kATSUKerningInhibitFactorTag	EQU		272					;	Type:			Fract between 0 and 1
+															;	Default value:	0
+kATSUDecompositionFactorTag		EQU		273					;	Type:			Fixed (-1.0 -> 1.0)
+															;	Default value:	0
+kATSUBaselineClassTag			EQU		274					;	Type:			BslnBaselineClass  (see SFNTLayoutTypes.h)
+															;	Default value:	kBSLNRomanBaseline - set to kBSLNNoBaselineOverride to use intrinsic baselines
+kATSUPriorityJustOverrideTag	EQU		275					;	Type:			ATSJustPriorityWidthDeltaOverrides (see ATSLayoutTypes.h)
+															;	Default value:	all zeros
+kATSUNoLigatureSplitTag			EQU		276					;	Type:			Boolean
+															;	Default value:	false - ligatures and compound characters have divisable components.
+kATSUNoCaretAngleTag			EQU		277					;	Type:			Boolean
+															;	Default value:	false - use the character's angularity to determine its boundaries
+kATSUSuppressCrossKerningTag	EQU		278					;	Type:			Boolean
+															;	Default value:	false - do not suppress automatic cross kerning (defined by font)
+kATSUNoOpticalAlignmentTag		EQU		279					;	Type:			Boolean
+															;	Default value:	false - do not suppress character's automatic optical positional alignment
+kATSUForceHangingTag			EQU		280					;	Type:			Boolean
+															;	Default value:	false - do not force the character's to hang beyond the line boundaries
+kATSUNoSpecialJustificationTag	EQU		281					;	Type:			Boolean
+															;	Default value:	false - perform post-compensation justification if needed
+kATSUStyleTextLocatorTag		EQU		282					;	Type:			TextBreakLocatorRef
+															;	Default value:	NULL - region derived locator or the default Text Utilities locator
+kATSUMaxStyleTag				EQU		283					;	This is just for convenience - the upper limit of the ATSUStyle attribute tags 
+kATSUMaxATSUITagValue			EQU		65535				;	This is the maximum Apple ATSUI reserved tag value.  Client defined tags must be larger.
+; *******************************
+; 	Enumerations and constants	
+; *******************************
+;  Cursor movement 
+
+kATSUByCharacter				EQU		0
+kATSUByCluster					EQU		1
+kATSUByWord						EQU		2
+;  Vertical text types 
+
+kATSUStronglyHorizontal			EQU		0
+kATSUStronglyVertical			EQU		1
+;  Line direction types (used for kATSULineDirectionTag values) 
+
+kATSULeftToRightBaseDirection	EQU		0					;	Impose left-to-right or top-to-bottom dominant direction 
+kATSURightToLeftBaseDirection	EQU		1					;	Impose right-to-left or bottom-to-top dominant direction 
+;  Style comparison types 
+
+kATSUStyleUnequal				EQU		0
+kATSUStyleContains				EQU		1
+kATSUStyleEquals				EQU		2
+kATSUStyleContainedBy			EQU		3
+;  Font Fallback methods 
+
+kATSUDefaultFontFallbacks		EQU		0
+kATSULastResortOnlyFallback		EQU		1
+kATSUSequentialFallbacksPreferred EQU	2
+kATSUSequentialFallbacksExclusive EQU	3
+;  ATSUI heap or memory allocation specifiers (of type ATSUHeapSpec) 
+
+kATSUUseCurrentHeap				EQU		0
+kATSUUseAppHeap					EQU		1
+kATSUUseSpecificHeap			EQU		2
+kATSUUseCallbacks				EQU		3
+;  LineFlushFactor convenience defined values 
+
+kATSUStartAlignment				EQU		$00000000
+kATSUEndAlignment				EQU		$40000000
+kATSUCenterAlignment			EQU		$20000000
+;  LineJustificationFactor convenience defined values 
+
+kATSUNoJustification			EQU		$00000000
+kATSUFullJustification			EQU		$40000000
+;  Other constants	
+
+kATSUInvalidFontID				EQU		0
+
+
+kATSUUseLineControlWidth		EQU		$7FFFFFFF
+
+
+kATSUNoSelector					EQU		$0000FFFF
+
+
+kATSUUseGrafPortPenLoc			EQU		$FFFFFFFF
+kATSUClearAll					EQU		$FFFFFFFF
+
+
+kATSUFromTextBeginning			EQU		$FFFFFFFF
+kATSUToTextEnd					EQU		$FFFFFFFF
+
+; ***************
+; 	Functions	
+; ***************
+
+; 	Clipboard support, flattened style version 0 (is is advised to not use these routines and perform your own flattening)	
+;
+; extern OSStatus ATSUCopyToHandle(ATSUStyle iStyle, Handle oStyleHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCopyToHandle
+	ENDIF
+
+;
+; extern OSStatus ATSUPasteFromHandle(ATSUStyle iStyle, Handle iStyleHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUPasteFromHandle
+	ENDIF
+
+; 	Memory allocation specification functions	
+;
+; extern OSStatus ATSUCreateMemorySetting(ATSUHeapSpec iHeapSpec, ATSUMemoryCallbacks *iMemoryCallbacks, ATSUMemorySetting *oMemorySetting)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCreateMemorySetting
+	ENDIF
+
+;
+; extern OSStatus ATSUSetCurrentMemorySetting(ATSUMemorySetting iMemorySetting)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetCurrentMemorySetting
+	ENDIF
+
+;
+; extern ATSUMemorySetting ATSUGetCurrentMemorySetting(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetCurrentMemorySetting
+	ENDIF
+
+;
+; extern OSStatus ATSUDisposeMemorySetting(ATSUMemorySetting iMemorySetting)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUDisposeMemorySetting
+	ENDIF
+
+; 	Basic style functions	
+;
+; extern OSStatus ATSUCreateStyle(ATSUStyle *oStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCreateStyle
+	ENDIF
+
+;
+; extern OSStatus ATSUCreateAndCopyStyle(ATSUStyle iStyle, ATSUStyle *oStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCreateAndCopyStyle
+	ENDIF
+
+;
+; extern OSStatus ATSUDisposeStyle(ATSUStyle iStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUDisposeStyle
+	ENDIF
+
+;
+; extern OSStatus ATSUSetStyleRefCon(ATSUStyle iStyle, UInt32 iRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetStyleRefCon
+	ENDIF
+
+;
+; extern OSStatus ATSUGetStyleRefCon(ATSUStyle iStyle, UInt32 *oRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetStyleRefCon
+	ENDIF
+
+; 	Style comparison 		
+;
+; extern OSStatus ATSUCompareStyles(ATSUStyle iFirstStyle, ATSUStyle iSecondStyle, ATSUStyleComparison *oComparison)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCompareStyles
+	ENDIF
+
+; 	Attribute manipulations	
+;
+; extern OSStatus ATSUCopyAttributes(ATSUStyle iSourceStyle, ATSUStyle iDestinationStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCopyAttributes
+	ENDIF
+
+;
+; extern OSStatus ATSUOverwriteAttributes(ATSUStyle iSourceStyle, ATSUStyle iDestinationStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUOverwriteAttributes
+	ENDIF
+
+;
+; extern OSStatus ATSUUnderwriteAttributes(ATSUStyle iSourceStyle, ATSUStyle iDestinationStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUUnderwriteAttributes
+	ENDIF
+
+; 	Empty styles	
+;
+; extern OSStatus ATSUClearStyle(ATSUStyle iStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUClearStyle
+	ENDIF
+
+;
+; extern OSStatus ATSUStyleIsEmpty(ATSUStyle iStyle, Boolean *oIsClear)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUStyleIsEmpty
+	ENDIF
+
+; 	Get and set attributes 
+;
+; extern OSStatus ATSUCalculateBaselineDeltas(ATSUStyle iStyle, BslnBaselineClass iBaselineClass, BslnBaselineRecord oBaselineDeltas)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCalculateBaselineDeltas
+	ENDIF
+
+;
+; extern OSStatus ATSUSetAttributes(ATSUStyle iStyle, ItemCount iAttributeCount, ATSUAttributeTag iTag[], ByteCount iValueSize[], ATSUAttributeValuePtr iValue[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetAttributes
+	ENDIF
+
+;
+; extern OSStatus ATSUGetAttribute(ATSUStyle iStyle, ATSUAttributeTag iTag, ByteCount iExpectedValueSize, ATSUAttributeValuePtr oValue, ByteCount *oActualValueSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetAttribute
+	ENDIF
+
+;
+; extern OSStatus ATSUGetAllAttributes(ATSUStyle iStyle, ATSUAttributeInfo oAttributeInfoArray[], ItemCount iTagValuePairArraySize, ItemCount *oTagValuePairCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetAllAttributes
+	ENDIF
+
+;
+; extern OSStatus ATSUClearAttributes(ATSUStyle iStyle, ItemCount iTagCount, ATSUAttributeTag iTag[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUClearAttributes
+	ENDIF
+
+; 	Font features	
+;
+; extern OSStatus ATSUSetFontFeatures(ATSUStyle iStyle, ItemCount iFeatureCount, ATSUFontFeatureType iType[], ATSUFontFeatureSelector iSelector[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetFontFeatures
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontFeature(ATSUStyle iStyle, ItemCount iFeatureIndex, ATSUFontFeatureType *oFeatureType, ATSUFontFeatureSelector *oFeatureSelector)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontFeature
+	ENDIF
+
+;
+; extern OSStatus ATSUGetAllFontFeatures(ATSUStyle iStyle, ItemCount iMaximumFeatureCount, ATSUFontFeatureType oFeatureType[], ATSUFontFeatureSelector oFeatureSelector[], ItemCount *oActualFeatureCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetAllFontFeatures
+	ENDIF
+
+;
+; extern OSStatus ATSUClearFontFeatures(ATSUStyle iStyle, ItemCount iFeatureCount, ATSUFontFeatureType iType[], ATSUFontFeatureSelector iSelector[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUClearFontFeatures
+	ENDIF
+
+; 	Font variations	
+;
+; extern OSStatus ATSUSetVariations(ATSUStyle iStyle, ItemCount iVariationCount, ATSUFontVariationAxis iAxes[], ATSUFontVariationValue iValue[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetVariations
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontVariationValue(ATSUStyle iStyle, ATSUFontVariationAxis iFontVariationAxis, ATSUFontVariationValue *oFontVariationValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontVariationValue
+	ENDIF
+
+;
+; extern OSStatus ATSUGetAllFontVariations(ATSUStyle iStyle, ItemCount iVariationCount, ATSUFontVariationAxis oVariationAxes[], ATSUFontVariationValue oFontVariationValues[], ItemCount *oActualVariationCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetAllFontVariations
+	ENDIF
+
+;
+; extern OSStatus ATSUClearFontVariations(ATSUStyle iStyle, ItemCount iAxisCount, ATSUFontVariationAxis iAxis[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUClearFontVariations
+	ENDIF
+
+; 	Basic text-layout functions	
+;
+; extern OSStatus ATSUCreateTextLayout(ATSUTextLayout *oTextLayout)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCreateTextLayout
+	ENDIF
+
+;
+; extern OSStatus ATSUCreateAndCopyTextLayout(ATSUTextLayout iTextLayout, ATSUTextLayout *oTextLayout)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCreateAndCopyTextLayout
+	ENDIF
+
+;
+; extern OSStatus ATSUCreateTextLayoutWithTextPtr(ConstUniCharArrayPtr iText, UniCharArrayOffset iTextOffset, UniCharCount iTextLength, UniCharCount iTextTotalLength, ItemCount iNumberOfRuns, UniCharCount iRunLengths[], ATSUStyle iStyles[], ATSUTextLayout *oTextLayout)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCreateTextLayoutWithTextPtr
+	ENDIF
+
+;
+; extern OSStatus ATSUCreateTextLayoutWithTextHandle(UniCharArrayHandle iText, UniCharArrayOffset iTextOffset, UniCharCount iTextLength, UniCharCount iTextTotalLength, ItemCount iNumberOfRuns, UniCharCount iRunLengths[], ATSUStyle iStyles[], ATSUTextLayout *oTextLayout)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCreateTextLayoutWithTextHandle
+	ENDIF
+
+;
+; extern OSStatus ATSUClearLayoutCache(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineStart)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUClearLayoutCache
+	ENDIF
+
+;
+; extern OSStatus ATSUDisposeTextLayout(ATSUTextLayout iTextLayout)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUDisposeTextLayout
+	ENDIF
+
+;
+; extern OSStatus ATSUSetTextLayoutRefCon(ATSUTextLayout iTextLayout, UInt32 iRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetTextLayoutRefCon
+	ENDIF
+
+;
+; extern OSStatus ATSUGetTextLayoutRefCon(ATSUTextLayout iTextLayout, UInt32 *oRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetTextLayoutRefCon
+	ENDIF
+
+; 	Glyph bounds retrieval	
+;
+; extern OSStatus ATSUGetGlyphBounds(ATSUTextLayout iTextLayout, ATSUTextMeasurement iTextBasePointX, ATSUTextMeasurement iTextBasePointY, UniCharArrayOffset iBoundsCharStart, UniCharCount iBoundsCharLength, UInt16 iTypeOfBounds, ItemCount iMaxNumberOfBounds, ATSTrapezoid oGlyphBounds[], ItemCount *oActualNumberOfBounds)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetGlyphBounds
+	ENDIF
+
+; 	Idle processing	
+;
+; extern OSStatus ATSUIdle(ATSUTextLayout iTextLayout)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUIdle
+	ENDIF
+
+; 	Text location	
+;
+; extern OSStatus ATSUSetTextPointerLocation(ATSUTextLayout iTextLayout, ConstUniCharArrayPtr iText, UniCharArrayOffset iTextOffset, UniCharCount iTextLength, UniCharCount iTextTotalLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetTextPointerLocation
+	ENDIF
+
+;
+; extern OSStatus ATSUSetTextHandleLocation(ATSUTextLayout iTextLayout, UniCharArrayHandle iText, UniCharArrayOffset iTextOffset, UniCharCount iTextLength, UniCharCount iTextTotalLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetTextHandleLocation
+	ENDIF
+
+;
+; extern OSStatus ATSUGetTextLocation(ATSUTextLayout iTextLayout, void **oText, Boolean *oTextIsStoredInHandle, UniCharArrayOffset *oOffset, UniCharCount *oTextLength, UniCharCount *oTextTotalLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetTextLocation
+	ENDIF
+
+; 	Text manipulation	
+;
+; extern OSStatus ATSUTextDeleted(ATSUTextLayout iTextLayout, UniCharArrayOffset iDeletedRangeStart, UniCharCount iDeletedRangeLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUTextDeleted
+	ENDIF
+
+;
+; extern OSStatus ATSUTextInserted(ATSUTextLayout iTextLayout, UniCharArrayOffset iInsertionLocation, UniCharCount iInsertionLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUTextInserted
+	ENDIF
+
+;
+; extern OSStatus ATSUTextMoved(ATSUTextLayout iTextLayout, ConstUniCharArrayPtr iNewLocation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUTextMoved
+	ENDIF
+
+; 	Layout controls	
+;
+; extern OSStatus ATSUCopyLayoutControls(ATSUTextLayout iSourceTextLayout, ATSUTextLayout iDestTextLayout)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCopyLayoutControls
+	ENDIF
+
+;
+; extern OSStatus ATSUSetLayoutControls(ATSUTextLayout iTextLayout, ItemCount iAttributeCount, ATSUAttributeTag iTag[], ByteCount iValueSize[], ATSUAttributeValuePtr iValue[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetLayoutControls
+	ENDIF
+
+;
+; extern OSStatus ATSUGetLayoutControl(ATSUTextLayout iTextLayout, ATSUAttributeTag iTag, ByteCount iExpectedValueSize, ATSUAttributeValuePtr oValue, ByteCount *oActualValueSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetLayoutControl
+	ENDIF
+
+;
+; extern OSStatus ATSUGetAllLayoutControls(ATSUTextLayout iTextLayout, ATSUAttributeInfo oAttributeInfoArray[], ItemCount iTagValuePairArraySize, ItemCount *oTagValuePairCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetAllLayoutControls
+	ENDIF
+
+;
+; extern OSStatus ATSUClearLayoutControls(ATSUTextLayout iTextLayout, ItemCount iTagCount, ATSUAttributeTag iTag[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUClearLayoutControls
+	ENDIF
+
+; 	Single line layout controls	
+;
+; extern OSStatus ATSUCopyLineControls(ATSUTextLayout iSourceTextLayout, UniCharArrayOffset iSourceLineStart, ATSUTextLayout iDestTextLayout, UniCharArrayOffset iDestLineStart)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCopyLineControls
+	ENDIF
+
+;
+; extern OSStatus ATSUSetLineControls(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineStart, ItemCount iAttributeCount, ATSUAttributeTag iTag[], ByteCount iValueSize[], ATSUAttributeValuePtr iValue[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetLineControls
+	ENDIF
+
+;
+; extern OSStatus ATSUGetLineControl(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineStart, ATSUAttributeTag iTag, ByteCount iExpectedValueSize, ATSUAttributeValuePtr oValue, ByteCount *oActualValueSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetLineControl
+	ENDIF
+
+;
+; extern OSStatus ATSUGetAllLineControls(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineStart, ATSUAttributeInfo oAttributeInfoArray[], ItemCount iTagValuePairArraySize, ItemCount *oTagValuePairCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetAllLineControls
+	ENDIF
+
+;
+; extern OSStatus ATSUClearLineControls(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineStart, ItemCount iTagCount, ATSUAttributeTag iTag[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUClearLineControls
+	ENDIF
+
+; 	Style run processing	
+;
+; extern OSStatus ATSUSetRunStyle(ATSUTextLayout iTextLayout, ATSUStyle iStyle, UniCharArrayOffset iRunStart, UniCharCount iRunLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetRunStyle
+	ENDIF
+
+;
+; extern OSStatus ATSUGetRunStyle(ATSUTextLayout iTextLayout, UniCharArrayOffset iOffset, ATSUStyle *oStyle, UniCharArrayOffset *oRunStart, UniCharCount *oRunLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetRunStyle
+	ENDIF
+
+;
+; extern OSStatus ATSUGetContinuousAttributes(ATSUTextLayout iTextLayout, UniCharArrayOffset iOffset, UniCharCount iLength, ATSUStyle oStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetContinuousAttributes
+	ENDIF
+
+; 	Drawing and measuring	
+;
+; extern OSStatus ATSUDrawText(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineOffset, UniCharCount iLineLength, ATSUTextMeasurement iLocationX, ATSUTextMeasurement iLocationY)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUDrawText
+	ENDIF
+
+;
+; extern OSStatus ATSUMeasureText(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineStart, UniCharCount iLineLength, ATSUTextMeasurement *oTextBefore, ATSUTextMeasurement *oTextAfter, ATSUTextMeasurement *oAscent, ATSUTextMeasurement *oDescent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUMeasureText
+	ENDIF
+
+;
+; extern OSStatus ATSUMeasureTextImage(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineOffset, UniCharCount iLineLength, ATSUTextMeasurement iLocationX, ATSUTextMeasurement iLocationY, Rect *oTextImageRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUMeasureTextImage
+	ENDIF
+
+; 	Highlighting	
+;
+; extern OSStatus ATSUHighlightText(ATSUTextLayout iTextLayout, ATSUTextMeasurement iTextBasePointX, ATSUTextMeasurement iTextBasePointY, UniCharArrayOffset iHighlightStart, UniCharCount iHighlightLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUHighlightText
+	ENDIF
+
+;
+; extern OSStatus ATSUUnhighlightText(ATSUTextLayout iTextLayout, ATSUTextMeasurement iTextBasePointX, ATSUTextMeasurement iTextBasePointY, UniCharArrayOffset iHighlightStart, UniCharCount iHighlightLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUUnhighlightText
+	ENDIF
+
+;
+; extern OSStatus ATSUGetTextHighlight(ATSUTextLayout iTextLayout, ATSUTextMeasurement iTextBasePointX, ATSUTextMeasurement iTextBasePointY, UniCharArrayOffset iHighlightStart, UniCharCount iHighlightLength, RgnHandle oHighlightRegion)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetTextHighlight
+	ENDIF
+
+; 	Hit-testing	
+;
+; extern OSStatus ATSUPositionToOffset(ATSUTextLayout iTextLayout, ATSUTextMeasurement iLocationX, ATSUTextMeasurement iLocationY, UniCharArrayOffset *ioPrimaryOffset, Boolean *oIsLeading, UniCharArrayOffset *oSecondaryOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUPositionToOffset
+	ENDIF
+
+;
+; extern OSStatus ATSUOffsetToPosition(ATSUTextLayout iTextLayout, UniCharArrayOffset iOffset, Boolean iIsLeading, ATSUCaret *oMainCaret, ATSUCaret *oSecondCaret, Boolean *oCaretIsSplit)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUOffsetToPosition
+	ENDIF
+
+; 	Cursor movement	
+;
+; extern OSStatus ATSUNextCursorPosition(ATSUTextLayout iTextLayout, UniCharArrayOffset iOldOffset, ATSUCursorMovementType iMovementType, UniCharArrayOffset *oNewOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUNextCursorPosition
+	ENDIF
+
+;
+; extern OSStatus ATSUPreviousCursorPosition(ATSUTextLayout iTextLayout, UniCharArrayOffset iOldOffset, ATSUCursorMovementType iMovementType, UniCharArrayOffset *oNewOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUPreviousCursorPosition
+	ENDIF
+
+;
+; extern OSStatus ATSURightwardCursorPosition(ATSUTextLayout iTextLayout, UniCharArrayOffset iOldOffset, ATSUCursorMovementType iMovementType, UniCharArrayOffset *oNewOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSURightwardCursorPosition
+	ENDIF
+
+;
+; extern OSStatus ATSULeftwardCursorPosition(ATSUTextLayout iTextLayout, UniCharArrayOffset iOldOffset, ATSUCursorMovementType iMovementType, UniCharArrayOffset *oNewOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSULeftwardCursorPosition
+	ENDIF
+
+; 	Line breaking	
+;
+; extern OSStatus ATSUBreakLine(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineStart, ATSUTextMeasurement iLineWidth, Boolean iUseAsSoftLineBreak, UniCharArrayOffset *oLineBreak)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUBreakLine
+	ENDIF
+
+;
+; extern OSStatus ATSUSetSoftLineBreak(ATSUTextLayout iTextLayout, UniCharArrayOffset iLineBreak)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetSoftLineBreak
+	ENDIF
+
+;
+; extern OSStatus ATSUGetSoftLineBreaks(ATSUTextLayout iTextLayout, UniCharArrayOffset iRangeStart, UniCharCount iRangeLength, ItemCount iMaximumBreaks, UniCharArrayOffset oBreaks[], ItemCount *oBreakCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetSoftLineBreaks
+	ENDIF
+
+;
+; extern OSStatus ATSUClearSoftLineBreaks(ATSUTextLayout iTextLayout, UniCharArrayOffset iRangeStart, UniCharCount iRangeLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUClearSoftLineBreaks
+	ENDIF
+
+; 	Font matching	
+;
+; extern OSStatus ATSUSetFontFallbacks(ItemCount iFontFallbacksCount, ATSUFontID iFontIDs[], ATSUFontFallbackMethod iFontFallbackMethod)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetFontFallbacks
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontFallbacks(ItemCount iMaxFontFallbacksCount, ATSUFontID oFontIDs[], ATSUFontFallbackMethod *oFontFallbackMethod, ItemCount *oActualFallbacksCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontFallbacks
+	ENDIF
+
+;
+; extern OSStatus ATSUMatchFontsToText(ATSUTextLayout iTextLayout, UniCharArrayOffset iTextStart, UniCharCount iTextLength, ATSUFontID *oFontID, UniCharArrayOffset *oChangedOffset, UniCharCount *oChangedLength)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUMatchFontsToText
+	ENDIF
+
+;
+; extern OSStatus ATSUSetTransientFontMatching(ATSUTextLayout iTextLayout, Boolean iTransientFontMatching)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUSetTransientFontMatching
+	ENDIF
+
+;
+; extern OSStatus ATSUGetTransientFontMatching(ATSUTextLayout iTextLayout, Boolean *oTransientFontMatching)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetTransientFontMatching
+	ENDIF
+
+; 	Font ID's	
+;
+; extern OSStatus ATSUFontCount(ItemCount *oFontCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUFontCount
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontIDs(ATSUFontID oFontIDs[], ItemCount iArraySize, ItemCount *oFontCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontIDs
+	ENDIF
+
+;
+; extern OSStatus ATSUFONDtoFontID(short iFONDNumber, Style iFONDStyle, ATSUFontID *oFontID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUFONDtoFontID
+	ENDIF
+
+;
+; extern OSStatus ATSUFontIDtoFOND(ATSUFontID iFontID, short *oFONDNumber, Style *oFONDStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUFontIDtoFOND
+	ENDIF
+
+; 	Font names	
+;
+; extern OSStatus ATSUCountFontNames(ATSUFontID iFontID, ItemCount *oFontNameCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCountFontNames
+	ENDIF
+
+;
+; extern OSStatus ATSUGetIndFontName(ATSUFontID iFontID, ItemCount iFontNameIndex, ByteCount iMaximumNameLength, Ptr oName, ByteCount *oActualNameLength, FontNameCode *oFontNameCode, FontPlatformCode *oFontNamePlatform, FontScriptCode *oFontNameScript, FontLanguageCode *oFontNameLanguage)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetIndFontName
+	ENDIF
+
+;
+; extern OSStatus ATSUFindFontName(ATSUFontID iFontID, FontNameCode iFontNameCode, FontPlatformCode iFontNamePlatform, FontScriptCode iFontNameScript, FontLanguageCode iFontNameLanguage, ByteCount iMaximumNameLength, Ptr oName, ByteCount *oActualNameLength, ItemCount *oFontNameIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUFindFontName
+	ENDIF
+
+;
+; extern OSStatus ATSUFindFontFromName(Ptr iName, ByteCount iNameLength, FontNameCode iFontNameCode, FontPlatformCode iFontNamePlatform, FontScriptCode iFontNameScript, FontLanguageCode iFontNameLanguage, ATSUFontID *oFontID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUFindFontFromName
+	ENDIF
+
+; 	Font features	
+;
+; extern OSStatus ATSUCountFontFeatureTypes(ATSUFontID iFontID, ItemCount *oTypeCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCountFontFeatureTypes
+	ENDIF
+
+;
+; extern OSStatus ATSUCountFontFeatureSelectors(ATSUFontID iFontID, ATSUFontFeatureType iType, ItemCount *oSelectorCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCountFontFeatureSelectors
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontFeatureTypes(ATSUFontID iFontID, ItemCount iMaximumTypes, ATSUFontFeatureType oTypes[], ItemCount *oActualTypeCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontFeatureTypes
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontFeatureSelectors(ATSUFontID iFontID, ATSUFontFeatureType iType, ItemCount iMaximumSelectors, ATSUFontFeatureSelector oSelectors[], Boolean oSelectorIsOnByDefault[], ItemCount *oActualSelectorCount, Boolean *oIsMutuallyExclusive)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontFeatureSelectors
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontFeatureNameCode(ATSUFontID iFontID, ATSUFontFeatureType iType, ATSUFontFeatureSelector iSelector, FontNameCode *oNameCode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontFeatureNameCode
+	ENDIF
+
+; 	Font tracking value & names	
+;
+; extern OSStatus ATSUCountFontTracking(ATSUFontID iFontID, ATSUVerticalCharacterType iCharacterOrientation, ItemCount *oTrackingCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCountFontTracking
+	ENDIF
+
+;
+; extern OSStatus ATSUGetIndFontTracking(ATSUFontID iFontID, ATSUVerticalCharacterType iCharacterOrientation, ItemCount iTrackIndex, Fixed *oFontTrackingValue, FontNameCode *oNameCode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetIndFontTracking
+	ENDIF
+
+; 	Font variations	
+;
+; extern OSStatus ATSUCountFontVariations(ATSUFontID iFontID, ItemCount *oVariationCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCountFontVariations
+	ENDIF
+
+;
+; extern OSStatus ATSUGetIndFontVariation(ATSUFontID iFontID, ItemCount iVariationIndex, ATSUFontVariationAxis *oATSUFontVariationAxis, ATSUFontVariationValue *oMinimumValue, ATSUFontVariationValue *oMaximumValue, ATSUFontVariationValue *oDefaultValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetIndFontVariation
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontVariationNameCode(ATSUFontID iFontID, ATSUFontVariationAxis iAxis, FontNameCode *oNameCode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontVariationNameCode
+	ENDIF
+
+; 	Font Instances	
+;
+; extern OSStatus ATSUCountFontInstances(ATSUFontID iFontID, ItemCount *oInstances)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUCountFontInstances
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontInstance(ATSUFontID iFontID, ItemCount iFontInstanceIndex, ItemCount iMaximumVariations, ATSUFontVariationAxis oAxes[], ATSUFontVariationValue oValues[], ItemCount *oActualVariationCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontInstance
+	ENDIF
+
+;
+; extern OSStatus ATSUGetFontInstanceNameCode(ATSUFontID iFontID, ItemCount iInstanceIndex, FontNameCode *oNameCode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ATSUGetFontInstanceNameCode
+	ENDIF
+
+	ENDIF ; __ATSUNICODE__ 
+

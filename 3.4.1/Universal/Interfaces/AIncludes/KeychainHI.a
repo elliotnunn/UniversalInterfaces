@@ -1,0 +1,138 @@
+;
+;    File:       KeychainHI.a
+;
+;    Contains:   Keychain API's with Human Interfaces
+;
+;    Version:    Technology: Keychain 3.0
+;                Release:    Universal Interfaces 3.4.1
+;
+;    Copyright:  © 2000-2001 by Apple Computer, Inc., all rights reserved
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__KEYCHAINHI__') = 'UNDEFINED' THEN
+__KEYCHAINHI__ SET 1
+
+	IF &TYPE('__KEYCHAINCORE__') = 'UNDEFINED' THEN
+	include 'KeychainCore.a'
+	ENDIF
+	IF &TYPE('__CFSTRING__') = 'UNDEFINED' THEN
+	include 'CFString.a'
+	ENDIF
+	IF &TYPE('__CFARRAY__') = 'UNDEFINED' THEN
+	include 'CFArray.a'
+	ENDIF
+	IF &TYPE('__CFDATE__') = 'UNDEFINED' THEN
+	include 'CFDate.a'
+	ENDIF
+
+;  Locking and unlocking a keychain 
+
+; *  KCUnlock()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   in KeychainLib 1.0 and later
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus KCUnlock(KCRef keychain, StringPtr password)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION KCUnlock
+	ENDIF
+
+;  Managing keychain items 
+
+; *  KCAddItem()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   in KeychainLib 1.0 and later
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus KCAddItem(KCItemRef item)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION KCAddItem
+	ENDIF
+
+;  Creating a new keychain 
+
+; *  KCCreateKeychain()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   in KeychainLib 1.0 and later
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus KCCreateKeychain(StringPtr password, KCRef *keychain)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION KCCreateKeychain
+	ENDIF
+
+;  Changing a keychain's settings 
+
+; *  KCChangeSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   in KeychainLib 2.0 and later
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus KCChangeSettings(KCRef keychain)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION KCChangeSettings
+	ENDIF
+
+;  Working with certificates 
+	IF CALL_NOT_IN_CARBON THEN
+
+; *  KCFindX509Certificates()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   in KeychainLib 2.0 and later
+; *    CarbonLib:        not available
+; *    Mac OS X:         not available
+; 
+
+;
+; pascal OSStatus KCFindX509Certificates(KCRef keychain, CFStringRef name, CFStringRef emailAddress, KCCertSearchOptions options, CFMutableArrayRef *certificateItems)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION KCFindX509Certificates
+	ENDIF
+
+
+; *  KCChooseCertificate()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   in KeychainLib 2.0 and later
+; *    CarbonLib:        not available
+; *    Mac OS X:         not available
+; 
+
+;
+; pascal OSStatus KCChooseCertificate(CFArrayRef items, KCItemRef *certificate, CFArrayRef policyOIDs, KCVerifyStopOn stopOn)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION KCChooseCertificate
+	ENDIF
+
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF ; __KEYCHAINHI__ 
+

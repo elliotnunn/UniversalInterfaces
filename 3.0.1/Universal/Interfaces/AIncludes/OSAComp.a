@@ -1,0 +1,59 @@
+;
+;	File:		OSAComp.a
+;
+;	Contains:	AppleScript Component Implementor's Interfaces.
+;
+;	Version:	Technology:	AppleScript 1.1
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1992-1997, 1997 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__OSACOMP__') = 'UNDEFINED' THEN
+__OSACOMP__ SET 1
+
+	IF &TYPE('__TYPES__') = 'UNDEFINED' THEN
+	include 'Types.a'
+	ENDIF
+	IF &TYPE('__AEDATAMODEL__') = 'UNDEFINED' THEN
+	include 'AEDataModel.a'
+	ENDIF
+
+; **************************************************************************
+;	Types and Constants
+;*************************************************************************
+
+; **************************************************************************
+;	Routines for Associating a Storage Type with a Script Data Handle 
+;*************************************************************************
+
+;
+; pascal OSErr OSAGetStorageType(Handle scriptData, DescType *dscType)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OSAGetStorageType
+	ENDIF
+
+;
+; pascal OSErr OSAAddStorageType(Handle scriptData, DescType dscType)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OSAAddStorageType
+	ENDIF
+
+;
+; pascal OSErr OSARemoveStorageType(Handle scriptData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OSARemoveStorageType
+	ENDIF
+
+
+	ENDIF ; __OSACOMP__ 
+

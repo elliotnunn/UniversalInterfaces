@@ -1,0 +1,235 @@
+
+Open Transport Client Release Notes
+
+Revision 1.3
+9/19/97
+
+
+Comments and technical support questions should be directed to AppleLink address DEVSUPPORT or Internet address 'devsupport@.apple.com'.
+
+
+Overview
+
+This is a development release of Open Transport for AppleTalk and TCP/IP.
+
+This release includes an AppleTalk Phase 2 stack containing PAP, ADSP, ATP, DDP and below. It includes a TCP/IP stack containing TCP, UDP, IP and a DNR. More information on the particular capabilities of these two stacks are contained in documentation specific to AppleTalk or TCP/IP (see below).
+
+What this release contains
+
+This release includes  
+• an Installer that will install Open Transport 1.3 and Apple Shared Library Manager 2.0.1 onto your machine. 
+• an Open Transport SDK folder that contains header files, libraries, and documents and samples.
+
+WARNINGS
+
+See also the ReadMe file that accompanies Open Transport
+
+Known bugs/incompatibilities
+
+
+Bug Fixes since 1.1
+
+General - OT 1.1.1
+
+• Fixed a problem where cancelling an installation could corrupt the system file.
+
+• Fixed a problem where the file "System Enabler 201" was left in the system folder, even if it wasn't needed.
+
+• Fixed a problem when running System 7.5.3, where Open Transport would not run on a 68020 machine that had been upgraded using an '040 accelerator card.
+
+• Fixed a problem where Norton Speed Disk sometimes crashed when running Open Transport.
+
+• Fixed a memory leak that occurred when opening an endpoint failed.
+
+• Memory fragmentation for TCP/IP has been eliminated on PowerPC machines.  However, 68K machines will still fragment memory for 2 minutes after the last TCP/IP application has terminated.  While we could entirely eliminate this fragmentation by loading into the system heap, it would mean that the TCP/IP stack was not eligible for VM paging, which is detrimental to overall system performance.  The workaround, if this is a problem, is to set TCP/IP to not load on demand in the control panel.
+
+• Fixed a problem where under heavy stress, networking would lock up.
+
+• If Open Transport was drag installed (don't do it - it won't work!), it installed it's Gestalt selectors even though Open Transport could not really be used.
+
+General - OT 1.2
+
+•Fixed a crash that can occur when AppleTalk is turned off and OT is used by clients. This sometimes could show up as a crash when turning on AppleTalk after an OT client has gone away, when reestablishing a connection with AOL Link, and possibly with many other situations involving using an OT client, quiting the client, and then using an OT client again.
+
+•OT will no longer crash if you accidently install an older version of ASLM after installing OT. However, it won't run either. You should make sure that nothing older then ASLM 2.0.1 gets installed if you want to use OT.
+
+General - OT 1.3
+
+•Fixed a bug that caused a 256 byte memory leak each time ARA 3.0 made a PPP connection. This leak could possibly have also affected other protocols.
+
+•Added and corrected CCI resources so Extension Manager information for OT files is now correct.
+
+•Removed many unecessary debugger breaks from the debug version of OpenTransport. This includes the debugger breaks you get on boot on every non-PCI PowerPC and on all PCI note books.
+
+•Fixed a bug in the OT implementation of CRMInstall that caused serial ports to sometimes not be registered properly. This was most notably a problem with the Global Village Platinum Pro PC Card and the symptom was getting a "Serial port in use" error when try to connect with the PPP control panel.
+
+AppleTalk - OT 1.1.1
+
+• AppleTalk now properly handles Phase I RTMP packets on LocalTalk.  This was causing problems using EtherPrint, TeleBridge, and other 3rd party forwarding technologies.
+
+• Fixed a problem in ADSP where it responded to the wrong socket if the other side of the connection negotiated a different socket.
+
+• When using ADEVs, Open Transport requests a specific address from the ADEV.  Some ADEVs return no error, but modify low memory locations to indicate a different address than that requested.  Open Transport now picks up that different address and uses it (of course, if "User Defined" addressing is checked in the control panel, we will not allow AppleTalk to open in this case).
+
+• Set the index number in a Get My Zone request to 0 (instead of 1) for compliance with Inside AppleTalk.
+
+• During bootup, decrease the time that NBP Registers use to register a name.
+
+• Fixed a problem where AppleTalk would awaken from sleep on the wrong port when docking with an Ethernet MicroDock.
+
+• Fixed a problem where packets directed to a multinode were also delivered to the user node.
+
+• Fixed a memory leak that occurred in low-memory situations when delivering multinode packets.
+
+AppleTalk - OT 1.2
+
+•Fixed a Chooser bug when clicking on the AppleTalk Inactive button. If you clicked Inactive, chose cancel from the warning dialog, and then clicked Inactive again, AppleTalk would get turned off without putting up the warning dialog for you again.
+
+•Made the Chooser runable on locked volumes.
+
+•Increased the number of servers that the Chooser will try to lookup in a zone from 256 to 512. This will prevent servers from not showing up if there are more then 256.
+
+AppleTalk - OT 1.3
+
+•Fixed a bug that sometimes prevented ARA 3.0 from properly setting the default zone (the zone that is automatically selected in the Chooser).
+
+•Fixed a crash that could occur when using LocalTalk and running out of memory. This only seemed to happen with Timbuktu 4.0 beta on a 68K Mac connected via LocalTalk.
+
+•Fixed a bug in the Chooser that caused it to add duplicate 'STR ' -4090 resources to the selected Chooser device file (ie. LaserWriter 8) each time you selected the device. This only happned if you had no zones. This bug could eventually cause the device file to become corrupt.
+
+•Integrated newer 'ltlk' resources from IRTalk to fix problems with using IRTalk on certain desktop machines.
+
+Backward-compatibility for AppleTalk - OT 1.1.1
+
+• The alert about switching to LocalTalk if the user-chosen link cannot be found or will not initialize will now appear correctly after boot time.
+
+• Fixed a crash that occurs under heavy stress when delivering packets to multinodes.  This affects the ARA MultiPort Server.  This bug has not been seen except while running the AppleShare server under heavy stress at the same time as multiple ARA connections are occurring on the MultiPort server.  It has not been seen on the ARA Personal Server.
+
+• Fixed a problem in ARA compatibility where we would sometimes not get the complete zone list from the server when we should have.
+
+• Fixed some problems in ARA compatibility where a packet would not get routed properly, causing machines attached to the local cable of the server not to be visible to the ARA client.
+
+TCP/IP - OT 1.1.1
+
+• Entries in the Address and Alias caches now flush when they reach their "time-to-die", and not when they exceed it.  TCP/IP also no longer caches resource records with a 0 time to live. 
+
+• The DNR no longer maps between an alias and the IP Address of the host being aliased. This allows certain "load-leveling" DNS schemes to work correctly.
+
+• When dealing with DHCP servers, try a "full-size" packet first, then fall back to "short" packets.  More servers use the "full-size" version.
+
+• Fixed a problem with timer overflow on long DHCP leases.  Also fixed some problems with renewing DHCP leases, and releasing the address if the lease terminates.
+
+• Fixed a problem that occurred when one end of a connection closes a "tcp" endpoint, while the other end simultaneously aborts the conntection.
+
+• Fixed a problem where a DNR SysInfo request will sporadically fail when a valid reply is mistakenly treated as having been truncated.
+
+• Fixed a hang that occasionally occured when flushing the DNR address cache.
+
+• Fixed a problem where resolving a bad name sometimes returned no error, when in fact an error occurred.
+
+• When looking up a name, a kOTNoDataErr error is now returned if no answer was received.  a kOTBadNameErr used to be returned.  
+
+TCP/IP - OT 1.2
+
+•Fixed the "Ping of Death" bug that occurs if a Ping packet bigger then 64k bytes is received.
+
+•OT is no longer vulnerable to TCP SYN attacks.
+
+•Fixed problems with TCP slow-link web server performance.
+
+•Fixed problems with TCP lost FINs.
+
+•Changed the BOOTP client implementation so that padded packets first since more servers prefer that.
+
+TCP/IP - OT 1.3
+
+•Improved HTTP performance by not delaying before sending out the second packet from the server.
+
+Backward-compatibility for TCP/IP - OT 1.1.1
+
+• Several bug fixes were made for MacTCP compatibility that should improve reliability.
+
+• Fixed a problem where TCP/IP and MacTCP applications caused the multifinder heap to become fragmented.
+
+• Fixed a memory leak that occurred every time the DNR was loaded and unloaded.
+
+• Fixed a hang that occurred with applications that use the "NoCopy" receive feature of MacTCP.  This hang occurs if Open Transport becomes low on memory (normally due to extremely high volumes of network traffic).
+
+• PUSH flag emulation now works correctly. 
+
+Backward-compatibility for TCP/IP - OT 1.2
+
+•Added the CompuServe PPP to the list of MDEVs that OT knows about.
+
+•Fixed a bug that could cause UDPRead's with infinite timouts to not complete whent the stream is closed.
+
+Backward-compatibility for TCP/IP - OT 1.3
+
+•Fixed crash that occurred with pings greater then 2020 bytes in size.
+
+•Multiple MDEVs are now supported properly.
+
+•Fixed a hang that would occur if an MDEV returned an error when writing a packet and also called the ioCompletion routine.
+
+Changes since 1.1
+
+General - OT 1.1.1
+
+• Added performance enhancements for opening and closing endpoints.
+
+• Open Transport now registers and unregisters CRM serial drivers.
+
+• When installing on certain Performa models with a 603 processor, the Open Transport installer will perform a test of the hardware, and not allow installation if the hardware is not working properly, putting up an alert telling the user to call Apple for information on getting the hardware fixed.
+
+• If Open Transport is run on certain Performa models with a 603 processor, it will test the hardware, and will run "classic" network if a hardware problem is detected.  It will also put up an alert notifying the user of the problem and what to do about it.
+
+• The Network Software Selector file is no longer installed or supported.
+
+AppleTalk - OT 1.1.1
+
+• A control panel called "AppleTalk Options" is now available in the "Open Transport Extras" folder to turn off router-related notification.  This is especially useful for ISDN dial-up users.
+
+TCP/IP - OT 1.1.1
+
+• Added performance enhancements for TCP open and closing connections.
+
+TCP/IP - OT 1.3
+
+• Single link multihoming (also know as IP aliasing) is now supported.
+
+
+Other notes about this build.
+
+ASLM 2.0.1
+
+This build installs ASLM 2.0.1.  If you currently have a debugging version of ASLM installed, installing the non-debug version of Open Transport will replace your debug version of ASLM with the non-debug version..
+
+Debugger support
+
+The debug version of the installer will install Open Transport Debugger preferences into the "OT Debugger Prefs" file in the Macsbug Preferences folder. This is a changed from 1.2 and earlier which installed the debugger prefs into the Debugger Prefs file in the System Folder. These debugger prefs contain the ASLM debugger prefs plus Macsbug templates for virtually all structures used in the API. A Macsbug dcmd is installed also that can display strings for error messages. For example, typing “OTErr -3158” will tell you what error number -3158 is.
+
+If you install the debug version of OpenTransport, there are many internal debugger breaks. You must have macsbug installed, or else if a debugger break occurs, you'll get the "bomb" box. 
+
+You must use Macsbug 6.5.3 or later if you want to make use of the OT Debugger Prefs.
+
+There is mostly a pattern to the debugger messages that appear. Most messages have a leading 2-character code. The meanings are: 
+
+NB Nonfatal error. Dump all the registers and do a stack crawl and include the results in a bug report along with what you were doing at the time. Hit 'g' in Macsbug to continue.  The machine should not crash, but it might hang.
+
+FX Fatal error.  An error that is probably fatal to the machine, but is cause by an external component, and not Open Transport itself.
+
+NX Nonfatal error.  An error occurred caused by an external component, and not Open Transport itself.  Hit 'g' in Macsbug to continue.  The machine should not crash, but it might hang.
+
+UF User fatal err.  A client of Open Transport did something wrong that is probably fatal.  Reboot the machine.
+
+UE User nonfatal error.   A client of Open Transport did something wrong.  Hit 'g' in Macsbug to continue.  The machine should not crash or hang.
+
+IE Informative error.  An error occurred that should rarely happen.  Hit 'g' in Macsbug to continue.  The machine should not crash or hang.
+
+IN Informative break.  This is just an informational break.  Hit 'g' in Macsbug to continue.  The machine should not crash or hang.
+
+The installer
+
+The installer will Easy Install the Apple Shared Library Manager and Open Transport AppleTalk and TCP/IP version 1.3, as well as AppleTalk  and MacTCP compatibility.
+You can “undo” the AppleTalk compatibility installation by using the Network Software Installer 1.4.2 or later, and custom installing AppleTalk for System 7, Ignore any warnings it might give you about installing over a ‘newer’ AppleTalk.
+ 

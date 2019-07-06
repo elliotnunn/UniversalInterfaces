@@ -1,0 +1,180 @@
+;
+;    File:       CFDictionary.a
+;
+;    Contains:   CoreFoundation dictionary collection
+;
+;    Version:    Technology: Mac OS X
+;                Release:    Universal Interfaces 3.3.2
+;
+;    Copyright:  © 1999-2000 by Apple Computer, Inc., all rights reserved
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__CFDICTIONARY__') = 'UNDEFINED' THEN
+__CFDICTIONARY__ SET 1
+
+	IF &TYPE('__CFBASE__') = 'UNDEFINED' THEN
+	include 'CFBase.a'
+	ENDIF
+
+CFDictionaryKeyCallBacks RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+retain					 ds.l	1				; offset: $4 (4)
+release					 ds.l	1				; offset: $8 (8)
+copyDescription			 ds.l	1				; offset: $C (12)
+equal					 ds.l	1				; offset: $10 (16)
+hash					 ds.l	1				; offset: $14 (20)
+sizeof					 EQU *					; size:   $18 (24)
+						ENDR
+CFDictionaryValueCallBacks RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+retain					 ds.l	1				; offset: $4 (4)
+release					 ds.l	1				; offset: $8 (8)
+copyDescription			 ds.l	1				; offset: $C (12)
+equal					 ds.l	1				; offset: $10 (16)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+
+
+
+
+;
+; extern CFTypeID CFDictionaryGetTypeID(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryGetTypeID
+	ENDIF
+
+;
+; extern CFDictionaryRef CFDictionaryCreate(CFAllocatorRef allocator, const void **keys, const void **values, CFIndex numValues, const CFDictionaryKeyCallBacks *keyCallBacks, const CFDictionaryValueCallBacks *valueCallBacks)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryCreate
+	ENDIF
+
+;
+; extern CFDictionaryRef CFDictionaryCreateCopy(CFAllocatorRef allocator, CFDictionaryRef dict)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryCreateCopy
+	ENDIF
+
+;
+; extern CFMutableDictionaryRef CFDictionaryCreateMutable(CFAllocatorRef allocator, CFIndex capacity, const CFDictionaryKeyCallBacks *keyCallBacks, const CFDictionaryValueCallBacks *valueCallBacks)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryCreateMutable
+	ENDIF
+
+;
+; extern CFMutableDictionaryRef CFDictionaryCreateMutableCopy(CFAllocatorRef allocator, CFIndex capacity, CFDictionaryRef dict)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryCreateMutableCopy
+	ENDIF
+
+;
+; extern CFIndex CFDictionaryGetCount(CFDictionaryRef dict)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryGetCount
+	ENDIF
+
+;
+; extern CFIndex CFDictionaryGetCountOfKey(CFDictionaryRef dict, const void *key)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryGetCountOfKey
+	ENDIF
+
+;
+; extern CFIndex CFDictionaryGetCountOfValue(CFDictionaryRef dict, const void *value)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryGetCountOfValue
+	ENDIF
+
+;
+; extern Boolean CFDictionaryContainsKey(CFDictionaryRef dict, const void *key)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryContainsKey
+	ENDIF
+
+;
+; extern Boolean CFDictionaryContainsValue(CFDictionaryRef dict, const void *value)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryContainsValue
+	ENDIF
+
+;
+; extern const void *CFDictionaryGetValue(CFDictionaryRef dict, const void *key)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryGetValue
+	ENDIF
+
+;
+; extern Boolean CFDictionaryGetValueIfPresent(CFDictionaryRef dict, const void *key, const void **value)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryGetValueIfPresent
+	ENDIF
+
+;
+; extern void CFDictionaryGetKeysAndValues(CFDictionaryRef dict, const void **keys, const void **values)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryGetKeysAndValues
+	ENDIF
+
+;
+; extern void CFDictionaryApplyFunction(CFDictionaryRef dict, CFDictionaryApplierFunction applier, void *context)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryApplyFunction
+	ENDIF
+
+;
+; extern void CFDictionaryAddValue(CFMutableDictionaryRef dict, const void *key, const void *value)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryAddValue
+	ENDIF
+
+;
+; extern void CFDictionarySetValue(CFMutableDictionaryRef dict, const void *key, const void *value)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionarySetValue
+	ENDIF
+
+;
+; extern void CFDictionaryReplaceValue(CFMutableDictionaryRef dict, const void *key, const void *value)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryReplaceValue
+	ENDIF
+
+;
+; extern void CFDictionaryRemoveValue(CFMutableDictionaryRef dict, const void *key)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryRemoveValue
+	ENDIF
+
+;
+; extern void CFDictionaryRemoveAllValues(CFMutableDictionaryRef dict)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFDictionaryRemoveAllValues
+	ENDIF
+
+
+	ENDIF ; __CFDICTIONARY__ 
+

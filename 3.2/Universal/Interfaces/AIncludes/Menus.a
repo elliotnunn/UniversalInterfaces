@@ -1,0 +1,1183 @@
+;
+;	File:		Menus.a
+;
+;	Contains:	Menu Manager Interfaces.
+;
+;	Version:	Technology:	Mac OS 8.5
+;				Release:	Universal Interfaces 3.2
+;
+;	Copyright:	© 1985-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__MENUS__') = 'UNDEFINED' THEN
+__MENUS__ SET 1
+
+	IF &TYPE('__APPLEEVENTS__') = 'UNDEFINED' THEN
+	include 'AppleEvents.a'
+	ENDIF
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+	include 'Events.a'
+	ENDIF
+	IF &TYPE('__PROCESSES__') = 'UNDEFINED' THEN
+	include 'Processes.a'
+	ENDIF
+	IF &TYPE('__TEXTCOMMON__') = 'UNDEFINED' THEN
+	include 'TextCommon.a'
+	ENDIF
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Gestalt and Errors (Mac OS 8.5 and later)											
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+gestaltMenuMgrAttr				EQU		'menu'				; If this Gestalt exists, the Mac OS 8.5 Menu Manager is installed
+gestaltMenuMgrPresent			EQU		1
+
+menuPropertyInvalid				EQU		-5603
+menuPropertyNotFoundErr			EQU		-5604
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu Constants 																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+noMark							EQU		0					;mark symbol for MarkItem
+
+															; menu defProc messages 
+kMenuDrawMsg					EQU		0
+kMenuChooseMsg					EQU		1
+kMenuSizeMsg					EQU		2
+kMenuDrawItemMsg				EQU		4
+kMenuCalcItemMsg				EQU		5
+kMenuThemeSavvyMsg				EQU		7					; is your MDEF theme-savvy?  If so, return hex 7473 in the whichItem parameter
+mDrawMsg						EQU		0
+mChooseMsg						EQU		1
+mSizeMsg						EQU		2
+mDrawItemMsg					EQU		4
+mCalcItemMsg					EQU		5
+
+kThemeSavvyMenuResponse			EQU		$7473
+
+textMenuProc					EQU		0
+hMenuCmd						EQU		27					;itemCmd == 0x001B ==> hierarchical menu
+hierMenu						EQU		-1					;a hierarchical menu - for InsertMenu call
+mPopUpMsg						EQU		3					;menu defProc messages - place yourself
+mctAllItems						EQU		-98					;search for all Items for the given ID
+mctLastIDIndic					EQU		-99					;last color table entry has this in ID field
+;  Constants for use with MacOS 8.0 (Appearance 1.0) and later
+
+kMenuStdMenuProc				EQU		63
+kMenuStdMenuBarProc				EQU		63
+
+kMenuNoModifiers				EQU		0					; Mask for no modifiers
+kMenuShiftModifier				EQU		$01					; Mask for shift key modifier
+kMenuOptionModifier				EQU		$02					; Mask for option key modifier
+kMenuControlModifier			EQU		$04					; Mask for control key modifier
+kMenuNoCommandModifier			EQU		$08					; Mask for no command key modifier
+
+kMenuNoIcon						EQU		0					; No icon
+kMenuIconType					EQU		1					; Type for ICON
+kMenuShrinkIconType				EQU		2					; Type for ICON plotted 16 x 16
+kMenuSmallIconType				EQU		3					; Type for SICN
+kMenuColorIconType				EQU		4					; Type for cicn
+kMenuIconSuiteType				EQU		5					; Type for Icon Suite
+kMenuIconRefType				EQU		6					; Type for Icon Ref
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu Structures 																	
+; ——————————————————————————————————————————————————————————————————————————————————————
+MenuInfo				RECORD 0
+menuID					 ds.w	1				; offset: $0 (0)
+menuWidth				 ds.w	1				; offset: $2 (2)
+menuHeight				 ds.w	1				; offset: $4 (4)
+menuProc				 ds.l	1				; offset: $6 (6)
+enableFlags				 ds.l	1				; offset: $A (10)
+menuData				 ds		Str255			; offset: $E (14)
+sizeof					 EQU *					; size:   $10E (270)
+						ENDR
+; typedef struct MenuInfo *				MenuPtr
+
+; typedef MenuPtr *						MenuHandle
+
+;  MenuRef is obsolete.  Use MenuHandle.  Or don’t.  It’s all the same to us.  We’re here to serve.
+; typedef MenuHandle 					MenuRef
+
+MCEntry					RECORD 0
+mctID					 ds.w	1				; offset: $0 (0)		; menu ID.  ID = 0 is the menu bar
+mctItem					 ds.w	1				; offset: $2 (2)		; menu Item. Item = 0 is a title
+mctRGB1					 ds		RGBColor		; offset: $4 (4)		; usage depends on ID and Item
+mctRGB2					 ds		RGBColor		; offset: $A (10)		; usage depends on ID and Item
+mctRGB3					 ds		RGBColor		; offset: $10 (16)		; usage depends on ID and Item
+mctRGB4					 ds		RGBColor		; offset: $16 (22)		; usage depends on ID and Item
+mctReserved				 ds.w	1				; offset: $1C (28)		; reserved for internal use
+sizeof					 EQU *					; size:   $1E (30)
+						ENDR
+; typedef struct MCEntry *				MCEntryPtr
+
+MCTable					RECORD 0
+elements				 ds.b	1 * MCEntry.sizeof
+sizeof					 EQU *					; size:   $1E (30)
+						ENDR
+
+
+; typedef struct MCEntry *				MCTablePtr
+
+; typedef MCTablePtr *					MCTableHandle
+
+MenuCRsrc				RECORD 0
+numEntries				 ds.w	1				; offset: $0 (0)		; number of entries
+mcEntryRecs				 ds		MCTable			; offset: $2 (2)		; ARRAY [1..numEntries] of MCEntry
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+; typedef struct MenuCRsrc *			MenuCRsrcPtr
+
+; typedef MenuCRsrcPtr *				MenuCRsrcHandle
+
+	IF TARGET_OS_WIN32 THEN
+;  QuickTime 3.0 
+MenuAccessKeyRec		RECORD 0
+count					 ds.w	1				; offset: $0 (0)
+flags					 ds.l	1				; offset: $2 (2)
+keys					 ds.b	1				; offset: $6 (6) <-- really an array of length one
+						 ORG 8
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct MenuAccessKeyRec *		MenuAccessKeyPtr
+
+; typedef MenuAccessKeyPtr *			MenuAccessKeyHandle
+
+;
+; extern void SetMenuItemHotKey(MenuHandle menu, short itemID, char hotKey, long flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemHotKey
+	ENDIF
+
+	ENDIF	; TARGET_OS_WIN32
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu ProcPtrs 																	
+; 																						
+; 	All of these procs are considered deprecated.  Developers interested in portability	
+; 	to Carbon should avoid them entirely, if at all possible.							
+; ——————————————————————————————————————————————————————————————————————————————————————
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu Manager Initialization														
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void InitProcMenu(short resID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InitProcMenu:	OPWORD	$A808
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitProcMenu
+	ENDIF
+
+;
+; pascal void InitMenus(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InitMenus:	OPWORD	$A930
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitMenus
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu Manipulation		 															
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal MenuHandle NewMenu(short menuID, ConstStr255Param menuTitle)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_NewMenu:	OPWORD	$A931
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewMenu
+	ENDIF
+
+;
+; pascal MenuHandle GetMenu(short resourceID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetMenu:	OPWORD	$A9BF
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenu
+	ENDIF
+
+;
+; pascal void DisposeMenu(MenuHandle theMenu)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DisposeMenu:	OPWORD	$A932
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisposeMenu
+	ENDIF
+
+;
+; pascal void CalcMenuSize(MenuHandle theMenu)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CalcMenuSize:	OPWORD	$A948
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CalcMenuSize
+	ENDIF
+
+;
+; pascal short CountMItems(MenuHandle theMenu)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CountMItems:	OPWORD	$A950
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CountMItems
+	ENDIF
+
+;  Routines available in Mac OS 8.5 and later
+
+;
+; pascal OSStatus GetMenuFont(MenuHandle menu, SInt16 *outFontID, UInt16 *outFontSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuFont
+	ENDIF
+
+;
+; pascal OSStatus SetMenuFont(MenuHandle menu, SInt16 inFontID, UInt16 inFontSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuFont
+	ENDIF
+
+;
+; pascal Boolean GetMenuExcludesMarkColumn(MenuHandle menu)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuExcludesMarkColumn
+	ENDIF
+
+;
+; pascal OSStatus SetMenuExcludesMarkColumn(MenuHandle menu, Boolean excludesMark)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuExcludesMarkColumn
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu Item Insertion	 															
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void AppendMenu(MenuHandle menu, ConstStr255Param data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_AppendMenu:	OPWORD	$A933
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AppendMenu
+	ENDIF
+
+;
+; pascal void InsertResMenu(MenuHandle theMenu, ResType theType, short afterItem)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InsertResMenu:	OPWORD	$A951
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InsertResMenu
+	ENDIF
+
+;
+; pascal void AppendResMenu(MenuHandle theMenu, ResType theType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_AppendResMenu:	OPWORD	$A94D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AppendResMenu
+	ENDIF
+
+;
+; pascal void InsertMenuItem(MenuHandle theMenu, ConstStr255Param itemString, short afterItem)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InsertMenuItem:	OPWORD	$A826
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InsertMenuItem
+	ENDIF
+
+;
+; pascal void DeleteMenuItem(MenuHandle theMenu, short item)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DeleteMenuItem:	OPWORD	$A952
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeleteMenuItem
+	ENDIF
+
+;
+; pascal void InsertFontResMenu(MenuHandle theMenu, short afterItem, short scriptFilter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InsertFontResMenu
+			move.w              #$0400,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InsertFontResMenu
+	ENDIF
+
+;
+; pascal void InsertIntlResMenu(MenuHandle theMenu, ResType theType, short afterItem, short scriptFilter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InsertIntlResMenu
+			move.w              #$0601,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InsertIntlResMenu
+	ENDIF
+
+;  Routines available in Mac OS 8.5 and later
+
+;
+; pascal OSStatus AppendMenuItemText(MenuHandle menu, ConstStr255Param inString)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AppendMenuItemText
+	ENDIF
+
+;
+; pascal OSStatus InsertMenuItemText(MenuHandle menu, ConstStr255Param inString, UInt16 afterItem)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InsertMenuItemText
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu Events				 														
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal long MenuKey(CharParameter ch)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_MenuKey:	OPWORD	$A93E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MenuKey
+	ENDIF
+
+;
+; pascal long MenuSelect(Point startPt)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_MenuSelect:	OPWORD	$A93D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MenuSelect
+	ENDIF
+
+;
+; pascal long PopUpMenuSelect(MenuHandle menu, short top, short left, short popUpItem)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_PopUpMenuSelect:	OPWORD	$A80B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PopUpMenuSelect
+	ENDIF
+
+;
+; pascal long MenuChoice(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_MenuChoice:	OPWORD	$AA66
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MenuChoice
+	ENDIF
+
+;  Routines available in Mac OS 8.0 (Appearance 1.0) and later
+;
+; pascal UInt32 MenuEvent(const EventRecord *inEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MenuEvent
+			move.w              #$020C,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MenuEvent
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu Bar 				  															
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal short GetMBarHeight(void)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMBarHeight        &dest=(sp)
+			move.w            $0BAA,&dest
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMBarHeight
+	ENDIF
+
+;
+; pascal void DrawMenuBar(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DrawMenuBar:	OPWORD	$A937
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawMenuBar
+	ENDIF
+
+;
+; pascal void InvalMenuBar(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InvalMenuBar:	OPWORD	$A81D
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InvalMenuBar
+	ENDIF
+
+;
+; pascal void HiliteMenu(short menuID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_HiliteMenu:	OPWORD	$A938
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HiliteMenu
+	ENDIF
+
+;
+; pascal Handle GetNewMBar(short menuBarID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetNewMBar:	OPWORD	$A9C0
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetNewMBar
+	ENDIF
+
+;
+; pascal Handle GetMenuBar(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetMenuBar:	OPWORD	$A93B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuBar
+	ENDIF
+
+;
+; pascal void SetMenuBar(Handle menuList)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetMenuBar:	OPWORD	$A93C
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuBar
+	ENDIF
+
+;
+; pascal MenuHandle GetMenuHandle(short menuID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetMenuHandle:	OPWORD	$A949
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuHandle
+	ENDIF
+
+;
+; pascal void InsertMenu(MenuHandle theMenu, short beforeID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_InsertMenu:	OPWORD	$A935
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InsertMenu
+	ENDIF
+
+;
+; pascal void DeleteMenu(short menuID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DeleteMenu:	OPWORD	$A936
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeleteMenu
+	ENDIF
+
+;
+; pascal void ClearMenuBar(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_ClearMenuBar:	OPWORD	$A934
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ClearMenuBar
+	ENDIF
+
+;
+; pascal void SetMenuFlash(short count)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetMenuFlash:	OPWORD	$A94A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuFlash
+	ENDIF
+
+;
+; pascal void FlashMenuBar(short menuID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_FlashMenuBar:	OPWORD	$A94C
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FlashMenuBar
+	ENDIF
+
+;
+; pascal Boolean SystemEdit(short editCmd)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SystemEdit:	OPWORD	$A9C2
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SystemEdit
+	ENDIF
+
+;
+; pascal void SystemMenu(long menuResult)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SystemMenu:	OPWORD	$A9B5
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SystemMenu
+	ENDIF
+
+;  Routines available in Mac OS 8.5 and later
+;
+; pascal Boolean IsMenuBarVisible(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsMenuBarVisible
+	ENDIF
+
+;
+; pascal void ShowMenuBar(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ShowMenuBar
+	ENDIF
+
+;
+; pascal void HideMenuBar(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION HideMenuBar
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu Item Accessors 																
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void CheckItem(MenuHandle theMenu, short item, Boolean checked)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_CheckItem:	OPWORD	$A945
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CheckItem
+	ENDIF
+
+;
+; pascal void SetMenuItemText(MenuHandle theMenu, short item, ConstStr255Param itemString)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetMenuItemText:	OPWORD	$A947
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemText
+	ENDIF
+
+;
+; pascal void GetMenuItemText(MenuHandle theMenu, short item, Str255 itemString)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetMenuItemText:	OPWORD	$A946
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemText
+	ENDIF
+
+;
+; pascal void SetItemMark(MenuHandle theMenu, short item, CharParameter markChar)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetItemMark:	OPWORD	$A944
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetItemMark
+	ENDIF
+
+;
+; pascal void GetItemMark(MenuHandle theMenu, short item, CharParameter *markChar)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetItemMark:	OPWORD	$A943
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetItemMark
+	ENDIF
+
+;
+; pascal void SetItemCmd(MenuHandle theMenu, short item, CharParameter cmdChar)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetItemCmd:	OPWORD	$A84F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetItemCmd
+	ENDIF
+
+;
+; pascal void GetItemCmd(MenuHandle theMenu, short item, CharParameter *cmdChar)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetItemCmd:	OPWORD	$A84E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetItemCmd
+	ENDIF
+
+;
+; pascal void SetItemIcon(MenuHandle theMenu, short item, short iconIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetItemIcon:	OPWORD	$A940
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetItemIcon
+	ENDIF
+
+;
+; pascal void GetItemIcon(MenuHandle theMenu, short item, short *iconIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetItemIcon:	OPWORD	$A93F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetItemIcon
+	ENDIF
+
+;
+; pascal void SetItemStyle(MenuHandle theMenu, short item, StyleParameter chStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetItemStyle:	OPWORD	$A942
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetItemStyle
+	ENDIF
+
+;
+; pascal void GetItemStyle(MenuHandle theMenu, short item, Style *chStyle)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetItemStyle:	OPWORD	$A941
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetItemStyle
+	ENDIF
+
+;
+; pascal void DisableItem(MenuHandle theMenu, short item)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DisableItem:	OPWORD	$A93A
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisableItem
+	ENDIF
+
+;
+; pascal void EnableItem(MenuHandle theMenu, short item)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_EnableItem:	OPWORD	$A939
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION EnableItem
+	ENDIF
+
+;  Routines available in Mac OS 8.0 (Appearance 1.0) and later
+
+;
+; pascal OSErr SetMenuItemCommandID(MenuHandle inMenu, SInt16 inItem, UInt32 inCommandID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMenuItemCommandID
+			move.w              #$0502,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemCommandID
+	ENDIF
+
+;
+; pascal OSErr GetMenuItemCommandID(MenuHandle inMenu, SInt16 inItem, UInt32 *outCommandID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMenuItemCommandID
+			move.w              #$0503,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemCommandID
+	ENDIF
+
+;
+; pascal OSErr SetMenuItemModifiers(MenuHandle inMenu, SInt16 inItem, UInt8 inModifiers)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMenuItemModifiers
+			move.w              #$0404,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemModifiers
+	ENDIF
+
+;
+; pascal OSErr GetMenuItemModifiers(MenuHandle inMenu, SInt16 inItem, UInt8 *outModifiers)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMenuItemModifiers
+			move.w              #$0505,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemModifiers
+	ENDIF
+
+;
+; pascal OSErr SetMenuItemIconHandle(MenuHandle inMenu, SInt16 inItem, UInt8 inIconType, Handle inIconHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMenuItemIconHandle
+			move.w              #$0606,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemIconHandle
+	ENDIF
+
+;
+; pascal OSErr GetMenuItemIconHandle(MenuHandle inMenu, SInt16 inItem, UInt8 *outIconType, Handle *outIconHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMenuItemIconHandle
+			move.w              #$0707,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemIconHandle
+	ENDIF
+
+;
+; pascal OSErr SetMenuItemTextEncoding(MenuHandle inMenu, SInt16 inItem, TextEncoding inScriptID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMenuItemTextEncoding
+			move.w              #$0408,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemTextEncoding
+	ENDIF
+
+;
+; pascal OSErr GetMenuItemTextEncoding(MenuHandle inMenu, SInt16 inItem, TextEncoding *outScriptID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMenuItemTextEncoding
+			move.w              #$0509,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemTextEncoding
+	ENDIF
+
+;
+; pascal OSErr SetMenuItemHierarchicalID(MenuHandle inMenu, SInt16 inItem, SInt16 inHierID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMenuItemHierarchicalID
+			move.w              #$040D,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemHierarchicalID
+	ENDIF
+
+;
+; pascal OSErr GetMenuItemHierarchicalID(MenuHandle inMenu, SInt16 inItem, SInt16 *outHierID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMenuItemHierarchicalID
+			move.w              #$050E,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemHierarchicalID
+	ENDIF
+
+;
+; pascal OSErr SetMenuItemFontID(MenuHandle inMenu, SInt16 inItem, SInt16 inFontID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMenuItemFontID
+			move.w              #$040F,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemFontID
+	ENDIF
+
+;
+; pascal OSErr GetMenuItemFontID(MenuHandle inMenu, SInt16 inItem, SInt16 *outFontID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMenuItemFontID
+			move.w              #$0510,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemFontID
+	ENDIF
+
+;
+; pascal OSErr SetMenuItemRefCon(MenuHandle inMenu, SInt16 inItem, UInt32 inRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMenuItemRefCon
+			move.w              #$050A,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemRefCon
+	ENDIF
+
+;
+; pascal OSErr GetMenuItemRefCon(MenuHandle inMenu, SInt16 inItem, UInt32 *outRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMenuItemRefCon
+			move.w              #$050B,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemRefCon
+	ENDIF
+
+;
+; pascal OSErr SetMenuItemRefCon2(MenuHandle inMenu, SInt16 inItem, UInt32 inRefCon2)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMenuItemRefCon2
+			move.w              #$0511,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemRefCon2
+	ENDIF
+
+;
+; pascal OSErr GetMenuItemRefCon2(MenuHandle inMenu, SInt16 inItem, UInt32 *outRefCon2)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMenuItemRefCon2
+			move.w              #$0512,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemRefCon2
+	ENDIF
+
+;
+; pascal OSErr SetMenuItemKeyGlyph(MenuHandle inMenu, SInt16 inItem, SInt16 inGlyph)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetMenuItemKeyGlyph
+			move.w              #$0513,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemKeyGlyph
+	ENDIF
+
+;
+; pascal OSErr GetMenuItemKeyGlyph(MenuHandle inMenu, SInt16 inItem, SInt16 *outGlyph)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetMenuItemKeyGlyph
+			move.w              #$0514,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemKeyGlyph
+	ENDIF
+
+;  Routines available in Mac OS 8.5 and later (supporting enabling/disabling of > 31 items)
+
+;
+; pascal void EnableMenuItem(MenuHandle theMenu, UInt16 item)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION EnableMenuItem
+	ENDIF
+
+;
+; pascal void DisableMenuItem(MenuHandle theMenu, UInt16 item)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisableMenuItem
+	ENDIF
+
+;
+; pascal Boolean IsMenuItemEnabled(MenuHandle menu, UInt16 item)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsMenuItemEnabled
+	ENDIF
+
+;
+; pascal void EnableMenuItemIcon(MenuHandle theMenu, UInt16 item)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_EnableMenuItemIcon
+			move.w              #$0019,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION EnableMenuItemIcon
+	ENDIF
+
+;
+; pascal void DisableMenuItemIcon(MenuHandle theMenu, UInt16 item)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DisableMenuItemIcon
+			move.w              #$0020,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisableMenuItemIcon
+	ENDIF
+
+;
+; pascal Boolean IsMenuItemIconEnabled(MenuHandle menu, UInt16 item)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IsMenuItemIconEnabled
+			move.w              #$0018,D0
+			dc.w            	$A825
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsMenuItemIconEnabled
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Menu Item Color Tables	 														
+; 	  																					
+; 	Menu color manipulation is considered deprecated with the advent of the Appearance	
+; 	Manager.  Avoid using these routines if possible 									
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal void DeleteMCEntries(short menuID, short menuItem)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DeleteMCEntries:	OPWORD	$AA60
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeleteMCEntries
+	ENDIF
+
+;
+; pascal MCTableHandle GetMCInfo(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetMCInfo:	OPWORD	$AA61
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMCInfo
+	ENDIF
+
+;
+; pascal void SetMCInfo(MCTableHandle menuCTbl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetMCInfo:	OPWORD	$AA62
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMCInfo
+	ENDIF
+
+;
+; pascal void DisposeMCInfo(MCTableHandle menuCTbl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DisposeMCInfo:	OPWORD	$AA63
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisposeMCInfo
+	ENDIF
+
+;
+; pascal MCEntryPtr GetMCEntry(short menuID, short menuItem)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetMCEntry:	OPWORD	$AA64
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMCEntry
+	ENDIF
+
+;
+; pascal void SetMCEntries(short numEntries, MCTablePtr menuCEntries)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SetMCEntries:	OPWORD	$AA65
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMCEntries
+	ENDIF
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  • Properties	 (Mac OS 8.5 and later)													
+; 																						
+;  With the following property APIs, you can attach any piece of data you'd like to a	
+;  menu or menu item. Passing zero for the item number parameter indicates you'd like	
+;  to attach the data to the menu itself, and not to any specific menu item.			
+; ——————————————————————————————————————————————————————————————————————————————————————
+;
+; pascal OSStatus GetMenuItemProperty(MenuHandle menu, UInt16 item, OSType propertyCreator, OSType propertyTag, UInt32 bufferSize, UInt32 *actualSize, void *propertyBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemProperty
+	ENDIF
+
+;
+; pascal OSStatus GetMenuItemPropertySize(MenuHandle menu, UInt16 item, OSType propertyCreator, OSType propertyTag, UInt32 *size)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMenuItemPropertySize
+	ENDIF
+
+;
+; pascal OSStatus SetMenuItemProperty(MenuHandle menu, UInt16 item, OSType propertyCreator, OSType propertyTag, UInt32 propertySize, void *propertyData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetMenuItemProperty
+	ENDIF
+
+;
+; pascal OSStatus RemoveMenuItemProperty(MenuHandle menu, UInt16 item, OSType propertyCreator, OSType propertyTag)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RemoveMenuItemProperty
+	ENDIF
+
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+; 	• Contextual Menu routines and constants											
+; 	available with Conxtextual Menu extension 1.0 and later								
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  Gestalt Selector for classic 68K apps only. 
+;  CFM apps should weak link and check the symbols. 
+
+gestaltContextualMenuAttr		EQU		'cmnu'
+gestaltContextualMenuUnusedBit	EQU		0
+gestaltContextualMenuTrapAvailable EQU	1
+;  Values indicating what kind of help the application supports 
+
+kCMHelpItemNoHelp				EQU		0
+kCMHelpItemAppleGuide			EQU		1
+kCMHelpItemOtherHelp			EQU		2
+;  Values indicating what was chosen from the menu 
+
+kCMNothingSelected				EQU		0
+kCMMenuItemSelected				EQU		1
+kCMShowHelpSelected				EQU		3
+;
+; pascal OSStatus InitContextualMenus(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InitContextualMenus
+			moveq           	#1,D0
+			dc.w            	$AA72
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitContextualMenus
+	ENDIF
+
+;
+; pascal Boolean IsShowContextualMenuClick(const EventRecord *inEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IsShowContextualMenuClick
+			moveq           	#2,D0
+			dc.w            	$AA72
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsShowContextualMenuClick
+	ENDIF
+
+;
+; pascal OSStatus ContextualMenuSelect(MenuHandle inMenu, Point inGlobalLocation, Boolean inReserved, UInt32 inHelpType, ConstStr255Param inHelpItemString, const AEDesc *inSelection, UInt32 *outUserSelectionType, SInt16 *outMenuID, UInt16 *outMenuItem)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ContextualMenuSelect
+			moveq           	#3,D0
+			dc.w            	$AA72
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ContextualMenuSelect
+	ENDIF
+
+;
+; pascal Boolean ProcessIsContextualMenuClient(ProcessSerialNumber *inPSN)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ProcessIsContextualMenuClient
+			moveq           	#4,D0
+			dc.w            	$AA72
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ProcessIsContextualMenuClient
+	ENDIF
+
+
+
+
+	IF OLDROUTINENAMES THEN
+	ENDIF	; OLDROUTINENAMES
+
+
+	IF TARGET_OS_WIN32 THEN
+	ENDIF	; TARGET_OS_WIN32
+	ENDIF ; __MENUS__ 
+

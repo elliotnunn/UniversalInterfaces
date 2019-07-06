@@ -1,0 +1,388 @@
+;
+;	File:		Events.a
+;
+;	Contains:	Event Manager Interfaces.
+;
+;	Version:	Technology:	Mac OS 8
+;				Release:	Universal Interfaces 3.2
+;
+;	Copyright:	© 1985-1998 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+__EVENTS__ SET 1
+
+	IF &TYPE('__OSUTILS__') = 'UNDEFINED' THEN
+	include 'OSUtils.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+
+	IF ¬ TARGET_OS_MAC THEN
+	IF &TYPE('__ENDIAN__') = 'UNDEFINED' THEN
+	include 'Endian.a'
+	ENDIF
+	ENDIF
+; typedef UInt16 						EventKind
+
+; typedef UInt16 						EventMask
+
+
+nullEvent						EQU		0
+mouseDown						EQU		1
+mouseUp							EQU		2
+keyDown							EQU		3
+keyUp							EQU		4
+autoKey							EQU		5
+updateEvt						EQU		6
+diskEvt							EQU		7
+activateEvt						EQU		8
+osEvt							EQU		15
+kHighLevelEvent					EQU		23
+
+mDownMask						EQU		$02					; mouse button pressed
+mUpMask							EQU		$04					; mouse button released
+keyDownMask						EQU		$08					; key pressed
+keyUpMask						EQU		$10					; key released
+autoKeyMask						EQU		$20					; key repeatedly held down
+updateMask						EQU		$40					; window needs updating
+diskMask						EQU		$80					; disk inserted
+activMask						EQU		$0100				; activate/deactivate window
+highLevelEventMask				EQU		$0400				; high-level events (includes AppleEvents)
+osMask							EQU		$8000				; operating system events (suspend, resume)
+everyEvent						EQU		$FFFF				; all of the above
+
+charCodeMask					EQU		$000000FF
+keyCodeMask						EQU		$0000FF00
+adbAddrMask						EQU		$00FF0000
+osEvtMessageMask				EQU		$FF000000
+
+															; OS event messages.  Event (sub)code is in the high byte of the message field.
+mouseMovedMessage				EQU		$00FA
+suspendResumeMessage			EQU		$0001
+
+resumeFlag						EQU		1					; Bit 0 of message indicates resume vs suspend
+convertClipboardFlag			EQU		2					; Bit 1 in resume message indicates clipboard change
+
+; typedef UInt16 						EventModifiers
+
+
+															; modifiers 
+activeFlagBit					EQU		0					; activate? (activateEvt and mouseDown)
+btnStateBit						EQU		7					; state of button?
+cmdKeyBit						EQU		8					; command key down?
+shiftKeyBit						EQU		9					; shift key down?
+alphaLockBit					EQU		10					; alpha lock down?
+optionKeyBit					EQU		11					; option key down?
+controlKeyBit					EQU		12					; control key down?
+rightShiftKeyBit				EQU		13					; right shift key down?
+rightOptionKeyBit				EQU		14					; right Option key down?
+rightControlKeyBit				EQU		15					; right Control key down?
+
+activeFlag						EQU		$01
+btnState						EQU		$80
+cmdKey							EQU		$0100
+shiftKey						EQU		$0200
+alphaLock						EQU		$0400
+optionKey						EQU		$0800
+controlKey						EQU		$1000
+rightShiftKey					EQU		$2000
+rightOptionKey					EQU		$4000
+rightControlKey					EQU		$8000
+
+kNullCharCode					EQU		0
+kHomeCharCode					EQU		1
+kEnterCharCode					EQU		3
+kEndCharCode					EQU		4
+kHelpCharCode					EQU		5
+kBellCharCode					EQU		7
+kBackspaceCharCode				EQU		8
+kTabCharCode					EQU		9
+kLineFeedCharCode				EQU		10
+kVerticalTabCharCode			EQU		11
+kPageUpCharCode					EQU		11
+kFormFeedCharCode				EQU		12
+kPageDownCharCode				EQU		12
+kReturnCharCode					EQU		13
+kFunctionKeyCharCode			EQU		16
+kEscapeCharCode					EQU		27
+kClearCharCode					EQU		27
+kLeftArrowCharCode				EQU		28
+kRightArrowCharCode				EQU		29
+kUpArrowCharCode				EQU		30
+kDownArrowCharCode				EQU		31
+kDeleteCharCode					EQU		127
+kNonBreakingSpaceCharCode		EQU		202
+EventRecord				RECORD 0
+what					 ds.w	1				; offset: $0 (0)
+message					 ds.l	1				; offset: $2 (2)
+when					 ds.l	1				; offset: $6 (6)
+where					 ds		Point			; offset: $A (10)
+modifiers				 ds.w	1				; offset: $E (14)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+
+;
+; pascal void GetMouse(Point *mouseLoc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetMouse:	OPWORD	$A972
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetMouse
+	ENDIF
+
+;
+; pascal Boolean Button(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_Button:	OPWORD	$A974
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Button
+	ENDIF
+
+;
+; pascal Boolean StillDown(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_StillDown:	OPWORD	$A973
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION StillDown
+	ENDIF
+
+;
+; pascal Boolean WaitMouseUp(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_WaitMouseUp:	OPWORD	$A977
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION WaitMouseUp
+	ENDIF
+
+;
+; pascal UInt32 TickCount(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_TickCount:	OPWORD	$A975
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TickCount
+	ENDIF
+
+;
+; pascal UInt32 KeyTranslate(const void *transData, UInt16 keycode, UInt32 *state)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_KeyTranslate:	OPWORD	$A9C3
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION KeyTranslate
+	ENDIF
+
+;
+; pascal UInt32 GetCaretTime(void)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetCaretTime         &dest=(sp)
+			move.l            $02F4,&dest
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetCaretTime
+	ENDIF
+
+
+KeyMap					RECORD 0
+map						 ds.b	16				; offset: $0 (0)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+;
+; pascal void GetKeys(KeyMap theKeys)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetKeys:	OPWORD	$A976
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetKeys
+	ENDIF
+
+
+
+;  Obsolete event types & masks 
+
+networkEvt						EQU		10
+driverEvt						EQU		11
+app1Evt							EQU		12
+app2Evt							EQU		13
+app3Evt							EQU		14
+app4Evt							EQU		15
+networkMask						EQU		$0400
+driverMask						EQU		$0800
+app1Mask						EQU		$1000
+app2Mask						EQU		$2000
+app3Mask						EQU		$4000
+app4Mask						EQU		$8000
+EvQEl					RECORD 0
+qLink					 ds.l	1				; offset: $0 (0)
+qType					 ds.w	1				; offset: $4 (4)
+evtQWhat				 ds.w	1				; offset: $6 (6)		;  this part is identical to the EventRecord as defined above 
+evtQMessage				 ds.l	1				; offset: $8 (8)
+evtQWhen				 ds.l	1				; offset: $C (12)
+evtQWhere				 ds		Point			; offset: $10 (16)
+evtQModifiers			 ds.w	1				; offset: $14 (20)
+sizeof					 EQU *					; size:   $16 (22)
+						ENDR
+; typedef struct EvQEl *				EvQElPtr
+
+; typedef GetNextEventFilterUPP 		GNEFilterUPP
+
+;
+; pascal QHdrPtr GetEvQHdr(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetEvQHdr            &dest=(sp)
+			move.l            #$0000014A,&dest
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetEvQHdr
+	ENDIF
+
+;
+; pascal UInt32 GetDblTime(void)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetDblTime           &dest=(sp)
+			move.l            $02F0,&dest
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDblTime
+	ENDIF
+
+;
+; pascal void SetEventMask(EventMask value)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetEventMask         &src=(sp)+
+			move.w            &src,$0144
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetEventMask
+	ENDIF
+
+;
+; pascal OSErr PPostEvent(EventKind eventCode, UInt32 eventMsg, EvQElPtr *qEl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_PPostEvent:	OPWORD	$A12F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PPostEvent
+	ENDIF
+
+;
+; pascal Boolean GetNextEvent(EventMask eventMask, EventRecord *theEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetNextEvent:	OPWORD	$A970
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetNextEvent
+	ENDIF
+
+;
+; pascal Boolean WaitNextEvent(EventMask eventMask, EventRecord *theEvent, UInt32 sleep, RgnHandle mouseRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_WaitNextEvent:	OPWORD	$A860
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION WaitNextEvent
+	ENDIF
+
+;
+; pascal Boolean EventAvail(EventMask eventMask, EventRecord *theEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_EventAvail:	OPWORD	$A971
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION EventAvail
+	ENDIF
+
+
+;
+; pascal OSErr PostEvent(EventKind eventNum, UInt32 eventMsg)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		; parameters:
+		;	eventNum        => A0
+		;	eventMsg        => D0
+		; returns:
+		;	OSErr           <= D0
+		_PostEvent:	OPWORD	$A02F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PostEvent
+	ENDIF
+
+;
+; pascal Boolean OSEventAvail(EventMask mask, EventRecord *theEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_OSEventAvail:	OPWORD	$A030
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OSEventAvail
+	ENDIF
+
+;
+; pascal Boolean GetOSEvent(EventMask mask, EventRecord *theEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetOSEvent:	OPWORD	$A031
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetOSEvent
+	ENDIF
+
+;
+; pascal void FlushEvents(EventMask whichMask, EventMask stopMask)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_FlushEvents:	OPWORD	$A032
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FlushEvents
+	ENDIF
+
+;
+; pascal void SystemClick(const EventRecord *theEvent, WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SystemClick:	OPWORD	$A9B3
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SystemClick
+	ENDIF
+
+;
+; pascal void SystemTask(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SystemTask:	OPWORD	$A9B4
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SystemTask
+	ENDIF
+
+;
+; pascal Boolean SystemEvent(const EventRecord *theEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_SystemEvent:	OPWORD	$A9B2
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SystemEvent
+	ENDIF
+
+
+
+	ENDIF ; __EVENTS__ 
+

@@ -1,0 +1,66 @@
+;
+;	File:		GoggleSprocket.a
+;
+;	Contains:	Games Sprockets: GoggleSprocket interfaces
+;
+;	Version:	Technology:	Goggle Sprocket 1.1
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1996-1997 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__GOGGLESPROCKET__') = 'UNDEFINED' THEN
+__GOGGLESPROCKET__ SET 1
+
+	IF &TYPE('__TYPES__') = 'UNDEFINED' THEN
+	include 'Types.a'
+	ENDIF
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+	include 'Events.a'
+	ENDIF
+
+	IF TARGET_CPU_PPC THEN
+; 
+;********************************************************************************
+;** constants & data types
+;********************************************************************************
+;
+
+; 
+;********************************************************************************
+;** prototypes for application level calls
+;********************************************************************************
+;
+
+;  general 
+;
+; extern OSStatus GSpStartup(UInt32 inReserved)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GSpStartup
+	ENDIF
+
+;
+; extern OSStatus GSpShutdown(UInt32 inReserved)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GSpShutdown
+	ENDIF
+
+;  configuration 
+;
+; extern OSStatus GSpConfigure(GSpEventProcPtr inEventProc, Point *inUpperLeft)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GSpConfigure
+	ENDIF
+
+	ENDIF	; TARGET_CPU_PPC
+	ENDIF ; __GOGGLESPROCKET__ 
+

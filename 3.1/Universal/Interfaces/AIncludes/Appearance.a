@@ -1,0 +1,588 @@
+;
+;	File:		Appearance.a
+;
+;	Contains:	Appearance Manager Interfaces.
+;
+;	Version:	Technology:	Appearance 1.0.2
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1994-1998 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__APPEARANCE__') = 'UNDEFINED' THEN
+__APPEARANCE__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__TEXTEDIT__') = 'UNDEFINED' THEN
+	include 'TextEdit.a'
+	ENDIF
+	IF &TYPE('__QDOFFSCREEN__') = 'UNDEFINED' THEN
+	include 'QDOffscreen.a'
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————
+;  Appearance Manager constants, etc.												
+; ——————————————————————————————————————————————————————————————————————————————————
+
+															; Appearance Trap Number 
+_AppearanceDispatch				EQU		$AA74
+;  Gestalt selector and values for the Appearance Manager 
+
+gestaltAppearanceAttr			EQU		'appr'
+gestaltAppearanceExists			EQU		0
+gestaltAppearanceCompatMode		EQU		1
+;  Gestalt selector for determining Appearance Manager version 	
+;  If this selector does not exist, but gestaltAppearanceAttr	
+;  does, it indicates that the 1.0 version is installed. This	
+;  gestalt returns a BCD number representing the version of the	
+;  Appearance Manager that is currently running, e.g. 0x0101 for
+;  version 1.0.1.												
+
+gestaltAppearanceVersion		EQU		'apvr'
+;  Appearance Manager Apple Events (1.0.1 and later) 
+
+kAppearanceEventClass			EQU		'appr'				; Event Class 
+kAEThemeSwitch					EQU		'thme'				; Event ID's: Theme Switched 
+;  Appearance Manager Error Codes 
+
+appearanceBadBrushIndexErr		EQU		-30560				; pattern index invalid 
+appearanceProcessRegisteredErr	EQU		-30561
+appearanceProcessNotRegisteredErr EQU	-30562
+appearanceBadTextColorIndexErr	EQU		-30563
+appearanceThemeHasNoAccents		EQU		-30564
+appearanceBadCursorIndexErr		EQU		-30565
+
+kThemeActiveDialogBackgroundBrush EQU	1					; Dialogs 
+kThemeInactiveDialogBackgroundBrush EQU	2					; Dialogs 
+kThemeActiveAlertBackgroundBrush EQU	3
+kThemeInactiveAlertBackgroundBrush EQU	4
+kThemeActiveModelessDialogBackgroundBrush EQU 5
+kThemeInactiveModelessDialogBackgroundBrush EQU 6
+kThemeActiveUtilityWindowBackgroundBrush EQU 7				; Miscellaneous 
+kThemeInactiveUtilityWindowBackgroundBrush EQU 8			; Miscellaneous 
+kThemeListViewSortColumnBackgroundBrush EQU 9				; Finder 
+kThemeListViewBackgroundBrush	EQU		10
+kThemeIconLabelBackgroundBrush	EQU		11
+kThemeListViewSeparatorBrush	EQU		12
+kThemeChasingArrowsBrush		EQU		13
+kThemeDragHiliteBrush			EQU		14
+kThemeDocumentWindowBackgroundBrush EQU	15
+kThemeFinderWindowBackgroundBrush EQU	16
+; typedef SInt16 						ThemeBrush
+
+
+kThemeActiveDialogTextColor		EQU		1					; Dialogs 
+kThemeInactiveDialogTextColor	EQU		2
+kThemeActiveAlertTextColor		EQU		3
+kThemeInactiveAlertTextColor	EQU		4
+kThemeActiveModelessDialogTextColor EQU	5
+kThemeInactiveModelessDialogTextColor EQU 6
+kThemeActiveWindowHeaderTextColor EQU	7					; Primitives 
+kThemeInactiveWindowHeaderTextColor EQU	8
+kThemeActivePlacardTextColor	EQU		9					; Primitives 
+kThemeInactivePlacardTextColor	EQU		10
+kThemePressedPlacardTextColor	EQU		11
+kThemeActivePushButtonTextColor	EQU		12					; Primitives 
+kThemeInactivePushButtonTextColor EQU	13
+kThemePressedPushButtonTextColor EQU	14
+kThemeActiveBevelButtonTextColor EQU	15					; Primitives 
+kThemeInactiveBevelButtonTextColor EQU	16
+kThemePressedBevelButtonTextColor EQU	17
+kThemeActivePopupButtonTextColor EQU	18					; Primitives 
+kThemeInactivePopupButtonTextColor EQU	19
+kThemePressedPopupButtonTextColor EQU	20
+kThemeIconLabelTextColor		EQU		21					; Finder 
+kThemeListViewTextColor			EQU		22
+;  Text Colors available in Appearance 1.0.1 or later 
+
+kThemeActiveDocumentWindowTitleTextColor EQU 23
+kThemeInactiveDocumentWindowTitleTextColor EQU 24
+kThemeActiveMovableModalWindowTitleTextColor EQU 25
+kThemeInactiveMovableModalWindowTitleTextColor EQU 26
+kThemeActiveUtilityWindowTitleTextColor EQU 27
+kThemeInactiveUtilityWindowTitleTextColor EQU 28
+kThemeActivePopupWindowTitleColor EQU	29
+kThemeInactivePopupWindowTitleColor EQU	30
+kThemeActiveRootMenuTextColor	EQU		31
+kThemeSelectedRootMenuTextColor	EQU		32
+kThemeDisabledRootMenuTextColor	EQU		33
+kThemeActiveMenuItemTextColor	EQU		34
+kThemeSelectedMenuItemTextColor	EQU		35
+kThemeDisabledMenuItemTextColor	EQU		36
+kThemeActivePopupLabelTextColor	EQU		37
+kThemeInactivePopupLabelTextColor EQU	38
+; typedef SInt16 						ThemeTextColor
+
+;  States to draw primitives: disabled, active, and pressed (hilited) 
+
+kThemeStateDisabled				EQU		0
+kThemeStateActive				EQU		1
+kThemeStatePressed				EQU		2
+; typedef UInt32 						ThemeDrawState
+
+; ——————————————————————————————————————————————————————————————————————————————————
+;  Theme menu bar drawing states													
+; ——————————————————————————————————————————————————————————————————————————————————
+
+kThemeMenuBarNormal				EQU		0
+kThemeMenuBarSelected			EQU		1
+; typedef SInt16 						ThemeMenuBarState
+
+;  attributes 
+
+kThemeMenuSquareMenuBar			EQU		$01
+; ——————————————————————————————————————————————————————————————————————————————————
+;  Theme menu drawing states													    
+; ——————————————————————————————————————————————————————————————————————————————————
+
+kThemeMenuActive				EQU		0
+kThemeMenuSelected				EQU		1
+kThemeMenuDisabled				EQU		3
+; typedef SInt16 						ThemeMenuState
+
+
+kThemeMenuTypePullDown			EQU		0
+kThemeMenuTypePopUp				EQU		1
+kThemeMenuTypeHierarchical		EQU		2
+; typedef SInt16 						ThemeMenuType
+
+
+kThemeMenuItemPlain				EQU		0
+kThemeMenuItemHierarchical		EQU		1
+kThemeMenuItemScrollUpArrow		EQU		2
+kThemeMenuItemScrollDownArrow	EQU		3
+; typedef SInt16 						ThemeMenuItemType
+
+; ——————————————————————————————————————————————————————————————————————————————————
+;  Menu Drawing callbacks														    
+; ——————————————————————————————————————————————————————————————————————————————————
+
+
+; ——————————————————————————————————————————————————————————————————————————————————
+; 	Appearance Manager APIs															
+; ——————————————————————————————————————————————————————————————————————————————————
+;  Registering Appearance-Savvy Applications 
+;
+; pascal OSStatus RegisterAppearanceClient(void)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_RegisterAppearanceClient
+			move.w              #$0015,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RegisterAppearanceClient
+	ENDIF
+
+;
+; pascal OSStatus UnregisterAppearanceClient(void)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_UnregisterAppearanceClient
+			move.w              #$0016,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UnregisterAppearanceClient
+	ENDIF
+
+; *****************************************************************************
+;	NOTES ON THEME BRUSHES
+;	Theme brushes can be either colors or patterns, depending on the theme.
+;	Because of this, you should be prepared to handle the case where a brush
+;	is a pattern and save and restore the pnPixPat and bkPixPat fields of
+;	your GrafPorts when saving the fore and back colors. Also, since patterns
+;	in bkPixPat override the background color of the window, you should use
+;	BackPat to set your background pattern to a normal white pattern. This
+;	will ensure that you can use RGBBackColor to set your back color to white,
+;	call EraseRect and get the expected results.
+;****************************************************************************
+
+
+;
+; pascal OSStatus SetThemePen(ThemeBrush inBrush, SInt16 inDepth, Boolean inIsColorDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetThemePen
+			move.w              #$0001,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetThemePen
+	ENDIF
+
+;
+; pascal OSStatus SetThemeBackground(ThemeBrush inBrush, SInt16 inDepth, Boolean inIsColorDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetThemeBackground
+			move.w              #$0002,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetThemeBackground
+	ENDIF
+
+;
+; pascal OSStatus SetThemeTextColor(ThemeTextColor inColor, SInt16 inDepth, Boolean inIsColorDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetThemeTextColor
+			move.w              #$0003,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetThemeTextColor
+	ENDIF
+
+;
+; pascal OSStatus SetThemeWindowBackground(WindowPtr inWindow, ThemeBrush inBrush, Boolean inUpdate)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetThemeWindowBackground
+			move.w              #$0004,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetThemeWindowBackground
+	ENDIF
+
+;  Window Placards, Headers and Frames 
+;
+; pascal OSStatus DrawThemeWindowHeader(const Rect *inRect, ThemeDrawState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeWindowHeader
+			move.w              #$0005,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeWindowHeader
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeWindowListViewHeader(const Rect *inRect, ThemeDrawState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeWindowListViewHeader
+			move.w              #$0006,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeWindowListViewHeader
+	ENDIF
+
+;
+; pascal OSStatus DrawThemePlacard(const Rect *inRect, ThemeDrawState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemePlacard
+			move.w              #$0007,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemePlacard
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeEditTextFrame(const Rect *inRect, ThemeDrawState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeEditTextFrame
+			move.w              #$0009,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeEditTextFrame
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeListBoxFrame(const Rect *inRect, ThemeDrawState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeListBoxFrame
+			move.w              #$000A,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeListBoxFrame
+	ENDIF
+
+;  Keyboard Focus Drawing 
+;
+; pascal OSStatus DrawThemeFocusRect(const Rect *inRect, Boolean inHasFocus)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeFocusRect
+			move.w              #$000B,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeFocusRect
+	ENDIF
+
+;  Dialog Group Boxes and Separators 
+;
+; pascal OSStatus DrawThemePrimaryGroup(const Rect *inRect, ThemeDrawState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemePrimaryGroup
+			move.w              #$000C,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemePrimaryGroup
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeSecondaryGroup(const Rect *inRect, ThemeDrawState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeSecondaryGroup
+			move.w              #$000D,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeSecondaryGroup
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeSeparator(const Rect *inRect, ThemeDrawState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeSeparator
+			move.w              #$000E,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeSeparator
+	ENDIF
+
+;  -------------------- BEGIN APPEARANCE 1.0.1 -------------------------------------
+;  The following Appearance Manager APIs are only available 
+;  in Appearance 1.0.1 or later 							
+;
+; pascal OSStatus DrawThemeModelessDialogFrame(const Rect *inRect, ThemeDrawState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeModelessDialogFrame
+			move.w              #$0008,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeModelessDialogFrame
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeGenericWell(const Rect *inRect, ThemeDrawState inState, Boolean inFillCenter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeGenericWell
+			move.w              #$0022,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeGenericWell
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeFocusRegion(RgnHandle inRegion, Boolean inHasFocus)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeFocusRegion
+			move.w              #$0023,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeFocusRegion
+	ENDIF
+
+;
+; pascal Boolean IsThemeInColor(SInt16 inDepth, Boolean inIsColorDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IsThemeInColor
+			move.w              #$0024,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsThemeInColor
+	ENDIF
+
+;  IMPORTANT: GetThemeAccentColors will only work in the platinum theme. Any other theme will 
+;  most likely return an error 
+;
+; pascal OSStatus GetThemeAccentColors(CTabHandle *outColors)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetThemeAccentColors
+			move.w              #$0025,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetThemeAccentColors
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeMenuBarBackground(const Rect *inBounds, ThemeMenuBarState inState, UInt32 inAttributes)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeMenuBarBackground
+			move.w              #$0018,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeMenuBarBackground
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeMenuTitle(const Rect *inMenuBarRect, const Rect *inTitleRect, ThemeMenuState inState, UInt32 inAttributes, MenuTitleDrawingUPP inTitleProc, UInt32 inTitleData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeMenuTitle
+			move.w              #$0019,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeMenuTitle
+	ENDIF
+
+;
+; pascal OSStatus GetThemeMenuBarHeight(SInt16 *outHeight)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetThemeMenuBarHeight
+			move.w              #$001A,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetThemeMenuBarHeight
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeMenuBackground(const Rect *inMenuRect, ThemeMenuType inMenuType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeMenuBackground
+			move.w              #$001B,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeMenuBackground
+	ENDIF
+
+;
+; pascal OSStatus GetThemeMenuBackgroundRegion(const Rect *inMenuRect, ThemeMenuType menuType, RgnHandle region)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetThemeMenuBackgroundRegion
+			move.w              #$001C,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetThemeMenuBackgroundRegion
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeMenuItem(const Rect *inMenuRect, const Rect *inItemRect, SInt16 inVirtualMenuTop, SInt16 inVirtualMenuBottom, ThemeMenuState inState, ThemeMenuItemType inItemType, MenuItemDrawingUPP inDrawProc, UInt32 inUserData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeMenuItem
+			move.w              #$001D,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeMenuItem
+	ENDIF
+
+;
+; pascal OSStatus DrawThemeMenuSeparator(const Rect *inItemRect)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DrawThemeMenuSeparator
+			move.w              #$001E,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DrawThemeMenuSeparator
+	ENDIF
+
+;
+; pascal OSStatus GetThemeMenuSeparatorHeight(SInt16 *outHeight)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetThemeMenuSeparatorHeight
+			move.w              #$001F,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetThemeMenuSeparatorHeight
+	ENDIF
+
+;
+; pascal OSStatus GetThemeMenuItemExtra(ThemeMenuItemType inItemType, SInt16 *outHeight, SInt16 *outWidth)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetThemeMenuItemExtra
+			move.w              #$0020,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetThemeMenuItemExtra
+	ENDIF
+
+;
+; pascal OSStatus GetThemeMenuTitleExtra(SInt16 *outWidth, Boolean inIsSquished)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetThemeMenuTitleExtra
+			move.w              #$0021,D0
+			dc.w            	$AA74
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetThemeMenuTitleExtra
+	ENDIF
+
+	ENDIF ; __APPEARANCE__ 
+

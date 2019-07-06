@@ -1,0 +1,716 @@
+;
+;	File:		Icons.a
+;
+;	Contains:	Icon Utilities Interfaces.
+;
+;	Version:	Technology:	Mac OS 8
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1990-1998 by Apple Computer, Inc. All rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__ICONS__') = 'UNDEFINED' THEN
+__ICONS__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+	IF &TYPE('__CODEFRAGMENTS__') = 'UNDEFINED' THEN
+	include 'CodeFragments.a'
+	ENDIF
+
+
+															; The following are icons for which there are both icon suites and SICNs. 
+kGenericDocumentIconResource	EQU		-4000
+kGenericStationeryIconResource	EQU		-3985
+kGenericEditionFileIconResource	EQU		-3989
+kGenericApplicationIconResource	EQU		-3996
+kGenericDeskAccessoryIconResource EQU	-3991
+kGenericFolderIconResource		EQU		-3999
+kPrivateFolderIconResource		EQU		-3994
+kFloppyIconResource				EQU		-3998
+kTrashIconResource				EQU		-3993
+kGenericRAMDiskIconResource		EQU		-3988
+kGenericCDROMIconResource		EQU		-3987				; The following are icons for which there are SICNs only. 
+kDesktopIconResource			EQU		-3992
+kOpenFolderIconResource			EQU		-3997
+kGenericHardDiskIconResource	EQU		-3995
+kGenericFileServerIconResource	EQU		-3972
+kGenericSuitcaseIconResource	EQU		-3970
+kGenericMoverObjectIconResource	EQU		-3969				; The following are icons for which there are icon suites only. 
+kGenericPreferencesIconResource	EQU		-3971
+kGenericQueryDocumentIconResource EQU	-16506
+kGenericExtensionIconResource	EQU		-16415
+kSystemFolderIconResource		EQU		-3983
+kAppleMenuFolderIconResource	EQU		-3982
+
+															; Obsolete. Use named constants defined above. 
+genericDocumentIconResource		EQU		-4000
+genericStationeryIconResource	EQU		-3985
+genericEditionFileIconResource	EQU		-3989
+genericApplicationIconResource	EQU		-3996
+genericDeskAccessoryIconResource EQU	-3991
+genericFolderIconResource		EQU		-3999
+privateFolderIconResource		EQU		-3994
+floppyIconResource				EQU		-3998
+trashIconResource				EQU		-3993
+genericRAMDiskIconResource		EQU		-3988
+genericCDROMIconResource		EQU		-3987
+desktopIconResource				EQU		-3992
+openFolderIconResource			EQU		-3997
+genericHardDiskIconResource		EQU		-3995
+genericFileServerIconResource	EQU		-3972
+genericSuitcaseIconResource		EQU		-3970
+genericMoverObjectIconResource	EQU		-3969
+genericPreferencesIconResource	EQU		-3971
+genericQueryDocumentIconResource EQU	-16506
+genericExtensionIconResource	EQU		-16415
+systemFolderIconResource		EQU		-3983
+appleMenuFolderIconResource		EQU		-3982
+
+kStartupFolderIconResource		EQU		-3981
+kOwnedFolderIconResource		EQU		-3980
+kDropFolderIconResource			EQU		-3979
+kSharedFolderIconResource		EQU		-3978
+kMountedFolderIconResource		EQU		-3977
+kControlPanelFolderIconResource	EQU		-3976
+kPrintMonitorFolderIconResource	EQU		-3975
+kPreferencesFolderIconResource	EQU		-3974
+kExtensionsFolderIconResource	EQU		-3973
+kFontsFolderIconResource		EQU		-3968
+kFullTrashIconResource			EQU		-3984
+
+															; Obsolete. Use named constants defined above. 
+startupFolderIconResource		EQU		-3981
+ownedFolderIconResource			EQU		-3980
+dropFolderIconResource			EQU		-3979
+sharedFolderIconResource		EQU		-3978
+mountedFolderIconResource		EQU		-3977
+controlPanelFolderIconResource	EQU		-3976
+printMonitorFolderIconResource	EQU		-3975
+preferencesFolderIconResource	EQU		-3974
+extensionsFolderIconResource	EQU		-3973
+fontsFolderIconResource			EQU		-3968
+fullTrashIconResource			EQU		-3984
+
+kLarge1BitMask					EQU		'ICN#'
+kLarge4BitData					EQU		'icl4'
+kLarge8BitData					EQU		'icl8'
+kSmall1BitMask					EQU		'ics#'
+kSmall4BitData					EQU		'ics4'
+kSmall8BitData					EQU		'ics8'
+kMini1BitMask					EQU		'icm#'
+kMini4BitData					EQU		'icm4'
+kMini8BitData					EQU		'icm8'
+
+															; Obsolete. Use names defined above. 
+large1BitMask					EQU		'ICN#'
+large4BitData					EQU		'icl4'
+large8BitData					EQU		'icl8'
+small1BitMask					EQU		'ics#'
+small4BitData					EQU		'ics4'
+small8BitData					EQU		'ics8'
+mini1BitMask					EQU		'icm#'
+mini4BitData					EQU		'icm4'
+mini8BitData					EQU		'icm8'
+;   alignment type values 
+
+kAlignNone						EQU		$00
+kAlignVerticalCenter			EQU		$01
+kAlignTop						EQU		$02
+kAlignBottom					EQU		$03
+kAlignHorizontalCenter			EQU		$04
+kAlignAbsoluteCenter			EQU		$05
+kAlignCenterTop					EQU		$06
+kAlignCenterBottom				EQU		$07
+kAlignLeft						EQU		$08
+kAlignCenterLeft				EQU		$09
+kAlignTopLeft					EQU		$0A
+kAlignBottomLeft				EQU		$0B
+kAlignRight						EQU		$0C
+kAlignCenterRight				EQU		$0D
+kAlignTopRight					EQU		$0E
+kAlignBottomRight				EQU		$0F
+
+															; Obsolete. Use names defined above. 
+atNone							EQU		$00
+atVerticalCenter				EQU		$01
+atTop							EQU		$02
+atBottom						EQU		$03
+atHorizontalCenter				EQU		$04
+atAbsoluteCenter				EQU		$05
+atCenterTop						EQU		$06
+atCenterBottom					EQU		$07
+atLeft							EQU		$08
+atCenterLeft					EQU		$09
+atTopLeft						EQU		$0A
+atBottomLeft					EQU		$0B
+atRight							EQU		$0C
+atCenterRight					EQU		$0D
+atTopRight						EQU		$0E
+atBottomRight					EQU		$0F
+; typedef SInt16 						IconAlignmentType
+
+;   transform type values  
+
+kTransformNone					EQU		$00
+kTransformDisabled				EQU		$01
+kTransformOffline				EQU		$02
+kTransformOpen					EQU		$03
+kTransformLabel1				EQU		$0100
+kTransformLabel2				EQU		$0200
+kTransformLabel3				EQU		$0300
+kTransformLabel4				EQU		$0400
+kTransformLabel5				EQU		$0500
+kTransformLabel6				EQU		$0600
+kTransformLabel7				EQU		$0700
+kTransformSelected				EQU		$4000
+kTransformSelectedDisabled		EQU		$4001
+kTransformSelectedOffline		EQU		$4002
+kTransformSelectedOpen			EQU		$4003
+
+															; Obsolete. Use names defined above. 
+ttNone							EQU		$00
+ttDisabled						EQU		$01
+ttOffline						EQU		$02
+ttOpen							EQU		$03
+ttLabel1						EQU		$0100
+ttLabel2						EQU		$0200
+ttLabel3						EQU		$0300
+ttLabel4						EQU		$0400
+ttLabel5						EQU		$0500
+ttLabel6						EQU		$0600
+ttLabel7						EQU		$0700
+ttSelected						EQU		$4000
+ttSelectedDisabled				EQU		$4001
+ttSelectedOffline				EQU		$4002
+ttSelectedOpen					EQU		$4003
+; typedef SInt16 						IconTransformType
+
+;   Selector mask values  
+
+kSelectorLarge1Bit				EQU		$00000001
+kSelectorLarge4Bit				EQU		$00000002
+kSelectorLarge8Bit				EQU		$00000004
+kSelectorSmall1Bit				EQU		$00000100
+kSelectorSmall4Bit				EQU		$00000200
+kSelectorSmall8Bit				EQU		$00000400
+kSelectorMini1Bit				EQU		$00010000
+kSelectorMini4Bit				EQU		$00020000
+kSelectorMini8Bit				EQU		$00040000
+kSelectorAllLargeData			EQU		$000000FF
+kSelectorAllSmallData			EQU		$0000FF00
+kSelectorAllMiniData			EQU		$00FF0000
+kSelectorAll1BitData			EQU		$00010101
+kSelectorAll4BitData			EQU		$00020202
+kSelectorAll8BitData			EQU		$00040404
+kSelectorAllAvailableData		EQU		$FFFFFFFF
+
+															; Obsolete. Use names defined above. 
+svLarge1Bit						EQU		$00000001
+svLarge4Bit						EQU		$00000002
+svLarge8Bit						EQU		$00000004
+svSmall1Bit						EQU		$00000100
+svSmall4Bit						EQU		$00000200
+svSmall8Bit						EQU		$00000400
+svMini1Bit						EQU		$00010000
+svMini4Bit						EQU		$00020000
+svMini8Bit						EQU		$00040000
+svAllLargeData					EQU		$000000FF
+svAllSmallData					EQU		$0000FF00
+svAllMiniData					EQU		$00FF0000
+svAll1BitData					EQU		$01010101
+svAll4BitData					EQU		$02020202
+svAll8BitData					EQU		$04040404
+svAllAvailableData				EQU		$FFFFFFFF
+; typedef UInt32 						IconSelectorValue
+
+; typedef IconActionProcPtr 			IconAction
+
+; typedef IconGetterProcPtr 			IconGetter
+
+	IF ¬ OLDROUTINELOCATIONS THEN
+CIcon					RECORD 0
+iconPMap				 ds		PixMap			; offset: $0 (0)		; the icon's pixMap
+iconMask				 ds		BitMap			; offset: $32 (50)		; the icon's mask
+iconBMap				 ds		BitMap			; offset: $40 (64)		; the icon's bitMap
+iconData				 ds.l	1				; offset: $4E (78)		; the icon's data
+iconMaskData			 ds.w	1				; offset: $52 (82) <-- really an array of length one ; icon's mask and BitMap data
+sizeof					 EQU *					; size:   $54 (84)
+						ENDR
+; typedef struct CIcon *				CIconPtr
+
+; typedef CIconPtr *					CIconHandle
+
+;
+; pascal CIconHandle GetCIcon(SInt16 iconID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetCIcon:	OPWORD	$AA1E
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetCIcon
+	ENDIF
+
+;
+; pascal void PlotCIcon(const Rect *theRect, CIconHandle theIcon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_PlotCIcon:	OPWORD	$AA1F
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PlotCIcon
+	ENDIF
+
+;
+; pascal void DisposeCIcon(CIconHandle theIcon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_DisposeCIcon:	OPWORD	$AA25
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisposeCIcon
+	ENDIF
+
+	ENDIF
+;
+; pascal Handle GetIcon(SInt16 iconID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_GetIcon:	OPWORD	$A9BB
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetIcon
+	ENDIF
+
+;
+; pascal void PlotIcon(const Rect *theRect, Handle theIcon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		_PlotIcon:	OPWORD	$A94B
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PlotIcon
+	ENDIF
+
+
+
+; 
+;	Note:	IconSuiteRef and IconCacheRef should be an abstract types, 
+;			but too much source code already relies on them being of type Handle.
+;
+
+; typedef Handle 						IconSuiteRef
+
+; typedef Handle 						IconCacheRef
+
+;
+; pascal OSErr PlotIconID(const Rect *theRect, IconAlignmentType align, IconTransformType transform, SInt16 theResID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_PlotIconID
+			move.w              #$0500,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PlotIconID
+	ENDIF
+
+;
+; pascal OSErr NewIconSuite(IconSuiteRef *theIconSuite)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NewIconSuite
+			move.w              #$0207,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NewIconSuite
+	ENDIF
+
+;
+; pascal OSErr AddIconToSuite(Handle theIconData, IconSuiteRef theSuite, ResType theType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AddIconToSuite
+			move.w              #$0608,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AddIconToSuite
+	ENDIF
+
+;
+; pascal OSErr GetIconFromSuite(Handle *theIconData, IconSuiteRef theSuite, ResType theType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetIconFromSuite
+			move.w              #$0609,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetIconFromSuite
+	ENDIF
+
+;
+; pascal OSErr ForEachIconDo(IconSuiteRef theSuite, IconSelectorValue selector, IconActionUPP action, void *yourDataPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_ForEachIconDo
+			move.w              #$080A,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ForEachIconDo
+	ENDIF
+
+;
+; pascal OSErr GetIconSuite(IconSuiteRef *theIconSuite, SInt16 theResID, IconSelectorValue selector)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetIconSuite
+			move.w              #$0501,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetIconSuite
+	ENDIF
+
+;
+; pascal OSErr DisposeIconSuite(IconSuiteRef theIconSuite, Boolean disposeData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DisposeIconSuite
+			move.w              #$0302,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DisposeIconSuite
+	ENDIF
+
+;
+; pascal OSErr PlotIconSuite(const Rect *theRect, IconAlignmentType align, IconTransformType transform, IconSuiteRef theIconSuite)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_PlotIconSuite
+			move.w              #$0603,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PlotIconSuite
+	ENDIF
+
+;
+; pascal OSErr MakeIconCache(IconCacheRef *theCache, IconGetterUPP makeIcon, void *yourDataPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MakeIconCache
+			move.w              #$0604,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MakeIconCache
+	ENDIF
+
+;
+; pascal OSErr LoadIconCache(const Rect *theRect, IconAlignmentType align, IconTransformType transform, IconCacheRef theIconCache)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_LoadIconCache
+			move.w              #$0606,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION LoadIconCache
+	ENDIF
+
+;
+; pascal OSErr PlotIconMethod(const Rect *theRect, IconAlignmentType align, IconTransformType transform, IconGetterUPP theMethod, void *yourDataPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_PlotIconMethod
+			move.w              #$0805,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PlotIconMethod
+	ENDIF
+
+;
+; pascal OSErr GetLabel(SInt16 labelNumber, RGBColor *labelColor, Str255 labelString)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetLabel
+			move.w              #$050B,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetLabel
+	ENDIF
+
+;
+; pascal Boolean PtInIconID(Point testPt, const Rect *iconRect, IconAlignmentType align, SInt16 iconID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_PtInIconID
+			move.w              #$060D,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PtInIconID
+	ENDIF
+
+;
+; pascal Boolean PtInIconSuite(Point testPt, const Rect *iconRect, IconAlignmentType align, IconSuiteRef theIconSuite)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_PtInIconSuite
+			move.w              #$070E,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PtInIconSuite
+	ENDIF
+
+;
+; pascal Boolean PtInIconMethod(Point testPt, const Rect *iconRect, IconAlignmentType align, IconGetterUPP theMethod, void *yourDataPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_PtInIconMethod
+			move.w              #$090F,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PtInIconMethod
+	ENDIF
+
+;
+; pascal Boolean RectInIconID(const Rect *testRect, const Rect *iconRect, IconAlignmentType align, SInt16 iconID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_RectInIconID
+			move.w              #$0610,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RectInIconID
+	ENDIF
+
+;
+; pascal Boolean RectInIconSuite(const Rect *testRect, const Rect *iconRect, IconAlignmentType align, IconSuiteRef theIconSuite)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_RectInIconSuite
+			move.w              #$0711,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RectInIconSuite
+	ENDIF
+
+;
+; pascal Boolean RectInIconMethod(const Rect *testRect, const Rect *iconRect, IconAlignmentType align, IconGetterUPP theMethod, void *yourDataPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_RectInIconMethod
+			move.w              #$0912,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RectInIconMethod
+	ENDIF
+
+;
+; pascal OSErr IconIDToRgn(RgnHandle theRgn, const Rect *iconRect, IconAlignmentType align, SInt16 iconID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IconIDToRgn
+			move.w              #$0613,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IconIDToRgn
+	ENDIF
+
+;
+; pascal OSErr IconSuiteToRgn(RgnHandle theRgn, const Rect *iconRect, IconAlignmentType align, IconSuiteRef theIconSuite)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IconSuiteToRgn
+			move.w              #$0714,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IconSuiteToRgn
+	ENDIF
+
+;
+; pascal OSErr IconMethodToRgn(RgnHandle theRgn, const Rect *iconRect, IconAlignmentType align, IconGetterUPP theMethod, void *yourDataPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_IconMethodToRgn
+			move.w              #$0915,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IconMethodToRgn
+	ENDIF
+
+;
+; pascal OSErr SetSuiteLabel(IconSuiteRef theSuite, SInt16 theLabel)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetSuiteLabel
+			move.w              #$0316,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetSuiteLabel
+	ENDIF
+
+;
+; pascal SInt16 GetSuiteLabel(IconSuiteRef theSuite)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetSuiteLabel
+			move.w              #$0217,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetSuiteLabel
+	ENDIF
+
+;
+; pascal OSErr GetIconCacheData(IconCacheRef theCache, void **theData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetIconCacheData
+			move.w              #$0419,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetIconCacheData
+	ENDIF
+
+;
+; pascal OSErr SetIconCacheData(IconCacheRef theCache, void *theData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetIconCacheData
+			move.w              #$041A,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetIconCacheData
+	ENDIF
+
+;
+; pascal OSErr GetIconCacheProc(IconCacheRef theCache, IconGetterUPP *theProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetIconCacheProc
+			move.w              #$041B,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetIconCacheProc
+	ENDIF
+
+;
+; pascal OSErr SetIconCacheProc(IconCacheRef theCache, IconGetterUPP theProc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_SetIconCacheProc
+			move.w              #$041C,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetIconCacheProc
+	ENDIF
+
+;
+; pascal OSErr PlotIconHandle(const Rect *theRect, IconAlignmentType align, IconTransformType transform, Handle theIcon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_PlotIconHandle
+			move.w              #$061D,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PlotIconHandle
+	ENDIF
+
+;
+; pascal OSErr PlotSICNHandle(const Rect *theRect, IconAlignmentType align, IconTransformType transform, Handle theSICN)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_PlotSICNHandle
+			move.w              #$061E,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PlotSICNHandle
+	ENDIF
+
+;
+; pascal OSErr PlotCIconHandle(const Rect *theRect, IconAlignmentType align, IconTransformType transform, CIconHandle theCIcon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_PlotCIconHandle
+			move.w              #$061F,D0
+			dc.w            	$ABC9
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PlotCIconHandle
+	ENDIF
+
+
+
+
+
+
+
+
+
+
+
+
+	ENDIF ; __ICONS__ 
+

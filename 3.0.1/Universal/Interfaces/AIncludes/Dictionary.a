@@ -1,0 +1,187 @@
+;
+;	File:		Dictionary.a
+;
+;	Contains:	Dictionary Manager Interfaces
+;
+;	Version:	Technology:	System 7
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1992-1997 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__DICTIONARY__') = 'UNDEFINED' THEN
+__DICTIONARY__ SET 1
+
+	IF &TYPE('__TYPES__') = 'UNDEFINED' THEN
+	include 'Types.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+
+
+															; Dictionary data insertion modes 
+kInsert							EQU		0					; Only insert the input entry if there is nothing in the dictionary that matches the key. 
+kReplace						EQU		1					; Only replace the entries which match the key with the input entry. 
+kInsertOrReplace				EQU		2					; Insert the entry if there is nothing in the dictionary which matches the key, otherwise replaces the existing matched entries with the input entry. 
+;  This Was InsertMode 
+; typedef short 						DictionaryDataInsertMode
+
+
+															; Key attribute constants 
+kIsCaseSensitive				EQU		$10					; case sensitive = 16		
+kIsNotDiacriticalSensitive		EQU		$20					; diac not sensitive = 32	
+
+															; Registered attribute type constants.	
+kNoun							EQU		-1
+kVerb							EQU		-2
+kAdjective						EQU		-3
+kAdverb							EQU		-4
+;  This Was AttributeType 
+; typedef SInt8 						DictionaryEntryAttribute
+
+;  Dictionary information record 
+DictionaryInformation	RECORD 0
+dictionaryFSSpec		 ds		FSSpec			; offset: $0 (0)
+numberOfRecords			 ds.l	1				; offset: $46 (70)
+currentGarbageSize		 ds.l	1				; offset: $4A (74)
+script					 ds.w	1				; offset: $4E (78)
+maximumKeyLength		 ds.w	1				; offset: $50 (80)
+keyAttributes			 ds.b	1				; offset: $52 (82)
+						 ORG 84
+sizeof					 EQU *					; size:   $54 (84)
+						ENDR
+DictionaryAttributeTable RECORD 0
+datSize					 ds.b	1				; offset: $0 (0)
+datTable				 ds.b	1				; offset: $1 (1) <-- really an array of length one
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+; typedef struct DictionaryAttributeTable * DictionaryAttributeTablePtr
+
+;
+; pascal OSErr InitializeDictionary(const FSSpec *theFsspecPtr, SInt16 maximumKeyLength, SInt8 keyAttributes, ScriptCode script)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InitializeDictionary
+			move.w              #$0500,D0
+			dc.w            	$AA53
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitializeDictionary
+	ENDIF
+
+;
+; pascal OSErr OpenDictionary(const FSSpec *theFsspecPtr, SInt8 accessPermission, SInt32 *dictionaryReference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_OpenDictionary
+			move.w              #$0501,D0
+			dc.w            	$AA53
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OpenDictionary
+	ENDIF
+
+;
+; pascal OSErr CloseDictionary(SInt32 dictionaryReference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CloseDictionary
+			move.w              #$0202,D0
+			dc.w            	$AA53
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CloseDictionary
+	ENDIF
+
+;
+; pascal OSErr InsertRecordToDictionary(SInt32 dictionaryReference, ConstStr255Param key, Handle recordDataHandle, DictionaryDataInsertMode whichMode)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_InsertRecordToDictionary
+			move.w              #$0703,D0
+			dc.w            	$AA53
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InsertRecordToDictionary
+	ENDIF
+
+;
+; pascal OSErr DeleteRecordFromDictionary(SInt32 dictionaryReference, ConstStr255Param key)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_DeleteRecordFromDictionary
+			move.w              #$0404,D0
+			dc.w            	$AA53
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DeleteRecordFromDictionary
+	ENDIF
+
+;
+; pascal OSErr FindRecordInDictionary(SInt32 dictionaryReference, ConstStr255Param key, DictionaryAttributeTablePtr requestedAttributeTablePointer, Handle recordDataHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_FindRecordInDictionary
+			move.w              #$0805,D0
+			dc.w            	$AA53
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindRecordInDictionary
+	ENDIF
+
+;
+; pascal OSErr FindRecordByIndexInDictionary(SInt32 dictionaryReference, SInt32 recordIndex, DictionaryAttributeTablePtr requestedAttributeTablePointer, Str255 recordKey, Handle recordDataHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_FindRecordByIndexInDictionary
+			move.w              #$0A06,D0
+			dc.w            	$AA53
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FindRecordByIndexInDictionary
+	ENDIF
+
+;
+; pascal OSErr GetDictionaryInformation(SInt32 dictionaryReference, DictionaryInformation *theDictionaryInformation)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GetDictionaryInformation
+			move.w              #$0407,D0
+			dc.w            	$AA53
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetDictionaryInformation
+	ENDIF
+
+;
+; pascal OSErr CompactDictionary(SInt32 dictionaryReference)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CompactDictionary
+			move.w              #$0208,D0
+			dc.w            	$AA53
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CompactDictionary
+	ENDIF
+
+
+
+	ENDIF ; __DICTIONARY__ 
+

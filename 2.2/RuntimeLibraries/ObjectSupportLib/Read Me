@@ -1,0 +1,19 @@
+Read Me
+
+This version of the Object Support Library (1.1.4) replaces previous versions.  It is installed into the Extensions folder by dropping the icon onto the closed System folder of your boot disk.   This should work on any Macintosh computer capable of running CFM (Code Fragment Manager) libraries.
+
+Use of the Object Support Library is described in Chapter 6 of Inside Macintosh: Interapplication Communication.
+
+This version of the Object Support Library (1.1.4) fixes bugs in the previous (1.1.2) release.  [Note: version number 1.1.3 was used internally for testing and never released].
+
+Bugs fixed:
+- Missing Gestalt selector was causing some Apps not to work with AppleScript (NOTE: checking the Gestalt selector is NOT the recommended method of checking for OSL existence!  Please see Tech Note #1083)
+- CompareProc bug where an unlocked handle's memory moved, orphaning pointers.
+
+
+There appears to be a memory leak in some cases when resolving boolean "whose clauses".  [This was reported against a prior version but not fixed in this release].
+
+11/21/96
+
+
+

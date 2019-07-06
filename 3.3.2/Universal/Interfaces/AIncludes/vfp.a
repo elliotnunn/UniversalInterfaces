@@ -1,0 +1,381 @@
+;
+;    File:       vfp.a
+;
+;    Contains:   MathLib style functions for vectors
+;
+;    Version:    Technology: 1.0
+;                Release:    Universal Interfaces 3.3.2
+;
+;    Copyright:  © 1999-2000 by Apple Computer, Inc., all rights reserved.
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__VFP__') = 'UNDEFINED' THEN
+__VFP__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+
+; 
+;———————————————————————————————————————————————————————————————————————————————
+;                                                                                
+;    A collection of numerical functions designed to facilitate a wide         
+;    range of numerical programming for the Altivect Programming model.      
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+	IF &TYPE('__VEC__') <> 'UNDEFINED' THEN
+; 
+;————————————————————————[ Computational Functions]—————————————————————————————
+;                                                                                
+;    Divf        C = A ÷ B                                                       
+;    Sqrtf       B = √A                                                          
+;    RSqrtf      B = 1/√A                                                        
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern vector float vDivf(vector float A, vector float B)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vDivf
+	ENDIF
+
+;
+; extern vector float vSqrtf(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vSqrtf
+	ENDIF
+
+;
+; extern vector float vRSqrtf(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vRSqrtf
+	ENDIF
+
+
+
+; 
+;——————————————————————————[ Exponential Functions]—————————————————————————————
+;                                                                                
+;    Exp         B = Exp(A)                                                      
+;    ExpM1       ExpM1(x) = Exp(x) - 1.  But, for small enough arguments,        
+;                ExpM1(x) is expected to be more accurate than Exp(x) - 1.       
+;    Log         B = Log(A)                                                      
+;    Log1P       Log1P = Log(1 + x). But, for small enough arguments,            
+;                Log1P is expected to be more accurate than Log(1 + x).          
+;    Logb        Extracts the exponent of its argument, as a signed integral     
+;                value. A subnormal argument is treated as though it were first  
+;                normalized. Thus:                                               
+;                1   <=   x * 2^(-logb(x))   <   2                           
+;    Scalb       Computes x * 2^n efficently.  This is not normally done by      
+;                computing 2^n explicitly.                                       
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+;
+; extern vector float vExpf(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vExpf
+	ENDIF
+
+;
+; extern vector float vExpM1f(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vExpM1f
+	ENDIF
+
+;
+; extern vector float vLogf(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vLogf
+	ENDIF
+
+;
+; extern vector float vLog1Pf(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vLog1Pf
+	ENDIF
+
+;
+; extern vector float vLogbf(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vLogbf
+	ENDIF
+
+;
+; extern vector float vScalbf(vector float X, vector signed int n)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vScalbf
+	ENDIF
+
+
+
+; 
+;———————————————————————————[ Auxiliary Functions]——————————————————————————————
+;                                                                                
+;    fab             Absolute value is part of the programming model, however    
+;                    completeness it is included in the library.                 
+;    copysign        Produces a value with the magnitude of its first argument   
+;                    and sign of its second argument.  NOTE: the order of the    
+;                    arguments matches the recommendation of the IEEE 754        
+;                    floating point standard,  which is opposite from the SANE   
+;                    copysign function.                                          
+;    nextafter       Computes the next representable value after 'x' in the      
+;                    direction of 'y'.  if x == y, then y is returned.           
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+;
+; extern vector float vFabf(vector float v)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vFabf
+	ENDIF
+
+;
+; extern vector float vCopySignf(vector float arg2, vector float arg1)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vCopySignf
+	ENDIF
+
+;
+; extern vector float vNextafterf(vector float x, vector float y)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vNextafterf
+	ENDIF
+
+
+
+; 
+;—————————————————————————————[ Inquiry Functions]——————————————————————————————
+;                                                                                
+;    classify        Returns one of the FP_≈ values.                             
+;    signbit         Non-zero if and only if the sign of the argument x is       
+;                    negative.  This includes, NaNs, infinities and zeros.       
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+;
+; extern vector unsigned int vClassifyf(vector float arg)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vClassifyf
+	ENDIF
+
+;
+; extern vector unsigned int vSignBitf(vector float arg)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vSignBitf
+	ENDIF
+
+
+
+; 
+;—————————————————————————[ Transandental Functions]————————————————————————————
+;                                                                                
+;    sin             B = Sin(A).                                                 
+;    cos             B = Cos(A).                                                 
+;    tan             B = Tan(A).                                                 
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+;
+; extern vector float vSinf(vector float arg)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vSinf
+	ENDIF
+
+;
+; extern vector float vCosf(vector float arg)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vCosf
+	ENDIF
+
+;
+; extern vector float vTanf(vector float arg)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vTanf
+	ENDIF
+
+
+
+; 
+;—————————————————————————[ Trigonometric Functions]————————————————————————————
+;                                                                                
+;    asin        result is in [-pi/2,pi/2].                                      
+;    acos        result is in [0,pi].                                            
+;    atan        result is in [-pi/2,pi/2].                                      
+;    atan2       Computes the arc tangent of y/x in [-pi,pi] using the sign of   
+;                both arguments to determine the quadrant of the computed value. 
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+;
+; extern vector float vASinf(vector float arg)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vASinf
+	ENDIF
+
+;
+; extern vector float vACosf(vector float arg)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vACosf
+	ENDIF
+
+;
+; extern vector float vATanf(vector float arg)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vATanf
+	ENDIF
+
+;
+; extern vector float vATan2f(vector float arg1, vector float arg2)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vATan2f
+	ENDIF
+
+
+
+; 
+;——————————————————————————[ Hyperbolic Functions]——————————————————————————————
+;                                                                                
+;    Sinh        Sine Hyperbolic.                                                
+;    Cosh        Cosine Hyperbolic.                                              
+;    Tanh        Tangent Hyperbolic.                                             
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+;
+; extern vector float vSinhf(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vSinhf
+	ENDIF
+
+;
+; extern vector float vCoshf(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vCoshf
+	ENDIF
+
+;
+; extern vector float vTanhf(vector float X)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vTanhf
+	ENDIF
+
+
+
+; 
+;———————————————————————————[ Remainder Functions]——————————————————————————————
+;                                                                                
+;    mod             B = X mod Y.                                                
+;    remainder       IEEE 754 floating point standard for remainder.             
+;    remquo          SANE remainder.  It stores into 'quotient' the 7 low-order  
+;                    bits of the integer quotient x/y, such that:                
+;                    -127 <= quotient <= 127.                                
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+;
+; extern vector float vFModf(vector float X, vector float Y)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vFModf
+	ENDIF
+
+;
+; extern vector float vRemainderf(vector float X, vector float Y)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vRemainderf
+	ENDIF
+
+;
+; extern vector float vRemQuof(vector float X, vector float Y, vector unsigned int *QUO)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vRemQuof
+	ENDIF
+
+
+
+; 
+;——————————————————————————————[ Power Functions]——————————————————————————————
+;                                                                                
+;    ipow            Returns x raised to the integer power of y.                 
+;    pow             Returns x raised to the power of y.  Result is more         
+;                    accurate than using exp(log(x)*y).                          
+;                                                                                
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+;
+; extern vector float vIPowf(vector float X, vector signed int Y)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vIPowf
+	ENDIF
+
+;
+; extern vector float vPowf(vector float X, vector float Y)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vPowf
+	ENDIF
+
+
+
+; 
+;———————————————————————————————————————————————————————————————————————————————
+;    Useful                                                                      
+;———————————————————————————————————————————————————————————————————————————————
+;
+
+;
+; extern vector unsigned int vTableLookUp(vector signed int Index_Vect, unsigned long *Table)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION vTableLookUp
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF
+	ENDIF ; __VFP__ 
+

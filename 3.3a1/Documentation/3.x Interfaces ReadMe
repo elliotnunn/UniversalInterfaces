@@ -1,0 +1,19 @@
+  
+                                                   
+                                                             Universal Interfaces 3.x 
+
+
+The goal of the 3.0 Universal Interfaces is to integrate all the latest Apple MacOS headers into one release.  This release will have a consistent style that, among other things, allows the interface files to work cross-platform.  For example, the CPU, OS, and runtime have all been factored into separate conditionals (e.g. TARGET_CPU_PPC, TARGET_OS_MAC, and TARGET_RT_MAC_CFM).  Please see the comments in ConditionalMacros.h for more details. 
+
+CIncludes
+The headers have been updated to remove more pascal artifacts. For example: uses of Ptr have been changed to void*, appropriate integers have been made unsigned, const has been added to appropriate parameters. 
+
+RIncludes
+The Rez interface files have been overhauled and subdivided by toolbox manager and have a new standard for versioning template changes.  The new subdivision, for example, puts the rez template for 'DLOG' is now in Dialogs.r instead of Types.r. For short term compatibility, Types.r has been changed to auto-include the other new .r files so that your sources which only includes Types.r will continue to build, but you should migrate your Rez sources to #include the appropriate .r file directly.   All rez templates that have changed over time now have a standard style of conditionalizing which allows access to any of the template versions on a type by type basis.  For example, you can #define WIND_RezTemplateVersion to be 1 before your #include of MacWindows.r to use the 'WIND' resource template that has the window positioning information at the end.
+
+AIncludes
+The Asm interface files are now "universal". They have the same file, structure, and constant names as C.  They are designed to work with Asm and PPCAsm.  If your source code was created using the old 68k includes (e.g. SysEqu.a, ToolEqu.a) you may have to do a significant amount of work to get you sources assembling with these new interfaces.  If you do choose to do the conversion, read the file "Universal AIncludes ReadMe" for tips on making easing the conversation process.
+
+
+∆ Note: In the past, the main release vehicle for the Universal Interfaces was with MPW on the E.T.O. series CD's.  In that environment, the interface files and libraries were merged in with any MPW specific interface files and libraries.  Beginning with the 3.0 Universal Interfaces, the MPW specific files are in a separate folder.  To install into an existing MPW environment, use the MPW_Install script.
+

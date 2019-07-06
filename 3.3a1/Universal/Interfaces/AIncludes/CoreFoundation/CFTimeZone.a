@@ -1,0 +1,44 @@
+;
+;	File:		CFTimeZone.a
+;
+;	Contains:	CoreFoundation time zone
+;
+;	Version:	Technology:	Mac OS X
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__COREFOUNDATION_CFTIMEZONE__') = 'UNDEFINED' THEN
+__COREFOUNDATION_CFTIMEZONE__ SET 1
+
+	IF &TYPE('___COREFOUNDATION_CFBASE__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFBase.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFARRAY__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFArray.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFDATA__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFData.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFDATE__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFDate.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFDICTIONARY__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFDictionary.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFSTRING__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFString.a'
+	ENDIF
+
+; 
+;	CFTimeZoneRef is defined in CFDate.h
+;
+
+	ENDIF ; __COREFOUNDATION_CFTIMEZONE__ 
+

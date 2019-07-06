@@ -1,0 +1,85 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.4.1
+Date:    September 13, 2001
+
+
+=========
+Overview
+=========
+
+The 3.4.1 Universal Interfaces are for use when
+developing for CarbonLib 1.5, Mac OS 9.1,
+Mac OS X 10.1, or QuickTime 5.0.1 using CFM or 
+classic 68k runtimes.
+
+When developing on Mac OS X and building for Mach-O,
+you should instead use framework header files 
+(e.g. #include <Carbon/Carbon.h>).  
+
+If you want your source code to be able to compile
+on Mac OS X and on classic Mac OS, you should continue
+to use "flat" includes (e.g. #include <Dialogs.h>)
+in your source code and when building on Mac OS X, 
+add -I/Developer/Headers/FlatCarbon to your compiler
+search path.  That directory contains files in the
+flat namespace (e.g. Dialogs.h) which redirect to
+the appropriate framework header (e.g. Carbon/Carbon.h).
+
+
+==================================================
+Notes on CarbonLib 1.5 development
+==================================================
+
+- CarbonLib 1.5 is designed to run on Mac OS 8.6 
+  through OS 9.1 
+  
+- Not all CarbonLib functions are available on older
+  System versions.  Just as you would for a 
+  traditional application, your application's
+  code should use Gestalt and/or other mechanisms to
+  see if a particular manager or function is available
+  before calling it.
+
+- The CarbonLib stub library is constructed to cause  
+  the linker to automatically weak link symbols in  
+  CarbonLib that might not be available when running 
+  on a pre Mac OS 9 system.
+ 
+- There is a new stub library named CarbonFrameworkLib.
+  It contains functions that are implemented on Mac OS X,
+  but have not (and may never be) implemented in CarbonLib.
+  If you link with it (in addition to CarbonLib) you will
+  automatically be weak-linked with those symbols.  This
+  enables you to more easily write applications that take
+  advantage of Carbon functionality available when
+  running on Mac OS X.
+
+
+==================================================
+Changes since Universal Interfaces 3.4
+==================================================
+
+- New .h/.a/.p/.r files:
+		CGPattern.h
+
+- Removed .h/.a/.p/.r files:
+
+- New StubLibraries
+		IsochronousDataHandlerLib
+		
+- Updated StubLibraries
+		CarbonLib
+		CarbonFrameworkLib
+		
+- UNIVERSAL_INTERFACES_VERSION is now at 0x0341.  To test if or which
+  header seed, use UNIVERSAL_INTERFACES_SEED_VERSION.
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+
+

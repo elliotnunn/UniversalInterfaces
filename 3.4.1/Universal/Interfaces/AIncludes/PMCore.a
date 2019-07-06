@@ -1,0 +1,2252 @@
+;
+;    File:       PMCore.a
+;
+;    Contains:   Carbon Printing Manager Interfaces.
+;
+;    Version:    Technology: Mac OS X
+;                Release:    Universal Interfaces 3.4.1
+;
+;    Copyright:  © 1998-2001 by Apple Computer, Inc., all rights reserved
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__PMCORE__') = 'UNDEFINED' THEN
+__PMCORE__ SET 1
+
+	IF &TYPE('__MACERRORS__') = 'UNDEFINED' THEN
+	include 'MacErrors.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__CMAPPLICATION__') = 'UNDEFINED' THEN
+	include 'CMApplication.a'
+	ENDIF
+	IF &TYPE('__PMDEFINITIONS__') = 'UNDEFINED' THEN
+	include 'PMDefinitions.a'
+	ENDIF
+	IF &TYPE('__CFSTRING__') = 'UNDEFINED' THEN
+	include 'CFString.a'
+	ENDIF
+	IF &TYPE('__CFURL__') = 'UNDEFINED' THEN
+	include 'CFURL.a'
+	ENDIF
+	IF &TYPE('PM_USE_SESSION_APIS') = 'UNDEFINED' THEN
+	PM_USE_SESSION_APIS: SET 1
+	ENDIF
+;  Callbacks 
+
+; *  NewPMIdleUPP()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+
+; *  DisposePMIdleUPP()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+
+; *  InvokePMIdleUPP()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+	IF PM_USE_SESSION_APIS THEN
+;  Session routines 
+;  Session support 
+
+; *  PMRetain()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMRetain(PMObject object)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMRetain
+	ENDIF
+
+
+; *  PMRelease()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMRelease(PMObject object)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMRelease
+	ENDIF
+
+;  Session Print loop 
+; ***********************
+;  A session is created with a refcount of 1. 
+; ***********************
+
+; *  PMCreateSession()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMCreateSession(PMPrintSession *printSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMCreateSession
+	ENDIF
+
+;  Session PMPageFormat 
+; ***********************
+;  A pageformat is created with a refcount of 1. 
+; ***********************
+
+; *  PMCreatePageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMCreatePageFormat(PMPageFormat *pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMCreatePageFormat
+	ENDIF
+
+
+; *  PMSessionDefaultPageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionDefaultPageFormat(PMPrintSession printSession, PMPageFormat pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionDefaultPageFormat
+	ENDIF
+
+
+; *  PMSessionValidatePageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionValidatePageFormat(PMPrintSession printSession, PMPageFormat pageFormat, Boolean *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionValidatePageFormat
+	ENDIF
+
+;  Session PMPrintSettings 
+; ***********************
+;  A printSettings is created with a refcount of 1. 
+; ***********************
+
+; *  PMCreatePrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMCreatePrintSettings(PMPrintSettings *printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMCreatePrintSettings
+	ENDIF
+
+
+; *  PMSessionDefaultPrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionDefaultPrintSettings(PMPrintSession printSession, PMPrintSettings printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionDefaultPrintSettings
+	ENDIF
+
+
+; *  PMSessionValidatePrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionValidatePrintSettings(PMPrintSession printSession, PMPrintSettings printSettings, Boolean *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionValidatePrintSettings
+	ENDIF
+
+;  Session Classic support 
+
+; *  PMSessionGeneral()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionGeneral(PMPrintSession printSession, Ptr pData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionGeneral
+	ENDIF
+
+
+; *  PMSessionConvertOldPrintRecord()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionConvertOldPrintRecord(PMPrintSession printSession, Handle printRecordHandle, PMPrintSettings *printSettings, PMPageFormat *pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionConvertOldPrintRecord
+	ENDIF
+
+
+; *  PMSessionMakeOldPrintRecord()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionMakeOldPrintRecord(PMPrintSession printSession, PMPrintSettings printSettings, PMPageFormat pageFormat, Handle *printRecordHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionMakeOldPrintRecord
+	ENDIF
+
+;  Session Driver Information 
+
+; *  PMPrinterGetDescriptionURL()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPrinterGetDescriptionURL(PMPrinter printer, CFStringRef descriptionType, CFURLRef *fileURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrinterGetDescriptionURL
+	ENDIF
+
+
+; *  PMSessionGetCurrentPrinter()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionGetCurrentPrinter(PMPrintSession printSession, PMPrinter *currentPrinter)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionGetCurrentPrinter
+	ENDIF
+
+
+; *  PMPrinterGetLanguageInfo()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPrinterGetLanguageInfo(PMPrinter printer, PMLanguageInfo *info)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrinterGetLanguageInfo
+	ENDIF
+
+
+; *  PMPrinterGetDriverCreator()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPrinterGetDriverCreator(PMPrinter printer, OSType *creator)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrinterGetDriverCreator
+	ENDIF
+
+
+; *  PMPrinterGetDriverReleaseInfo()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPrinterGetDriverReleaseInfo(PMPrinter printer, VersRec *release)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrinterGetDriverReleaseInfo
+	ENDIF
+
+
+; *  PMPrinterGetPrinterResolutionCount()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPrinterGetPrinterResolutionCount(PMPrinter printer, UInt32 *count)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrinterGetPrinterResolutionCount
+	ENDIF
+
+
+; *  PMPrinterGetPrinterResolution()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPrinterGetPrinterResolution(PMPrinter printer, PMTag tag, PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrinterGetPrinterResolution
+	ENDIF
+
+
+; *  PMPrinterGetIndexedPrinterResolution()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPrinterGetIndexedPrinterResolution(PMPrinter printer, UInt32 index, PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPrinterGetIndexedPrinterResolution
+	ENDIF
+
+;  Session ColorSync & PostScript Support 
+
+; *  PMSessionEnableColorSync()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionEnableColorSync(PMPrintSession printSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionEnableColorSync
+	ENDIF
+
+
+; *  PMSessionDisableColorSync()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionDisableColorSync(PMPrintSession printSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionDisableColorSync
+	ENDIF
+
+
+; *  PMSessionPostScriptBegin()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionPostScriptBegin(PMPrintSession printSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionPostScriptBegin
+	ENDIF
+
+
+; *  PMSessionPostScriptEnd()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionPostScriptEnd(PMPrintSession printSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionPostScriptEnd
+	ENDIF
+
+
+; *  PMSessionPostScriptHandle()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionPostScriptHandle(PMPrintSession printSession, Handle psHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionPostScriptHandle
+	ENDIF
+
+
+; *  PMSessionPostScriptData()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionPostScriptData(PMPrintSession printSession, Ptr psPtr, Size len)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionPostScriptData
+	ENDIF
+
+
+; *  PMSessionPostScriptFile()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionPostScriptFile(PMPrintSession printSession, FSSpec *psFile)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionPostScriptFile
+	ENDIF
+
+
+; *  PMSessionSetPSInjectionData()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionSetPSInjectionData(PMPrintSession printSession, PMPrintSettings printSettings, CFArrayRef injectionDictArray)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionSetPSInjectionData
+	ENDIF
+
+;  Session Error 
+
+; *  PMSessionError()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionError(PMPrintSession printSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionError
+	ENDIF
+
+
+; *  PMSessionSetError()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionSetError(PMPrintSession printSession, OSStatus printError)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionSetError
+	ENDIF
+
+;  Other Session routines 
+
+; *  PMSessionGetDocumentFormatGeneration()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionGetDocumentFormatGeneration(PMPrintSession printSession, CFArrayRef *docFormats)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionGetDocumentFormatGeneration
+	ENDIF
+
+
+; *  PMSessionSetDocumentFormatGeneration()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionSetDocumentFormatGeneration(PMPrintSession printSession, CFStringRef docFormat, CFArrayRef graphicsContextTypes, CFTypeRef options)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionSetDocumentFormatGeneration
+	ENDIF
+
+
+; *  PMSessionGetDocumentFormatSupported()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionGetDocumentFormatSupported(PMPrintSession printSession, CFArrayRef *docFormats, UInt32 limit)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionGetDocumentFormatSupported
+	ENDIF
+
+
+; *  PMSessionIsDocumentFormatSupported()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionIsDocumentFormatSupported(PMPrintSession printSession, CFStringRef docFormat, Boolean *supported)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionIsDocumentFormatSupported
+	ENDIF
+
+
+; *  PMSessionGetGraphicsContext()
+; *  
+; *  Parameters:
+; *    
+; *    printSession:
+; *      the session
+; *    
+; *    graphicsContextType:
+; *      either kPMGraphicsContextQuickdraw or
+; *      kPMGraphicsContextCoreGraphics
+; *    
+; *    graphicsContext:
+; *      returns a GrafPtr or a CGContextRef
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionGetGraphicsContext(PMPrintSession printSession, CFStringRef graphicsContextType, void **graphicsContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionGetGraphicsContext
+	ENDIF
+
+
+; *  PMSessionSetIdleProc()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionSetIdleProc(PMPrintSession printSession, PMIdleUPP idleProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionSetIdleProc
+	ENDIF
+
+
+; *  PMSessionSetDataInSession()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionSetDataInSession(PMPrintSession printSession, CFStringRef key, CFTypeRef data)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionSetDataInSession
+	ENDIF
+
+
+; *  PMSessionGetDataFromSession()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionGetDataFromSession(PMPrintSession printSession, CFStringRef key, CFTypeRef *data)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionGetDataFromSession
+	ENDIF
+
+
+; *  PMSessionCreatePrinterList()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.4 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionCreatePrinterList(PMPrintSession printSession, CFArrayRef *printerList, CFIndex *currentIndex, PMPrinter *currentPrinter)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionCreatePrinterList
+	ENDIF
+
+
+; *  PMSessionSetCurrentPrinter()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.4 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionSetCurrentPrinter(PMPrintSession session, CFStringRef printerName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionSetCurrentPrinter
+	ENDIF
+
+
+; *  PMSessionSetDestination()
+; *  
+; *  Summary:
+; *    Alter a print session and print settings so that an associated
+; *    print job is sent to the provided destination type in the,
+; *    optional, MIME document format.
+; *  
+; *  Discussion:
+; *    This function is most useful when an application would like to
+; *    write its print output to disk without requiring user
+; *    interaction. The list of MIME types that can be sent to the
+; *    provided destination can be obtained from
+; *    PMSessionCopyOutputFormatList and one of these passed to this
+; *    function.
+; *  
+; *  Parameters:
+; *    
+; *    printSession:
+; *      The session to be used for a print job. The session holds the
+; *      preview setting which can override the destination type in the
+; *      print settings.
+; *    
+; *    printSettings:
+; *      The print settings to be used for a print job. The print
+; *      settings specify whether a job will be directed toward a
+; *      printer or to file. It also holds the requested MIME output
+; *      type.
+; *    
+; *    destType:
+; *      The destiation type for a print job associated with the
+; *      provided print session and print settings. Fax is currently not
+; *      supported, but kPMDestinationPrinter, kPMDestinationFile, and
+; *      kPMDestinationPreview can be set.
+; *    
+; *    destFormat:
+; *      The MIME type to be generated for the provided destination
+; *      type. This parameter can be NULL in which the default format
+; *      for the requested destination type is used. To obtain a list of
+; *      valid formats for a given destiation type, use the function
+; *      PMSessionCopyOutputFormatList.
+; *    
+; *    destLocation:
+; *      Some destination types support a destination location. The
+; *      clearest example is the kPMDestinationFile destination type
+; *      which allows a caller to also supply a file URL specifying
+; *      where the output file is to be created.
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.5 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionSetDestination(PMPrintSession printSession, PMPrintSettings printSettings, PMDestinationType destType, CFStringRef destFormat, CFURLRef destLocation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionSetDestination
+	ENDIF
+
+
+; *  PMSessionGetDestinationType()
+; *  
+; *  Summary:
+; *    Hand back the destination type that will be used for a print job
+; *    with the specified print settings and print session.
+; *  
+; *  Discussion:
+; *    Currently there are four destination types:
+; *    kPMDestinationPrinter, kPMDestinationFile, kPMDestinationFax and
+; *    kPMDestinationPreview. The first three destination types are
+; *    stored in the print settings. The switch for preview is stored in
+; *    the print session and, if enabled, overrides the destination in
+; *    the print setting. This function is preferred over
+; *    PMGetDestination as the latter does not take a print session
+; *    parameter and therefore can not indicate whether preview has been
+; *    selected as the destination.
+; *  
+; *  Parameters:
+; *    
+; *    printSession:
+; *      The session to be used for a print job. The session holds the
+; *      preview setting which can override the destination type in the
+; *      print settings.
+; *    
+; *    printSettings:
+; *      The print settings to be used for a print job. The print
+; *      settings specify whether a job will be directed toward a
+; *      printer or to file.
+; *    
+; *    destTypeP:
+; *      A pointer to a caller supplied PMDestinationType variable. If
+; *      this function succeeds then *'destTypeP' will be filled in with
+; *      the destination type for a print job that used the specified
+; *      session and print settings. If this function fails, then
+; *      *'destType' will be set to kPMDestinationInvalid.
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.5 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionGetDestinationType(PMPrintSession printSession, PMPrintSettings printSettings, PMDestinationType *destTypeP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionGetDestinationType
+	ENDIF
+
+
+; *  PMSessionCopyDestinationFormat()
+; *  
+; *  Summary:
+; *    Hand back the destination output MIME type associated with the
+; *    provided print session and print settings.
+; *  
+; *  Parameters:
+; *    
+; *    printSession:
+; *      A currently open print session.
+; *    
+; *    printSettings:
+; *      The print settings that are to be searched.
+; *    
+; *    destFormatP:
+; *      A pointer to a caller allocated CFStringRef variable. If this
+; *      routine returns noErr then *'destFormatP' will either be a copy
+; *      of a CFStringRef specifying the output format for the print
+; *      job, or NULL indicating that the default output format will be
+; *      used. If this function return an error, then *'destFormatP'
+; *      will be set to NULL.
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.5 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionCopyDestinationFormat(PMPrintSession printSession, PMPrintSettings printSettings, CFStringRef *destFormatP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionCopyDestinationFormat
+	ENDIF
+
+
+; *  PMSessionCopyDestinationLocation()
+; *  
+; *  Summary:
+; *    Hand back the URL destination location given a print session and
+; *    print settings.
+; *  
+; *  Discussion:
+; *    Some destination type support a destination location which
+; *    further defines where the output from a pritn job should be sent.
+; *    The kPMDestinationFile destiation type, for example, will use a
+; *    file URL to determine where a new file should be created.
+; *  
+; *  Parameters:
+; *    
+; *    printSession:
+; *      A currently open print session.
+; *    
+; *    printSettings:
+; *      The print settings that are to be searched.
+; *    
+; *    destLocationP:
+; *      A pointer to a caller allocated CFURLRef variable. If this
+; *      routine returns noErr then *'outputFileP' will either be NULL
+; *      indicating that the job is using the default destination
+; *      location for the current destination type or a copy of a
+; *      CFURLRef will be placed in *'destLocationP'. If this function
+; *      returns an error then 'destLocationP' will be set to NULL.
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.5 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionCopyDestinationLocation(PMPrintSession printSession, PMPrintSettings printSettings, CFURLRef *destLocationP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionCopyDestinationLocation
+	ENDIF
+
+
+; *  PMSessionCopyOutputFormatList()
+; *  
+; *  Summary:
+; *    Hands back an an array of MIME types describing the possible
+; *    output formats for the printer module associated with the current
+; *    printer.
+; *  
+; *  Parameters:
+; *    
+; *    printSession:
+; *      This session's current printer's printer module will be queried
+; *      for its supported output MIME types.
+; *    
+; *    destType:
+; *      A print job can have one of several possible destination types.
+; *      The list of valid output formats is dependent upon the
+; *      destination type. This parameter specifies destination type of
+; *      interest when retrieving the output formats list.
+; *    
+; *    documentFormatP:
+; *      A pointer to a caller's CFArrayRef variable. If this routine
+; *      completes successfully, then *'documentFormatP' will be set to
+; *      a CFArrayRef containing CFStringRefs. Each CFStringRef in the
+; *      array is a MIME type specifying a type of output that can be
+; *      generated by the printer module associated with the current
+; *      printer.
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        not available
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionCopyOutputFormatList(PMPrintSession printSession, PMDestinationType destType, CFArrayRef *documentFormatP)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionCopyOutputFormatList
+	ENDIF
+
+
+
+; *  PMSessionCreatePageFormatList()
+; *  
+; *  Summary:
+; *    Hand back a list of page format instances. Each page format
+; *    instance describes a paper size available on the specified
+; *    printer.
+; *  
+; *  Parameters:
+; *    
+; *    printSession:
+; *      A currently open print session.
+; *    
+; *    printer:
+; *      The printer whose page size list should be enumerated. To get
+; *      the session's current printer, see PMSessionGetCurrentPrinter().
+; *    
+; *    pageFormatList:
+; *      If this function is successful then noErr will be returned and
+; *      *'pageFormatList' will be set to a newly created CFArray. Each
+; *      element in the array will be a PMPageFormat describing an
+; *      available paper size for the specified printer. If this
+; *      function fails then a non-zero error code will be returned and
+; *      *'pageFormatList' will be set to NULL.
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        not available
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSessionCreatePageFormatList(PMPrintSession printSession, PMPrinter printer, CFArrayRef *pageFormatList)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSessionCreatePageFormatList
+	ENDIF
+
+	ELSE
+
+; *  PMSetIdleProc()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetIdleProc(PMIdleUPP idleProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetIdleProc
+	ENDIF
+
+;  Print loop 
+
+; *  PMBegin()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMBegin(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMBegin
+	ENDIF
+
+
+; *  PMEnd()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMEnd(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMEnd
+	ENDIF
+
+; ***********************
+;   Valid only within a PMBeginPage/PMEndPage block. You should retrieve the printing 
+;   port with this call and set it before imaging a page. 
+; ***********************
+
+; *  PMGetGrafPtr()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetGrafPtr(PMPrintContext printContext, GrafPtr *grafPort)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetGrafPtr
+	ENDIF
+
+;  PMPageFormat 
+
+; *  PMNewPageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMNewPageFormat(PMPageFormat *pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMNewPageFormat
+	ENDIF
+
+
+; *  PMDisposePageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMDisposePageFormat(PMPageFormat pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDisposePageFormat
+	ENDIF
+
+
+; *  PMDefaultPageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMDefaultPageFormat(PMPageFormat pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDefaultPageFormat
+	ENDIF
+
+
+; *  PMValidatePageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMValidatePageFormat(PMPageFormat pageFormat, Boolean *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMValidatePageFormat
+	ENDIF
+
+;  PMPrintSettings 
+
+; *  PMNewPrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMNewPrintSettings(PMPrintSettings *printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMNewPrintSettings
+	ENDIF
+
+
+; *  PMDisposePrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMDisposePrintSettings(PMPrintSettings printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDisposePrintSettings
+	ENDIF
+
+
+; *  PMDefaultPrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMDefaultPrintSettings(PMPrintSettings printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDefaultPrintSettings
+	ENDIF
+
+
+; *  PMValidatePrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMValidatePrintSettings(PMPrintSettings printSettings, Boolean *result)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMValidatePrintSettings
+	ENDIF
+
+;  Classic Support 
+
+; *  PMGeneral()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGeneral(Ptr pData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGeneral
+	ENDIF
+
+
+; *  PMConvertOldPrintRecord()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMConvertOldPrintRecord(Handle printRecordHandle, PMPrintSettings *printSettings, PMPageFormat *pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMConvertOldPrintRecord
+	ENDIF
+
+
+; *  PMMakeOldPrintRecord()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMMakeOldPrintRecord(PMPrintSettings printSettings, PMPageFormat pageFormat, Handle *printRecordHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMMakeOldPrintRecord
+	ENDIF
+
+;  Driver Information 
+
+; *  PMIsPostScriptDriver()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMIsPostScriptDriver(Boolean *isPostScript)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMIsPostScriptDriver
+	ENDIF
+
+
+; *  PMGetLanguageInfo()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetLanguageInfo(PMLanguageInfo *info)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetLanguageInfo
+	ENDIF
+
+
+; *  PMGetDriverCreator()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetDriverCreator(OSType *creator)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetDriverCreator
+	ENDIF
+
+
+; *  PMGetDriverReleaseInfo()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetDriverReleaseInfo(VersRec *release)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetDriverReleaseInfo
+	ENDIF
+
+
+; *  PMGetPrinterResolutionCount()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetPrinterResolutionCount(UInt32 *count)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPrinterResolutionCount
+	ENDIF
+
+
+; *  PMGetPrinterResolution()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetPrinterResolution(PMTag tag, PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPrinterResolution
+	ENDIF
+
+
+; *  PMGetIndexedPrinterResolution()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetIndexedPrinterResolution(UInt32 index, PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetIndexedPrinterResolution
+	ENDIF
+
+; ***********************
+;   PMEnableColorSync and PMDisableColorSync are valid within 
+;   BeginPage/EndPage block 
+; ***********************
+;  ColorSync & PostScript Support 
+
+; *  PMEnableColorSync()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMEnableColorSync(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMEnableColorSync
+	ENDIF
+
+
+; *  PMDisableColorSync()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMDisableColorSync(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMDisableColorSync
+	ENDIF
+
+; ***********************
+;   The PMPostScriptxxx calls are valid within a 
+;   BeginPage/EndPage block 
+; ***********************
+
+; *  PMPostScriptBegin()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPostScriptBegin(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptBegin
+	ENDIF
+
+
+; *  PMPostScriptEnd()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPostScriptEnd(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptEnd
+	ENDIF
+
+; ***********************
+;   These PMPostScriptxxx calls are valid within a 
+;   PMPostScriptBegin/PMPostScriptEnd block 
+; ***********************
+
+; *  PMPostScriptHandle()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPostScriptHandle(Handle psHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptHandle
+	ENDIF
+
+
+; *  PMPostScriptData()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPostScriptData(Ptr psPtr, Size len)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptData
+	ENDIF
+
+
+; *  PMPostScriptFile()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMPostScriptFile(FSSpec *psFile)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMPostScriptFile
+	ENDIF
+
+;  Error 
+
+; *  PMError()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMError(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMError
+	ENDIF
+
+
+; *  PMSetError()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetError(OSStatus printError)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetError
+	ENDIF
+
+	ENDIF	; PM_USE_SESSION_APIS
+;  PMPageFormat 
+
+; *  PMCopyPageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMCopyPageFormat(PMPageFormat formatSrc, PMPageFormat formatDest)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMCopyPageFormat
+	ENDIF
+
+; ***********************
+;   Flattening a page format should only be necessary if you intend to preserve 
+;   the object settings along with a document. A page format will persist outside of a 
+;   PMBegin/PMEnd block. This will allow you to use any accessors on the object without 
+;   the need to flatten and unflatten. Keep in mind accessors make no assumption 
+;   on the validity of the value you set. This can only be done thru PMValidatePageFormat 
+;   in a PMBegin/PMEnd block or with PMSessionValidatePageFormat with a valid session. 
+;   It is your responsibility for disposing of the handle. 
+; ***********************
+
+; *  PMFlattenPageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMFlattenPageFormat(PMPageFormat pageFormat, Handle *flatFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMFlattenPageFormat
+	ENDIF
+
+
+; *  PMUnflattenPageFormat()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMUnflattenPageFormat(Handle flatFormat, PMPageFormat *pageFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMUnflattenPageFormat
+	ENDIF
+
+;  PMPageFormat Accessors 
+; ***********************
+;  PMSetxxx calls only saves the value inside the printing object. They make no assumption on the 
+;  validity of the value. This should be done using PMValidatePageFormat/PMSessionValidatePageFormat 
+;  Any dependant settings are also updated during a validate call. 
+;  For example: 
+;  PMGetAdjustedPaperRect - returns a rect of a certain size 
+;  PMSetScale( aPageFormat, 500.0 )  
+;  PMGetAdjustedPaperRect - returns the SAME rect as the first call  
+; 
+;  PMGetAdjustedPaperRect - returns a rect of a certain size 
+;  PMSetScale( aPageFormat, 500.0 ) 
+;  PMValidatePageFormat or PMSessionValidatePageFormat 
+;  PMGetAdjustedPaperRect - returns a rect thats scaled 500% from the first call 
+; ***********************
+
+; *  PMGetPageFormatExtendedData()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetPageFormatExtendedData(PMPageFormat pageFormat, OSType dataID, UInt32 *size, void *extendedData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPageFormatExtendedData
+	ENDIF
+
+
+; *  PMSetPageFormatExtendedData()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetPageFormatExtendedData(PMPageFormat pageFormat, OSType dataID, UInt32 size, void *extendedData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetPageFormatExtendedData
+	ENDIF
+
+; ***********************
+;   A value of 100.0 means 100% (no scaling). 50.0 means 50% scaling 
+; ***********************
+
+; *  PMGetScale()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetScale(PMPageFormat pageFormat, double *scale)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetScale
+	ENDIF
+
+
+; *  PMSetScale()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetScale(PMPageFormat pageFormat, double scale)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetScale
+	ENDIF
+
+; ***********************
+;   This is the drawing resolution of an app. This should not be confused with 
+;   the resolution of the printer. You can call PMGetPrinterResolution to see 
+;   what resolutions are avaliable for the current printer. 
+; ***********************
+
+; *  PMGetResolution()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetResolution(PMPageFormat pageFormat, PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetResolution
+	ENDIF
+
+
+; *  PMSetResolution()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetResolution(PMPageFormat pageFormat, const PMResolution *res)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetResolution
+	ENDIF
+
+; ***********************
+;   This is the physical size of the paper without regard to resolution, orientation 
+;   or scaling. It is returned as a 72dpi value. 
+; ***********************
+
+; *  PMGetPhysicalPaperSize()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetPhysicalPaperSize(PMPageFormat pageFormat, PMRect *paperSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPhysicalPaperSize
+	ENDIF
+
+
+; *  PMSetPhysicalPaperSize()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetPhysicalPaperSize(PMPageFormat pageFormat, const PMRect *paperSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetPhysicalPaperSize
+	ENDIF
+
+; ***********************
+;   This is the physical size of the page without regard to resolution, orientation 
+;   or scaling. It is returned as a 72dpi value. 
+; ***********************
+
+; *  PMGetPhysicalPageSize()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetPhysicalPageSize(PMPageFormat pageFormat, PMRect *pageSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPhysicalPageSize
+	ENDIF
+
+
+; *  PMGetAdjustedPaperRect()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetAdjustedPaperRect(PMPageFormat pageFormat, PMRect *paperRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetAdjustedPaperRect
+	ENDIF
+
+
+; *  PMGetAdjustedPageRect()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetAdjustedPageRect(PMPageFormat pageFormat, PMRect *pageRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetAdjustedPageRect
+	ENDIF
+
+
+; *  PMGetUnadjustedPaperRect()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetUnadjustedPaperRect(PMPageFormat pageFormat, PMRect *paperRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetUnadjustedPaperRect
+	ENDIF
+
+
+; *  PMSetUnadjustedPaperRect()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetUnadjustedPaperRect(PMPageFormat pageFormat, const PMRect *paperRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetUnadjustedPaperRect
+	ENDIF
+
+
+; *  PMGetUnadjustedPageRect()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetUnadjustedPageRect(PMPageFormat pageFormat, PMRect *pageRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetUnadjustedPageRect
+	ENDIF
+
+
+; *  PMSetAdjustedPageRect()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetAdjustedPageRect(PMPageFormat pageFormat, const PMRect *pageRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetAdjustedPageRect
+	ENDIF
+
+
+; *  PMGetOrientation()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetOrientation(PMPageFormat pageFormat, PMOrientation *orientation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetOrientation
+	ENDIF
+
+
+; *  PMSetOrientation()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetOrientation(PMPageFormat pageFormat, PMOrientation orientation, Boolean lock)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetOrientation
+	ENDIF
+
+;  PMPrintSettings 
+
+; *  PMCopyPrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMCopyPrintSettings(PMPrintSettings settingSrc, PMPrintSettings settingDest)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMCopyPrintSettings
+	ENDIF
+
+; ***********************
+;   Flattening a print settings should only be necessary if you intend to preserve 
+;   the object settings along with a document. A print settings will persist outside of a 
+;   PMBegin/PMEnd block. This allows you to use any accessors on the object without 
+;   the need to flatten and unflatten. Keep in mind the accessors make no assumption 
+;   on the validity of the value. This can only be done thru PMValidatePrintSettings 
+;   in a PMBegin/PMEnd block or with PMSessionValidatePrintSettings with a valid session. 
+;   It is your responsibility for disposing of the handle. 
+; ***********************
+
+; *  PMFlattenPrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMFlattenPrintSettings(PMPrintSettings printSettings, Handle *flatSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMFlattenPrintSettings
+	ENDIF
+
+
+; *  PMUnflattenPrintSettings()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMUnflattenPrintSettings(Handle flatSettings, PMPrintSettings *printSettings)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMUnflattenPrintSettings
+	ENDIF
+
+;  PMPrintSettings Accessors 
+
+; *  PMGetPrintSettingsExtendedData()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetPrintSettingsExtendedData(PMPrintSettings printSettings, OSType dataID, UInt32 *size, void *extendedData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPrintSettingsExtendedData
+	ENDIF
+
+
+; *  PMSetPrintSettingsExtendedData()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetPrintSettingsExtendedData(PMPrintSettings printSettings, OSType dataID, UInt32 size, void *extendedData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetPrintSettingsExtendedData
+	ENDIF
+
+
+; *  PMGetDestination()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetDestination(PMPrintSettings printSettings, PMDestinationType *destType, CFURLRef *fileURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetDestination
+	ENDIF
+
+
+; *  PMGetJobName()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetJobName(PMPrintSettings printSettings, StringPtr name)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetJobName
+	ENDIF
+
+
+; *  PMSetJobName()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetJobName(PMPrintSettings printSettings, StringPtr name)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetJobName
+	ENDIF
+
+
+; *  PMGetCopies()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetCopies(PMPrintSettings printSettings, UInt32 *copies)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetCopies
+	ENDIF
+
+
+; *  PMSetCopies()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetCopies(PMPrintSettings printSettings, UInt32 copies, Boolean lock)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetCopies
+	ENDIF
+
+
+; *  PMGetFirstPage()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetFirstPage(PMPrintSettings printSettings, UInt32 *first)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetFirstPage
+	ENDIF
+
+
+; *  PMSetFirstPage()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetFirstPage(PMPrintSettings printSettings, UInt32 first, Boolean lock)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetFirstPage
+	ENDIF
+
+
+; *  PMGetLastPage()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetLastPage(PMPrintSettings printSettings, UInt32 *last)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetLastPage
+	ENDIF
+
+
+; *  PMSetLastPage()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetLastPage(PMPrintSettings printSettings, UInt32 last, Boolean lock)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetLastPage
+	ENDIF
+
+; ***********************
+;   The default page range is from 1-32000. The page range is something that is 
+;   set by the application. It is NOT the first and last page to print. It serves 
+;   as limits for setting the first and last page. You may pass kPMPrintAllPages for 
+;   the maxPage value to specified that all pages are available for printing. 
+; ***********************
+
+; *  PMGetPageRange()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetPageRange(PMPrintSettings printSettings, UInt32 *minPage, UInt32 *maxPage)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetPageRange
+	ENDIF
+
+; ***********************
+;  The first and last page are immediately clipped to the new range 
+; ***********************
+
+; *  PMSetPageRange()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetPageRange(PMPrintSettings printSettings, UInt32 minPage, UInt32 maxPage)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetPageRange
+	ENDIF
+
+
+; *  PMSetProfile()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.0 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetProfile(PMPrintSettings printSettings, PMTag tag, const CMProfileLocation *profile)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetProfile
+	ENDIF
+
+
+; *  PMGetColorMode()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetColorMode(PMPrintSettings printSettings, PMColorMode *colorMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetColorMode
+	ENDIF
+
+
+; *  PMSetColorMode()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetColorMode(PMPrintSettings printSettings, PMColorMode colorMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetColorMode
+	ENDIF
+
+
+; *  PMGetJobNameCFString()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMGetJobNameCFString(PMPrintSettings printSettings, CFStringRef *name)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMGetJobNameCFString
+	ENDIF
+
+
+; *  PMSetJobNameCFString()
+; *  
+; *  Availability:
+; *    Non-Carbon CFM:   not available
+; *    CarbonLib:        in CarbonLib 1.1 and later
+; *    Mac OS X:         in version 10.0 and later
+; 
+
+;
+; pascal OSStatus PMSetJobNameCFString(PMPrintSettings printSettings, CFStringRef name)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION PMSetJobNameCFString
+	ENDIF
+
+	ENDIF ; __PMCORE__ 
+

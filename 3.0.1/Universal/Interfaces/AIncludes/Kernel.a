@@ -1,0 +1,30 @@
+;
+;	File:		Kernel.a
+;
+;	Contains:	Kernel Interfaces
+;
+;	Version:	Technology:	System 8
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1994-1997 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__KERNEL__') = 'UNDEFINED' THEN
+__KERNEL__ SET 1
+
+	IF &TYPE('__DRIVERSERVICES__') = 'UNDEFINED' THEN
+	include 'DriverServices.a'
+	ENDIF
+
+; 
+;	The contents of Kernel.h has been merged into DriverServices.h
+;
+
+	ENDIF ; __KERNEL__ 
+

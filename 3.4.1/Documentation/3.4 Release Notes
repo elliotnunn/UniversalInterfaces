@@ -1,0 +1,190 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.4
+Date:    April 17, 2001
+
+
+=========
+Overview
+=========
+
+The 3.4 Universal Interfaces are for use when
+developing for CarbonLib 1.3, Mac OS 9.1,
+Mac OS X 10.0, or QuickTime 5.0.1 using CFM or 
+classic 68k runtimes.
+
+When developing on Mac OS X and building for Mach-O,
+you should instead use framework header files 
+(e.g. #include <Carbon/Carbon.h>).  
+
+If you want your source code to be able to compile
+on Mac OS X and on classic Mac OS, you should continue
+to use "flat" includes (e.g. #include <Dialogs.h>)
+in your source code and when building on Mac OS X, 
+add -I/Developer/Headers/FlatCarbon to your compiler
+search path.  That directory contains files in the
+flat namespace (e.g. Dialogs.h) which redirect to
+the appropriate framework header (e.g. Carbon/Carbon.h).
+
+
+==================================================
+Notes on CarbonLib 1.3 development
+==================================================
+
+- CarbonLib 1.3 is designed to run on Mac OS 8.6 
+  through OS 9.1 
+  
+- Not all CarbonLib functions are available on older
+  System versions.  For instance, NavServices might
+  not be installed on an 8.1 system.  Just as you would
+  for a traditional application, your application's
+  code should use Gestalt and/or other mechanisms to
+  see if a particular manager or function is available
+  before calling it.
+
+- The CarbonLib stub library is constructed to cause  
+  the linker to automatically weak link symbols in  
+  CarbonLib that might not be available when running 
+  on a pre Mac OS 9 system.
+ 
+- There is a new stub library named CarbonFrameworkLib.
+  It contains functions that are implemented on Mac OS X,
+  but have not (and may never be) implemented in CarbonLib.
+  If you link with it (in addition to CarbonLib) you will
+  automatically be weak-linked with those symbols.  This
+  enables you to more easily write applications that take
+  advantage of Carbon functionality available when
+  running on Mac OS X.
+
+
+==================================================
+Changes since Universal Interfaces 3.3.2
+==================================================
+
+
+- New .h/.a/.p/.r files:
+
+		AEHelpers.h
+		AEInteraction.h
+		AppleDiskPartitions.h
+		AppleHelp.h
+		ApplicationServices.h
+		ATSFont.h
+		ATSTypes.h
+		Carbon.h
+		CarbonEvents.h
+		CFPluginCOM.h
+		CFTree.h
+		CFUUID.h
+		CFXMLNode.h
+		CFXMLParser.h
+		CGAffineTransform.h
+		CGBase.h
+		CGBitmapContext.h
+		CGColorSpace.h
+		CGContext.h
+		CGDataConsumer.h
+		CGDataProvider.h
+		CGDirectDisplay.h
+		CGDirectPalette.h
+		CGError.h
+		CGFont.h
+		CGGeometry.h
+		CGImage.h
+		CGPDFContext.h
+		CGPDFDocument.h
+		CGRemoteOperation.h
+		CGWindowLevel.h
+		CMDeviceIntegration.h
+		CMTypes.h
+		CoreServices.h
+		DeviceControl.h
+		FileMapping.h
+		IBCarbonRuntime.h
+		ICAApplication.h
+		ICACamera.h
+		ICADevice.h
+		IsochronousDataHandler.h
+		KeychainHI.h
+		KeychainCore.h
+		LaunchServices.h
+		MacApplication.h
+		MultiprocessingInfo.h
+		NSLCore.h
+		PMCore.h
+		PMDefinitions.h
+		QuickTime.h
+		TargetConditionals.h
+		TextEncodingPlugin.h
+		TypeSelect.h
+		vBigNum.h
+		vBLAS.h
+		vDSP.h
+
+- Removed .h/.a/.p/.r files:
+		All GXPrinting headers and libraries
+		All AOCE headers and libraries
+
+
+- New StubLibraries
+		CarbonFrameworkLib
+		CFragManager
+		ControlStripLib
+		ImageCaptureLib
+		vecLib
+		
+- Updated StubLibraries
+		AppleScriptLib
+		ATSUnicodeLib
+		CarbonLib
+		CFragManager
+		ColorSyncLib
+		ContextualMenu
+		ControlsLib
+		DebugLib
+		DisplayLib
+		HIDLib
+		IconServicesLib
+		InterfaceLib
+		InternetConfigLib
+		MathLib
+		MPLibrary
+		NetworkSetup
+		NSLPPCLib
+		PCCard3Lib
+		PowerMgrLib
+		QTStreamLib
+		QuickTimeLib
+		QuickTimeVRLib
+		SoundLib
+		Textension
+		ThreadsLib
+		UnicodeConverter
+		USBManagerLib
+		USBServicesLib
+		
+- New function formatting
+- New comment before each function that details in on which systems
+  the function is available.
+- Most function macros are now available as inlines for C++
+- Fixed misplaced #endif statements in .k.h files
+- Fixed spaces in comments to align as 3.3 headers did with 
+  tab stops set to 4.
+- New...Proc and Call...Proc macros no longer available when
+  building for Carbon.  This functions are not on Mac OS X.
+  Use New...UPP, Invoke...UPP, and Dispose...UPP instead.
+- ProcPtrs that are register based on classic 68K are now typedef'ed
+  to have no parameters when compiling for classic 68K.
+- CoreGraphics headers are now included even though CG functions can
+  only be called from Mach-O (not CFM).
+- UNIVERSAL_INTERFACES_VERSION is now at 0x0340.  To test if or which
+  header seed, use UNIVERSAL_INTERFACES_SEED_VERSION.
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+
+

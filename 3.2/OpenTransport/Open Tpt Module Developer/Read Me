@@ -1,0 +1,44 @@
+Open Transport 1.3 Module Developer ReadMe
+9/19/97
+
+
+WARNINGS
+
+See also the ReadMe file that accompanies Open Transport
+
+About the Developer Kit
+
+This developer kit was created using the PreRelease MPW environment from E.T.O. #20.
+
+The file Devices.h is required for PCI driver development.  This file
+supersedes the file Devices.h from the E.T.O. #20 release.  It is modified from
+the original Devices.h in order to work with E.T.O. #20 header files.
+
+This folder also contains the file NameRegistry.h which was used to build 
+Open Transport. 
+
+Compiling STREAMS modules:
+==========================
+
+STREAMS modules should be compiled by #include <OpenTptModule.h>.  A STREAMS module or driver should never #include <OpenTransport.h> directly.  In addition, a STREAMS modules or driver should not #include any of the client header files.  There are incompatibilities between kernel and client header files in an attempt to keep this from inadvertently happening.
+
+Linking with Open Transport Libraries:
+===============================
+
+WARNING:
+NEVER, NEVER link a STREAMS module or driver against an Open Transport client library.
+
+For 68K:
+If you are writing a STREAMS module or driver, link with OpenTptModule.o.
+
+If you are writing a port scanning library, link with OpenTptKernelUtils.o.  Never link a port scanning library with OpenTptModule.o - this will cause the whole STREAM environment to load, which is undesireable for a port scanner.
+
+For 68K modules or drivers, you must also link with LibraryManager.o from the ASLM SDK, since your module or driver must be an ASLM-loadable module.
+
+For PPC:
+If you are writing a STREAMS module or driver, link with OpenTptModuleLib.
+
+If you are writing a port scanning library, link with OpenTptKernelUtilLib.  Never link a port scanning library with OpenTptModuleLib - this will cause the whole STREAM environment to load, which is undesireable for a port scanner.
+
+If you are using ASLM for your STREAMS module, you must also link with LibraryManagerPPC.o.
+

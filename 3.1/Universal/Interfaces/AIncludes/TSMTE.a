@@ -1,0 +1,73 @@
+;
+;	File:		TSMTE.a
+;
+;	Contains:	Text Services Managerfor TextEdit Interfaces.
+;
+;	Version:	Technology:	System 7.5
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	©1991-1998 Apple Technology, Inc. All rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__TSMTE__') = 'UNDEFINED' THEN
+__TSMTE__ SET 1
+
+	IF &TYPE('__TEXTEDIT__') = 'UNDEFINED' THEN
+	include 'TextEdit.a'
+	ENDIF
+	IF &TYPE('__DIALOGS__') = 'UNDEFINED' THEN
+	include 'Dialogs.a'
+	ENDIF
+	IF &TYPE('__APPLEEVENTS__') = 'UNDEFINED' THEN
+	include 'AppleEvents.a'
+	ENDIF
+	IF &TYPE('__TEXTSERVICES__') = 'UNDEFINED' THEN
+	include 'TextServices.a'
+	ENDIF
+;  #include <Gestalt.i>
+
+
+;  signature, interface types
+
+kTSMTESignature					EQU		'tmTE'
+kTSMTEInterfaceType				EQU		'tmTE'
+kTSMTEDialog					EQU		'tmDI'
+
+;  update flag for TSMTERec
+
+kTSMTEAutoScroll				EQU		1
+
+;  callback procedure definitions
+
+
+
+;  data types
+TSMTERec				RECORD 0
+textH					 ds.l	1				; offset: $0 (0)
+preUpdateProc			 ds.l	1				; offset: $4 (4)
+postUpdateProc			 ds.l	1				; offset: $8 (8)
+updateFlag				 ds.l	1				; offset: $C (12)
+refCon					 ds.l	1				; offset: $10 (16)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+; typedef struct TSMTERec *				TSMTERecPtr
+
+; typedef TSMTERecPtr *					TSMTERecHandle
+
+TSMDialogRecord			RECORD 0
+fDialog					 ds		DialogRecord	; offset: $0 (0)
+fDocID					 ds.l	1				; offset: $AA (170)
+fTSMTERecH				 ds.l	1				; offset: $AE (174)
+fTSMTERsvd				 ds.l	3				; offset: $B2 (178)		;  reserved
+sizeof					 EQU *					; size:   $BE (190)
+						ENDR
+; typedef struct TSMDialogRecord *		TSMDialogPeek
+
+	ENDIF ; __TSMTE__ 
+

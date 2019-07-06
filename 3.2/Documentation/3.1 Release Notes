@@ -1,0 +1,292 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.1
+Date:    February 12, 1998
+Author:  Nick Kledzik
+
+
+=================
+Important Notice
+=================
+
+The FOR_≈ (e.g. FOR_SYSTEM7_ONLY) conditionals have been removed 
+from ConditionalMacros.h/p/a/r.  If you are using any of them
+in your source code you should remove them.  ConditionalMacros.h
+now defines them in such a way that you will get an error
+during compilation if you try to use them.  
+
+
+==========================================
+New Features in Universal Interfaces 3.1
+==========================================
+
+-	Latest interfaces and stub libraries for:
+		Mac OS 8.1 
+		Appearance 1.0.2
+		ColorSync 2.5 (late beta)
+		QuickTime 3.0 (late beta)
+		Quickdraw 3D 1.5.4
+		QuickTime VR 2.1
+
+-	More cross-platform support:
+
+		- Function names that collide with other OS toolbox functions now have a "Mac"
+		  prefix, optional on MacOS and required on other OS's. (e.g. SetPort -> MacSetPort).
+		  
+		- Types.h has been renamed to MacTypes.h
+
+-	New interface files (ComponentIncludes) for component writers. These files are helpful
+	when implementing your own component. 
+	
+-	New files:
+		Endian.h
+		HFSVolumes.h
+		JManager.h
+		MacTypes.h
+		QTML.h
+		SFNTLayoutTypes.h
+		UnicodeConverter.h
+
+- 	Pascal specific changes:
+
+		- Use UInt16 and UInt32 instead of INTEGER and LONGINT anywhere the
+		  C headers used unsigned short and unsigned long.
+		  
+		- Instead of function pointers being defined as simply ProcPtr, they
+		  are now defined as typed functions if the compiler supports it.
+
+- 	All interfaces files now have CKID resources to make the files read-only.
+
+
+==================================================
+Bug Fixes and Changes in Universal Interfaces 3.1
+==================================================
+
+	AERegistry.h: 
+		Added kAEReopenApplication sent by Finder 8.0
+		
+	Appearance.h: 
+		Update for Appearance 1.0.2, moved window, dialog, and control specific stuff to their own files.
+		
+	AppleGuide.h: 
+		Roll in AGFile routines, the implementation of which will be available in a later SDK.
+
+	ATA.h: 
+		Added kATAPIResetEvent to ATA event codes.
+		
+	AVComponents.h: 
+		Added AVPortGetDisplayTimingInfo()
+		
+	CMApplication.h
+	CMICCProfile.h: 
+		Update for ColorSync 2.5
+		
+	CodeFragments.h: 			
+		Add kCFragLibUsageMapPrivatelyMask to allow app's private libraries to load into App heap
+		
+	ColorPickerComponents.h:
+		Renamed some types and constants to have less generic names.
+		
+	Components.h:
+		QuickTime 3.0
+		
+	ConditionalMacros.h:	
+		Support Metrowerks MIPS target.  Support Rhapsody gcc compiler. 
+		Comment out old Copland FOR_SYSTEM≈ conditionals.
+		
+	Controls.h: 
+		Roll in QuickTime 3.0 and Appearance 1.0.2 changes
+		
+	DeskBus.h: 
+		Add back ADBInitProcPtr
+		
+	Devices.h: 
+		Add file based driver details
+		
+	Dialogs.h: 
+		Roll in QuickTime 3.0 and Appearance 1.0.2 changes
+		
+	DiskInit.h: 
+		Add HFSPlusDefaults for initializing Mac OS Extended format disk in Mac OS 8.1
+		
+	Disks.h: 
+		Add disk driver control csCodes
+		
+	Displays.h: 
+		Latest stuff
+		
+	Drag.h: 
+		Add Finder 8.0 drag flavors
+	
+	DriverGestalt.h: 
+		Add DriverGestaltMediaInfoResponse to allow disk drivers to hint VM
+		
+	Endian.h
+		New for QuickTime 3.0.  Utility routines for converting between big and little endian numbers.
+	
+	Errors.h: 
+		Sorted error codes numerically
+		
+	FileTransfers.h: 
+		Added Async routines
+		
+	Folders.h: 
+		Fix kCreateFolder for pascal.  Fix kOnSystemDisk to be signed.
+		
+	FSM.h:
+		Fix to work properly for CFM based clients
+		
+	Gestalt.h: 
+		Update to latest values
+		
+	GXPrinting.h: 
+		Rename SendMessage to MacSendMessage
+		
+	HFSVolumes.h
+		New for MacOS 8.1.  HFS and HFS+ disk layout
+
+	Icons.h
+		Fix value of old constant name: trashIconResource
+
+	ImageCodec.h: 
+	ImageCompression.h:
+		Update to QuickTime 3.0
+		
+	JManager.h:
+		New for MRJ 2.0.  API to invoke MRJ to run java code.
+		
+	Lists.h: 
+		Roll in QuickTime 3.0 changes
+		
+	LowMem.h: 
+		Add LMGetABusGlobals()
+		
+	MacMemory.h: 
+		Add routines to control VM paging attributes
+	
+	MacWindows.h: 
+		 Roll in QuickTime 3.0 and Appearance 1.x changes
+	
+	MacTypes.h: 
+		 Fix Int64 and NumVersion structs for little endian machines, disable Visual C warning on true/false
+	
+	MediaHandlers.h: 
+		 Update to QuickTime 3.0
+	
+	Menus.h: 
+		 Roll in QuickTime 3.0 and Appearance 1.x changes
+	
+	MixedMode.h: 
+		 Removed CallAsyncUniversalProc() it has never been available
+	
+	Movies.h: 
+	MovieFormat.h: 
+		 Update to QuickTime 3.0
+	
+	QTML.h
+		 New for QuickTime 3.0
+
+	Quickdraw.h: 
+		 Add PixMap extensions for QuickTime 3.0
+
+	QuickTimeComponents.h: 
+	QuickTimeMusic.h: 
+		 Update to QuickTime 3.0
+	
+	QuickTimeVR.h: 
+	QuickTimeVRFormat.h: 
+		 Update for QuickTime VR 2.1
+	
+	Script.h: 
+		 Add region codes from Language Kit Extensions
+	
+	SFNTTypes.h: 
+		 Remove dependecy on GXTypes
+	
+	Sound.h: 
+		 Update to QuickTime 3.0
+	
+	Start.h: 
+		 Add Extension loading hooks for Mac OS 8.1
+	
+	TextCommon.h: 
+		 Update for Text Encoding Converter 1.3
+	
+	Types.h: 
+		 Contents moved into MacTypes.h
+	
+	Unicode.h: 
+		 Contents moved into UnicodeConverter.h
+	
+	UnicodeConverter.h: 
+		 New name for Unicode.h
+
+	Video.h: 
+		 Add more timing constants
+	
+
+========================================
+Bug Fixes and Changes in Stub Libraries
+========================================
+	
+	AppearanceLib
+		Update to 1.0.2
+
+	ColorSyncLib
+		Update to 2.5B4
+	
+	InterfaceLib
+		Updated to 1.1.4 which exports CallComponentUPP as data instead of TVector
+	
+	JManagerLib
+		New for MRJ 2.0
+		
+	QuickDraw3D
+	QuickDraw3DViewerLib
+	QuickDraw3DRAVELib
+		Update to 1.5.4
+		
+	QuickTimeLib
+		Update to 3.0B
+
+	QuickTimeVRLib
+		Update to 2.1
+
+
+==========================
+Known Bugs and Limitations
+==========================
+
+	- SIOW.r
+		The version of SIOW.r that currently ships with MPW is incompatible with
+		3.1 Universal Interfaces.  To fix you will need to change occurances of
+		"#if SystemSevenOrLater" in ALRT resources to "#if ALRT_RezTemplateVersion == 1"
+		"#if SystemSevenOrLater" in WIND resources to "#if WIND_RezTemplateVersion == 1"
+
+	- Disassembler.h
+		The version of Disassembler.h that currently ships with MPW is incompatible with
+		3.1 Universal Interfaces. 
+		
+		To fix you will need to change:
+
+			#ifndef __TYPES__	
+			typedef unsigned char Boolean;
+			enum {false, true};
+			#endif
+		
+		to:
+		
+			#ifndef __TYPES__	
+			#include <Types.h>
+			#endif
+		
+		
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+
+

@@ -1,0 +1,108 @@
+;
+;	File:		CFPreferences.a
+;
+;	Contains:	CoreFoundation preferences
+;
+;	Version:	Technology:	Mac OS X
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__COREFOUNDATION_CFPREFERENCES__') = 'UNDEFINED' THEN
+__COREFOUNDATION_CFPREFERENCES__ SET 1
+
+	IF &TYPE('___COREFOUNDATION_CFBASE__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFBase.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFARRAY__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFArray.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFDICTIONARY__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFDictionary.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFSTRING__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFString.a'
+	ENDIF
+
+
+;  Searches the various sources of application defaults to find the value for the given key.  
+;   key must not be NULL.  If a value is found, it returns it; otherwise returns NULL.  Caller 
+;   must release the returned value 
+
+;
+; extern CFTypeRef CFPreferencesCopyAppValue(CFStringRef key, CFStringRef appName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPreferencesCopyAppValue
+	ENDIF
+
+;  Sets the given value for the given key in the "normal" place for application preferences.  
+;   key must not be NULL.  If value is NULL, key is removed instead. 
+;
+; extern void CFPreferencesSetAppValue(CFStringRef key, CFTypeRef value, CFStringRef appName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPreferencesSetAppValue
+	ENDIF
+
+;  Writes all changes in all sources of application defaults.  Returns success or failure. 
+;
+; extern Boolean CFPreferencesAppSynchronize(CFStringRef appName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPreferencesAppSynchronize
+	ENDIF
+
+
+;  The primitive get mechanism; all arguments must be non-NULL (use the constants above for common values).  
+;   Only the exact location specified by app-user-host is searched.  The returned CFType must be released by 
+;   the caller when it is finished with it. 
+
+;
+; extern CFTypeRef CFPreferencesCopyValue(CFStringRef key, CFStringRef appName, CFStringRef user, CFStringRef host)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPreferencesCopyValue
+	ENDIF
+
+;  The primitive set function; all arguments except value must be non-NULL.  If value is NULL, the given key is removed 
+;
+; extern void CFPreferencesSetValue(CFStringRef key, CFTypeRef value, CFStringRef appName, CFStringRef user, CFStringRef host)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPreferencesSetValue
+	ENDIF
+
+;
+; extern Boolean CFPreferencesSynchronize(CFStringRef appName, CFStringRef user, CFStringRef host)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPreferencesSynchronize
+	ENDIF
+
+;  Constructs and returns the list of the name of all applications which have preferences in the scope of the given user and host.
+;    The returned value must be released by the caller; neither argument may be NULL. 
+;
+; extern CFArrayRef CFPreferencesCopyApplicationList(CFStringRef userName, CFStringRef hostName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPreferencesCopyApplicationList
+	ENDIF
+
+;  Constructs and returns the list of all keys set in the given location.  
+;   The returned value must be released by the caller; all arguments must be non-NULL 
+;
+; extern CFArrayRef CFPreferencesCopyKeyList(CFStringRef appName, CFStringRef userName, CFStringRef hostName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPreferencesCopyKeyList
+	ENDIF
+
+	ENDIF ; __COREFOUNDATION_CFPREFERENCES__ 
+

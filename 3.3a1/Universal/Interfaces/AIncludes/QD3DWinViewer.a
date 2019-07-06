@@ -1,0 +1,587 @@
+;
+;	File:		QD3DWinViewer.a
+;
+;	Contains:	Win32 Viewer Controller Interface File.								
+;
+;	Version:	Technology:	Quickdraw 3D 1.6
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1995-1999 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__QD3DWINVIEWER__') = 'UNDEFINED' THEN
+__QD3DWINVIEWER__ SET 1
+
+	IF &TYPE('__QD3D__') = 'UNDEFINED' THEN
+	include 'QD3D.a'
+	ENDIF
+	IF &TYPE('__QD3DGROUP__') = 'UNDEFINED' THEN
+	include 'QD3DGroup.a'
+	ENDIF
+
+	IF TARGET_OS_WIN32 THEN
+; typedef void *						TQ3ViewerObject
+
+
+kQ3ViewerShowBadge				EQU		$01
+kQ3ViewerActive					EQU		$02
+kQ3ViewerControllerVisible		EQU		$04
+kQ3ViewerButtonCamera			EQU		$08
+kQ3ViewerButtonTruck			EQU		$10
+kQ3ViewerButtonOrbit			EQU		$20
+kQ3ViewerButtonZoom				EQU		$40
+kQ3ViewerButtonDolly			EQU		$80
+kQ3ViewerButtonReset			EQU		$0100
+kQ3ViewerButtonNone				EQU		$0200
+kQ3ViewerOutputTextMode			EQU		$0400
+kQ3ViewerDraggingInOff			EQU		$0800
+kQ3ViewerButtonOptions			EQU		$1000
+kQ3ViewerPaneGrowBox			EQU		$2000
+kQ3ViewerDefault				EQU		$8000
+
+
+kQ3ViewerEmpty					EQU		0
+kQ3ViewerHasModel				EQU		$01
+kQ3ViewerHasUndo				EQU		$02
+
+; typedef long							TQ3ViewerCameraView
+kQ3ViewerCameraRestore			EQU		0
+kQ3ViewerCameraFit				EQU		1
+kQ3ViewerCameraFront			EQU		2
+kQ3ViewerCameraBack				EQU		3
+kQ3ViewerCameraLeft				EQU		4
+kQ3ViewerCameraRight			EQU		5
+kQ3ViewerCameraTop				EQU		6
+kQ3ViewerCameraBottom			EQU		7
+
+; ******************************************************************************
+; **																			 **
+; **								WM_NOTIFY structures  						 **
+; **																			 **
+; ****************************************************************************
+
+TQ3ViewerDropFiles		RECORD 0
+nmhdr					 ds.l	1				; offset: $0 (0)
+hDrop					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+TQ3ViewerSetView		RECORD 0
+nmhdr					 ds.l	1				; offset: $0 (0)
+view					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+TQ3ViewerSetViewNumber	RECORD 0
+nmhdr					 ds.l	1				; offset: $0 (0)
+number					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+TQ3ViewerButtonSet		RECORD 0
+nmhdr					 ds.l	1				; offset: $0 (0)
+button					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; ******************************************************************************
+; **																			 **
+; **								WM_NOTIFY defines  							 **
+; **																			 **
+; ****************************************************************************
+
+; ******************************************************************************
+; **																			 **
+; **							Win32 Window Class Name  						 **
+; **		Can be passed as a parameter to CreateWindow or CreateWindowEx  	 **
+; **																			 **
+; ****************************************************************************
+
+
+; ******************************************************************************
+; **																			 **
+; **							Win32 Clipboard type     						 **
+; **																			 **
+; ****************************************************************************
+
+; ******************************************************************************
+; **																			 **
+; **		Return viewer version number										 **
+; **																			 **
+; ****************************************************************************
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern TQ3Status Q3WinViewerGetVersion(unsigned long *majorRevision, unsigned long *minorRevision)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetVersion
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Return viewer release version number								 **
+; **		(in 'vers' format - e.g. 0x01518000 ==> 1.5.1 release)				 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerGetReleaseVersion(unsigned long *releaseRevision)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetReleaseVersion
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **						Creation and destruction							 **
+; **				Note that this is not a QuickDraw 3D object					 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3ViewerObject Q3WinViewerNew(HWND window, const RECT *rect, unsigned long flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerNew
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerDispose(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerDispose
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **					Functions to attach data to a WinViewer					 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerUseFile(TQ3ViewerObject viewer, HANDLE fileHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerUseFile
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerUseData(TQ3ViewerObject viewer, void *data, unsigned long size)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerUseData
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **				Functions to write data out from the WinViewer				 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerWriteFile(TQ3ViewerObject viewer, HANDLE fileHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerWriteFile
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerWriteData(TQ3ViewerObject viewer, void *data, unsigned long dataSize, unsigned long *actualDataSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerWriteData
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Use this function to force the WinViewer to re-draw					 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerDraw(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerDraw
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerDrawContent(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerDrawContent
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerDrawControlStrip(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerDrawControlStrip
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Function used by the WinViewer to filter and handle events			 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern BOOL Q3WinViewerMouseDown(TQ3ViewerObject viewer, long x, long y)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerMouseDown
+	ENDIF
+
+;
+; extern BOOL Q3WinViewerContinueTracking(TQ3ViewerObject viewer, long x, long y)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerContinueTracking
+	ENDIF
+
+;
+; extern BOOL Q3WinViewerMouseUp(TQ3ViewerObject viewer, long x, long y)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerMouseUp
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		This function returns a Bitmap of the contents of the 				 **
+; **		WinViewer's window.  The application should dispose the Bitmap.		 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern HBITMAP Q3WinViewerGetBitmap(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetBitmap
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **					Calls for dealing with Buttons							 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerGetButtonRect(TQ3ViewerObject viewer, unsigned long button, RECT *rectangle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetButtonRect
+	ENDIF
+
+;
+; extern unsigned long Q3WinViewerGetCurrentButton(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetCurrentButton
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerSetCurrentButton(TQ3ViewerObject viewer, unsigned long button)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerSetCurrentButton
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Functions to set/get the group to be displayed by the WinViewer.	 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerUseGroup(TQ3ViewerObject viewer, TQ3GroupObject group)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerUseGroup
+	ENDIF
+
+;
+; extern TQ3GroupObject Q3WinViewerGetGroup(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetGroup
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Functions to set/get the color used to clear the window				 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerSetBackgroundColor(TQ3ViewerObject viewer, TQ3ColorARGB *color)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerSetBackgroundColor
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerGetBackgroundColor(TQ3ViewerObject viewer, TQ3ColorARGB *color)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetBackgroundColor
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Getting/Setting a WinViewer's View object.							 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3ViewObject Q3WinViewerGetView(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetView
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerRestoreView(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerRestoreView
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Calls for setting/getting WinViewer flags							 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerSetFlags(TQ3ViewerObject viewer, unsigned long flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerSetFlags
+	ENDIF
+
+;
+; extern unsigned long Q3WinViewerGetFlags(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetFlags
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Calls related to bounds/dimensions.  Bounds is the size of 			 **
+; **		the window.  Dimensions can either be the Rect from the ViewHints	 **
+; **		or the current dimensions of the window (if you do a Set).			 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerSetBounds(TQ3ViewerObject viewer, RECT *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerSetBounds
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerGetBounds(TQ3ViewerObject viewer, RECT *bounds)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetBounds
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerSetDimension(TQ3ViewerObject viewer, unsigned long width, unsigned long height)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerSetDimension
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerGetDimension(TQ3ViewerObject viewer, unsigned long *width, unsigned long *height)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetDimension
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerGetMinimumDimension(TQ3ViewerObject viewer, unsigned long *width, unsigned long *height)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetMinimumDimension
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **							Window related calls							 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerSetWindow(TQ3ViewerObject viewer, HWND window)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerSetWindow
+	ENDIF
+
+;
+; extern HWND Q3WinViewerGetWindow(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetWindow
+	ENDIF
+
+;
+; extern TQ3ViewerObject Q3WinViewerGetViewer(HWND theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetViewer
+	ENDIF
+
+;
+; extern HWND Q3WinViewerGetControlStrip(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetControlStrip
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Adjust Cursor provided for compatibility with Mac Viewer			 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Boolean Q3WinViewerAdjustCursor(TQ3ViewerObject viewer, long x, long y)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerAdjustCursor
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerCursorChanged(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerCursorChanged
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **		Returns the state of the WinViewer.  See the constant defined at the **
+; **		top of this file.													 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern unsigned long Q3WinViewerGetState(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetState
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **							Clipboard utilities								 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerClear(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerClear
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerCut(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerCut
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerCopy(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerCopy
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerPaste(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerPaste
+	ENDIF
+
+
+; ******************************************************************************
+; **																		     **
+; **								Undo							 			 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerUndo(TQ3ViewerObject viewer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerUndo
+	ENDIF
+
+;
+; extern TQ3Boolean Q3WinViewerGetUndoString(TQ3ViewerObject viewer, char *theString, unsigned long stringSize, unsigned long *actualSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetUndoString
+	ENDIF
+
+
+; ******************************************************************************
+; **																		     **
+; **							New Camera Stuff								 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3Status Q3WinViewerGetCameraCount(TQ3ViewerObject viewer, unsigned long *count)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerGetCameraCount
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerSetCameraNumber(TQ3ViewerObject viewer, unsigned long cameraNo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerSetCameraNumber
+	ENDIF
+
+;
+; extern TQ3Status Q3WinViewerSetCameraView(TQ3ViewerObject viewer, TQ3ViewerCameraView viewType)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3WinViewerSetCameraView
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF	; TARGET_OS_WIN32
+
+	ENDIF ; __QD3DWINVIEWER__ 
+

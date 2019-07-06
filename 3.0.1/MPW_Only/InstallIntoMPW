@@ -1,0 +1,58 @@
+#
+# 	File:		InstallIntoMPW
+# 
+# 	Copyright:	© 1997 by Apple Computer, Inc. All rights reserved.
+# 
+# 	Version:	Universal Interfaces 3.0.1, August 8, 1997
+#
+#	Purpose:	This script will help install updates to Universal Interfaces
+#				into the MPW environment.
+#
+# 	Usage: 		Run this file in MPW.  It will generate the commands needed
+#				to update the running MPW to the latest Universal Interfaces.
+#
+#
+#
+
+set exit 0
+
+If "{CIncludes}"
+	If "{CIncludes}" =~ /(≈:)®1Interfaces:CIncludes:/
+		Set InterfacesAndLibrariesDir "{®1}"
+	End
+End
+
+If !`Exists "{InterfacesAndLibrariesDir}"`
+	If "{ShellDirectory}"
+		If `Exists "{ShellDirectory}Interfaces:CIncludes:"`
+			Set InterfacesAndLibrariesDir "{ShellDirectory}"
+		Else If `Exists "{ShellDirectory}:Interfaces&Libraries:CIncludes:"`
+			If "{ShellDirectory}" =~ /(≈:)®1IMPW:/
+				Set InterfacesAndLibrariesDir "{®1}Interfaces&Libraries:"
+			End
+		End
+	End
+End
+
+If (!"{InterfacesAndLibrariesDir}") || (!`Exists "{InterfacesAndLibrariesDir}"`)
+	Echo "### Error: Could not find Interfaces&Libraries. Try setting ∂{CIncludes∂}" >dev:stderr
+	Exit 1
+End
+
+
+Set ThisScript `files "{0}" -f`
+If "{ThisScript}" =~ /(≈:)®1MPW_Only:InstallIntoMPW/
+	Set UI "{®1}"
+End
+
+If (!`Exists "{UI}MPW_Only:"`) || (!`Exists "{UI}Universal:"`)
+	Echo "### Error: Script "{0}" not in Interfaces&Libraries folder" >dev:stderr
+	Exit 1
+End
+
+
+BackUp -from "{UI}MPW_Only:Interfaces:" 				-to "{InterfacesAndLibrariesDir}Interfaces:" -r -a
+BackUp -from "{UI}MPW_Only:Libraries:StubLibraries:"	-to "{InterfacesAndLibrariesDir}Libraries:SharedLibraries:" -r -a
+BackUp -from "{UI}Universal:Interfaces:" 				-to "{InterfacesAndLibrariesDir}Interfaces:" -r -a
+BackUp -from "{UI}Universal:Libraries:StubLibraries:" 	-to "{InterfacesAndLibrariesDir}Libraries:SharedLibraries:" -r -a
+

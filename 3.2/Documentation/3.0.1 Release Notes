@@ -1,0 +1,78 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.0.1
+Date:    August 12, 1997
+Author:  Nick Kledzik
+
+==========================================
+New Features in Universal Interfaces 3.0.1
+==========================================
+
+-	QuickTime VR interfaces and libraries are now included.
+
+-	Appearance Manager (Mac OS 8) interfaces and libraries are now included.
+
+-	FoldersLib (Mac OS 8) stub library is now included.
+
+-	PCCard 3.0 (aka PCMCIA) interfaces and libraries are now included.
+
+-	Classic 68K libraries are now included.
+
+-	Updated to latest LocationManager interfaces and libraries.
+
+-	Updated to latest Quickdraw 3D interfaces.
+
+-	Updated to latest Unicode Converter interfaces.
+
+
+===================================================
+Bug Fixes and Changes in Universal Interfaces 3.0.1
+===================================================
+
+-	ConditionalMacros: Add support for NeXT GNU C compiler and
+	Motorola mcc compiler.  Add case for Metrowerks pascal Intel
+	compiler.
+
+-	DriverGestalt: Added constants and strutures to allow disk
+	drivers to return their icons and VM/FileMapping abilities.
+	
+-	Files: new structs and constants were added to support VolMountInfo
+	with AppleShare Client 3.7 which supports mounting over IP.  
+	Added bSupportsAsyncRequests to GetVolParms attributes.
+	
+-	FileTypesAndCreators: signature 'PIXL' was renamed from
+	sigPixelPaintPro to sigOptix.
+	
+-	Folders: the folder constants for Location Manager were added.
+
+-	Fonts: the fields FMOutput.fontHandle and WidthTable.tabFont
+	had their name and type restored.  In the 3.0 release they
+	mistakenly went out with the type FontResult.
+	
+-	LowMem.h: Fix accessor macros which did not have extra parenthesis
+	around arguments.
+	
+-	Types: Fix definition of ProcPtr and Register68KProcPtr to use
+	CALLBACK_API() macros.
+
+
+
+==========================
+Known Bugs and Limitations
+==========================
+
+-	Not all compilers are supported by ConditionalMacros.h, in particular
+	the variations on GNU C.
+
+-	Although the framework is in place, the 3.0.1 Universal Interfaces do
+	not yet work on other platforms (e.g. unix or Win32).  
+
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+
+

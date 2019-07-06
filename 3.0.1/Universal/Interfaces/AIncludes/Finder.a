@@ -1,0 +1,142 @@
+;
+;	File:		Finder.a
+;
+;	Contains:	Finder flags and container types.
+;
+;	Version:	Technology:	System 7.5
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1990-1997 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__FINDER__') = 'UNDEFINED' THEN
+__FINDER__ SET 1
+
+	IF &TYPE('__TYPES__') = 'UNDEFINED' THEN
+	include 'Types.a'
+	ENDIF
+	IF &TYPE('__DIALOGS__') = 'UNDEFINED' THEN
+	include 'Dialogs.a'
+	ENDIF
+
+
+kCustomIconResource				EQU		-16455				; Custom icon family resource ID 
+
+kContainerFolderAliasType		EQU		'fdrp'				; type for folder aliases 
+kContainerTrashAliasType		EQU		'trsh'				; type for trash folder aliases 
+kContainerHardDiskAliasType		EQU		'hdsk'				; type for hard disk aliases 
+kContainerFloppyAliasType		EQU		'flpy'				; type for floppy aliases 
+kContainerServerAliasType		EQU		'srvr'				; type for server aliases 
+kApplicationAliasType			EQU		'adrp'				; type for application aliases 
+kContainerAliasType				EQU		'drop'				; type for all other containers 
+															; types for Special folder aliases 
+kSystemFolderAliasType			EQU		'fasy'
+kAppleMenuFolderAliasType		EQU		'faam'
+kStartupFolderAliasType			EQU		'fast'
+kPrintMonitorDocsFolderAliasType EQU	'fapn'
+kPreferencesFolderAliasType		EQU		'fapf'
+kControlPanelFolderAliasType	EQU		'fact'
+kExtensionFolderAliasType		EQU		'faex'				; types for AppleShare folder aliases 
+kExportedFolderAliasType		EQU		'faet'
+kDropFolderAliasType			EQU		'fadr'
+kSharedFolderAliasType			EQU		'fash'
+kMountedFolderAliasType			EQU		'famn'
+
+															; Finder Flags 
+kIsOnDesk						EQU		$0001
+kColor							EQU		$000E
+kIsShared						EQU		$0040				; bit 0x0080 is hasNoINITS 
+kHasBeenInited					EQU		$0100				; bit 0x0200 was the letter bit for AOCE, but is now reserved for future use 
+kHasCustomIcon					EQU		$0400
+kIsStationery					EQU		$0800
+kNameLocked						EQU		$1000
+kHasBundle						EQU		$2000
+kIsInvisible					EQU		$4000
+kIsAlias						EQU		$8000
+	IF OLDROUTINENAMES THEN
+
+kIsStationary					EQU		$0800
+	ENDIF	; OLDROUTINENAMES
+; 	
+;	The following declerations used to be in Files.≈, 
+;	but are Finder specific and were moved here.
+;
+
+
+															; Finder Constants 
+fOnDesk							EQU		1
+fHasBundle						EQU		8192
+fTrash							EQU		-3
+fDesktop						EQU		-2
+fDisk							EQU		0
+FInfo					RECORD 0
+fdType					 ds.l	1				; offset: $0 (0)		; the type of the file
+fdCreator				 ds.l	1				; offset: $4 (4)		; file's creator
+fdFlags					 ds.w	1				; offset: $8 (8)		; flags ex. hasbundle,invisible,locked, etc.
+fdLocation				 ds		Point			; offset: $A (10)		; file's location in folder
+fdFldr					 ds.w	1				; offset: $E (14)		; folder containing file
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+FXInfo					RECORD 0
+fdIconID				 ds.w	1				; offset: $0 (0)		; Icon ID
+fdUnused				 ds.w	3				; offset: $2 (2)		; unused but reserved 6 bytes
+fdScript				 ds.b	1				; offset: $8 (8)		; Script flag and number
+fdXFlags				 ds.b	1				; offset: $9 (9)		; More flag bits
+fdComment				 ds.w	1				; offset: $A (10)		; Comment ID
+fdPutAway				 ds.l	1				; offset: $C (12)		; Home Dir ID
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+DInfo					RECORD 0
+frRect					 ds		Rect			; offset: $0 (0)		; folder rect
+frFlags					 ds.w	1				; offset: $8 (8)		; Flags
+frLocation				 ds		Point			; offset: $A (10)		; folder location
+frView					 ds.w	1				; offset: $E (14)		; folder view
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+DXInfo					RECORD 0
+frScroll				 ds		Point			; offset: $0 (0)		; scroll position
+frOpenChain				 ds.l	1				; offset: $4 (4)		; DirID chain of open folders
+frScript				 ds.b	1				; offset: $8 (8)		; Script flag and number
+frXFlags				 ds.b	1				; offset: $9 (9)		; More flag bits
+frComment				 ds.w	1				; offset: $A (10)		; comment
+frPutAway				 ds.l	1				; offset: $C (12)		; DirID
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+
+;  Values of the 'message' parameter to a Control Panel 'cdev' 
+
+initDev							EQU		0					;Time for cdev to initialize itself
+hitDev							EQU		1					;Hit on one of my items
+closeDev						EQU		2					;Close yourself
+nulDev							EQU		3					;Null event
+updateDev						EQU		4					;Update event
+activDev						EQU		5					;Activate event
+deactivDev						EQU		6					;Deactivate event
+keyEvtDev						EQU		7					;Key down/auto key
+macDev							EQU		8					;Decide whether or not to show up
+undoDev							EQU		9
+cutDev							EQU		10
+copyDev							EQU		11
+pasteDev						EQU		12
+clearDev						EQU		13
+cursorDev						EQU		14
+
+;  Special values a Control Panel 'cdev' can return 
+
+cdevGenErr						EQU		-1					;General error; gray cdev w/o alert
+cdevMemErr						EQU		0					;Memory shortfall; alert user please
+cdevResErr						EQU		1					;Couldn't get a needed resource; alert
+cdevUnset						EQU		3					; cdevValue is initialized to this
+;  Control Panel Default Proc 
+
+
+
+
+	ENDIF ; __FINDER__ 
+

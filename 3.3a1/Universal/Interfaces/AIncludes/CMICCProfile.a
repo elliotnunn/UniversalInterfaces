@@ -1,0 +1,792 @@
+;
+;	File:		CMICCProfile.a
+;
+;	Contains:	ICC Profile Format Definitions
+;
+;	Version:	Technology:	ColorSync 2.5
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1994-1999 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__CMICCPROFILE__') = 'UNDEFINED' THEN
+__CMICCPROFILE__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+
+;  ICC Profile version constants  
+
+cmICCProfileVersion2			EQU		$02000000
+cmICCProfileVersion21			EQU		$02100000
+cmCS2ProfileVersion				EQU		$02000000
+cmCS1ProfileVersion				EQU		$00000100			; ColorSync 1.0 profile version 
+;  Current Major version number 
+
+cmProfileMajorVersionMask		EQU		$FF000000
+cmCurrentProfileMajorVersion	EQU		$02000000
+;  magic cookie number for anonymous file ID 
+
+cmMagicNumber					EQU		'acsp'
+
+; ***********************************************************************
+; *************** ColorSync 2.0 profile specification *******************
+; ***********************************************************************
+; *** flags field  ***
+
+cmICCReservedFlagsMask			EQU		$0000FFFF			; these bits of the flags field are defined and reserved by ICC 
+cmEmbeddedMask					EQU		$00000001			; if bit 0 is 0 then not embedded profile, if 1 then embedded profile 
+cmEmbeddedUseMask				EQU		$00000002			; if bit 1 is 0 then ok to use anywhere, if 1 then ok to use as embedded profile only 
+cmCMSReservedFlagsMask			EQU		$FFFF0000			; these bits of the flags field are defined and reserved by CMS vendor 
+cmQualityMask					EQU		$00030000			; if bits 16-17 is 0 then normal, if 1 then draft, if 2 then best 
+cmInterpolationMask				EQU		$00040000			; if bit 18 is 0 then interpolation, if 1 then lookup only 
+cmGamutCheckingMask				EQU		$00080000			; if bit 19 is 0 then create gamut checking info, if 1 then no gamut checking info 
+;  copyright-protection flag options 
+
+cmEmbeddedProfile				EQU		0					; 0 is not embedded profile, 1 is embedded profile 
+cmEmbeddedUse					EQU		1					; 0 is to use anywhere, 1 is to use as embedded profile only 
+;  speed and quality flag options 
+
+cmNormalMode					EQU		0					; it uses the least significent two bits in the high word of flag 
+cmDraftMode						EQU		1					; it should be evaulated like this: right shift 16 bits first, mask off the 
+cmBestMode						EQU		2					; high 14 bits, and then compare with the enum to determine the option value 
+
+; *** deviceAttributes fields ***
+;  deviceAttributes[0] is defined by and reserved for device vendors 
+;  deviceAttributes[1] is defined by and reserved for ICC 
+;  The following bits of deviceAttributes[1] are currently defined 
+
+cmReflectiveTransparentMask		EQU		$00000001			; if bit 0 is 0 then reflective media, if 1 then transparency media 
+cmGlossyMatteMask				EQU		$00000002			; if bit 1 is 0 then glossy, if 1 then matte 
+;  device/media attributes element values  
+
+cmReflective					EQU		0					; if bit 0 is 0 then reflective media, if 1 then transparency media 
+cmGlossy						EQU		1					; if bit 1 is 0 then glossy, if 1 then matte 
+
+; *** renderingIntent field ***
+
+cmPerceptual					EQU		0					; Photographic images 
+cmRelativeColorimetric			EQU		1					; Logo Colors 
+cmSaturation					EQU		2					; Business graphics 
+cmAbsoluteColorimetric			EQU		3					; Logo Colors 
+
+
+;  data type element values 
+
+cmAsciiData						EQU		0
+cmBinaryData					EQU		1
+;  screen encodings  
+
+cmPrtrDefaultScreens			EQU		0					; Use printer default screens.  0 is false, 1 is ture 
+cmLinesPer						EQU		1					; 0 is LinesPerCm, 1 is LinesPerInch 
+;  2.0 tag type information 
+
+cmNumHeaderElements				EQU		10
+;  public tags 
+
+cmAToB0Tag						EQU		'A2B0'
+cmAToB1Tag						EQU		'A2B1'
+cmAToB2Tag						EQU		'A2B2'
+cmBlueColorantTag				EQU		'bXYZ'
+cmBlueTRCTag					EQU		'bTRC'
+cmBToA0Tag						EQU		'B2A0'
+cmBToA1Tag						EQU		'B2A1'
+cmBToA2Tag						EQU		'B2A2'
+cmCalibrationDateTimeTag		EQU		'calt'
+cmCharTargetTag					EQU		'targ'
+cmCopyrightTag					EQU		'cprt'
+cmDeviceMfgDescTag				EQU		'dmnd'
+cmDeviceModelDescTag			EQU		'dmdd'
+cmGamutTag						EQU		'gamt'
+cmGrayTRCTag					EQU		'kTRC'
+cmGreenColorantTag				EQU		'gXYZ'
+cmGreenTRCTag					EQU		'gTRC'
+cmLuminanceTag					EQU		'lumi'
+cmMeasurementTag				EQU		'meas'
+cmMediaBlackPointTag			EQU		'bkpt'
+cmMediaWhitePointTag			EQU		'wtpt'
+cmNamedColorTag					EQU		'ncol'
+cmNamedColor2Tag				EQU		'ncl2'
+cmPreview0Tag					EQU		'pre0'
+cmPreview1Tag					EQU		'pre1'
+cmPreview2Tag					EQU		'pre2'
+cmProfileDescriptionTag			EQU		'desc'
+cmProfileSequenceDescTag		EQU		'pseq'
+cmPS2CRD0Tag					EQU		'psd0'
+cmPS2CRD1Tag					EQU		'psd1'
+cmPS2CRD2Tag					EQU		'psd2'
+cmPS2CRD3Tag					EQU		'psd3'
+cmPS2CSATag						EQU		'ps2s'
+cmPS2RenderingIntentTag			EQU		'ps2i'
+cmRedColorantTag				EQU		'rXYZ'
+cmRedTRCTag						EQU		'rTRC'
+cmScreeningDescTag				EQU		'scrd'
+cmScreeningTag					EQU		'scrn'
+cmTechnologyTag					EQU		'tech'
+cmUcrBgTag						EQU		'bfd '
+cmViewingConditionsDescTag		EQU		'vued'
+cmViewingConditionsTag			EQU		'view'
+;  custom tags 
+
+cmPS2CRDVMSizeTag				EQU		'psvm'
+cmVideoCardGammaTag				EQU		'vcgt'
+cmMakeAndModelTag				EQU		'mmod'
+;  technology tag descriptions 
+
+cmTechnologyFilmScanner			EQU		'fscn'
+cmTechnologyReflectiveScanner	EQU		'rscn'
+cmTechnologyInkJetPrinter		EQU		'ijet'
+cmTechnologyThermalWaxPrinter	EQU		'twax'
+cmTechnologyElectrophotographicPrinter EQU 'epho'
+cmTechnologyElectrostaticPrinter EQU	'esta'
+cmTechnologyDyeSublimationPrinter EQU	'dsub'
+cmTechnologyPhotographicPaperPrinter EQU 'rpho'
+cmTechnologyFilmWriter			EQU		'fprn'
+cmTechnologyVideoMonitor		EQU		'vidm'
+cmTechnologyVideoCamera			EQU		'vidc'
+cmTechnologyProjectionTelevision EQU	'pjtv'
+cmTechnologyCRTDisplay			EQU		'CRT '
+cmTechnologyPMDisplay			EQU		'PMD '
+cmTechnologyAMDisplay			EQU		'AMD '
+cmTechnologyPhotoCD				EQU		'KPCD'
+cmTechnologyPhotoImageSetter	EQU		'imgs'
+cmTechnologyGravure				EQU		'grav'
+cmTechnologyOffsetLithography	EQU		'offs'
+cmTechnologySilkscreen			EQU		'silk'
+cmTechnologyFlexography			EQU		'flex'
+;  public type signatures 
+
+cmSigCurveType					EQU		'curv'
+cmSigDataType					EQU		'data'
+cmSigDateTimeType				EQU		'dtim'
+cmSigLut16Type					EQU		'mft2'
+cmSigLut8Type					EQU		'mft1'
+cmSigMeasurementType			EQU		'meas'
+cmSigNamedColorType				EQU		'ncol'
+cmSigNamedColor2Type			EQU		'ncl2'
+cmSigProfileDescriptionType		EQU		'desc'
+cmSigScreeningType				EQU		'scrn'
+cmSigS15Fixed16Type				EQU		'sf32'
+cmSigSignatureType				EQU		'sig '
+cmSigTextType					EQU		'text'
+cmSigU16Fixed16Type				EQU		'uf32'
+cmSigU1Fixed15Type				EQU		'uf16'
+cmSigUInt32Type					EQU		'ui32'
+cmSigUInt64Type					EQU		'ui64'
+cmSigUInt8Type					EQU		'ui08'
+cmSigUnicodeTextType			EQU		'utxt'
+cmSigViewingConditionsType		EQU		'view'
+cmSigXYZType					EQU		'XYZ '
+;  custom type signatures 
+
+cmSigVideoCardGammaType			EQU		'vcgt'
+cmSigMakeAndModelType			EQU		'mmod'
+
+;  Measurement type encodings 
+;  Measurement Flare 
+
+cmFlare0						EQU		$00000000
+cmFlare100						EQU		$00000001
+;  Measurement Geometry	
+
+cmGeometryUnknown				EQU		$00000000
+cmGeometry045or450				EQU		$00000001
+cmGeometry0dord0				EQU		$00000002
+;  Standard Observer	
+
+cmStdobsUnknown					EQU		$00000000
+cmStdobs1931TwoDegrees			EQU		$00000001
+cmStdobs1964TenDegrees			EQU		$00000002
+;  Standard Illuminant 
+
+cmIlluminantUnknown				EQU		$00000000
+cmIlluminantD50					EQU		$00000001
+cmIlluminantD65					EQU		$00000002
+cmIlluminantD93					EQU		$00000003
+cmIlluminantF2					EQU		$00000004
+cmIlluminantD55					EQU		$00000005
+cmIlluminantA					EQU		$00000006
+cmIlluminantEquiPower			EQU		$00000007
+cmIlluminantF8					EQU		$00000008
+;  Spot Function Value 
+
+cmSpotFunctionUnknown			EQU		0
+cmSpotFunctionDefault			EQU		1
+cmSpotFunctionRound				EQU		2
+cmSpotFunctionDiamond			EQU		3
+cmSpotFunctionEllipse			EQU		4
+cmSpotFunctionLine				EQU		5
+cmSpotFunctionSquare			EQU		6
+cmSpotFunctionCross				EQU		7
+;  Color Space Signatures 
+
+cmXYZData						EQU		'XYZ '
+cmLabData						EQU		'Lab '
+cmLuvData						EQU		'Luv '
+cmYxyData						EQU		'Yxy '
+cmRGBData						EQU		'RGB '
+cmGrayData						EQU		'GRAY'
+cmHSVData						EQU		'HSV '
+cmHLSData						EQU		'HLS '
+cmCMYKData						EQU		'CMYK'
+cmCMYData						EQU		'CMY '
+cmMCH5Data						EQU		'MCH5'
+cmMCH6Data						EQU		'MCH6'
+cmMCH7Data						EQU		'MCH7'
+cmMCH8Data						EQU		'MCH8'
+cm3CLRData						EQU		'3CLR'
+cm4CLRData						EQU		'4CLR'
+cm5CLRData						EQU		'5CLR'
+cm6CLRData						EQU		'6CLR'
+cm7CLRData						EQU		'7CLR'
+cm8CLRData						EQU		'8CLR'
+cmNamedData						EQU		'NAME'
+;  profileClass enumerations 
+
+cmInputClass					EQU		'scnr'
+cmDisplayClass					EQU		'mntr'
+cmOutputClass					EQU		'prtr'
+cmLinkClass						EQU		'link'
+cmAbstractClass					EQU		'abst'
+cmColorSpaceClass				EQU		'spac'
+cmNamedColorClass				EQU		'nmcl'
+;  platform enumerations 
+
+cmMacintosh						EQU		'APPL'
+cmMicrosoft						EQU		'MSFT'
+cmSolaris						EQU		'SUNW'
+cmSiliconGraphics				EQU		'SGI '
+cmTaligent						EQU		'TGNT'
+;  ColorSync 1.0 elements 
+
+cmCS1ChromTag					EQU		'chrm'
+cmCS1TRCTag						EQU		'trc '
+cmCS1NameTag					EQU		'name'
+cmCS1CustTag					EQU		'cust'
+;  General element data types 
+CMDateTime				RECORD 0
+year					 ds.w	1				; offset: $0 (0)
+month					 ds.w	1				; offset: $2 (2)
+dayOfTheMonth			 ds.w	1				; offset: $4 (4)
+hours					 ds.w	1				; offset: $6 (6)
+minutes					 ds.w	1				; offset: $8 (8)
+seconds					 ds.w	1				; offset: $A (10)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+CMFixedXYZColor			RECORD 0
+X						 ds.l	1				; offset: $0 (0)
+Y						 ds.l	1				; offset: $4 (4)
+Z						 ds.l	1				; offset: $8 (8)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+; typedef unsigned short 				CMXYZComponent
+
+CMXYZColor				RECORD 0
+X						 ds.w	1				; offset: $0 (0)
+Y						 ds.w	1				; offset: $2 (2)
+Z						 ds.w	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+CM2Header				RECORD 0
+size					 ds.l	1				; offset: $0 (0)		;  This is the total size of the Profile 
+CMMType					 ds.l	1				; offset: $4 (4)		;  CMM signature,  Registered with CS2 consortium  
+profileVersion			 ds.l	1				; offset: $8 (8)		;  Version of CMProfile format 
+profileClass			 ds.l	1				; offset: $C (12)		;  input, display, output, devicelink, abstract, or color conversion profile type 
+dataColorSpace			 ds.l	1				; offset: $10 (16)		;  color space of data 
+profileConnectionSpace	 ds.l	1				; offset: $14 (20)		;  profile connection color space 
+dateTime				 ds		CMDateTime		; offset: $18 (24)		;  date and time of profile creation 
+CS2profileSignature		 ds.l	1				; offset: $24 (36)		;  'acsp' constant ColorSync 2.0 file ID 
+platform				 ds.l	1				; offset: $28 (40)		;  primary profile platform, Registered with CS2 consortium 
+flags					 ds.l	1				; offset: $2C (44)		;  profile flags 
+deviceManufacturer		 ds.l	1				; offset: $30 (48)		;  Registered with ICC consortium 
+deviceModel				 ds.l	1				; offset: $34 (52)		;  Registered with ICC consortium 
+deviceAttributes		 ds.l	2				; offset: $38 (56)		;  Attributes[0] is for device vendors, [1] is for ICC 
+renderingIntent			 ds.l	1				; offset: $40 (64)		;  preferred rendering intent of tagged object 
+white					 ds		CMFixedXYZColor ; offset: $44 (68)		;  profile illuminant 
+creator					 ds.l	1				; offset: $50 (80)		;  profile creator 
+reserved				 ds.b	44				; offset: $54 (84)		;  reserved for future use 
+sizeof					 EQU *					; size:   $80 (128)
+						ENDR
+CMTagRecord				RECORD 0
+tag						 ds.l	1				; offset: $0 (0)		;  Registered with CS2 consortium 
+elementOffset			 ds.l	1				; offset: $4 (4)		;  Relative to start of CMProfile 
+elementSize				 ds.l	1				; offset: $8 (8)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+CMTagElemTable			RECORD 0
+count					 ds.l	1				; offset: $0 (0)
+tagList					 ds		CMTagRecord		; offset: $4 (4) <-- really an array of length one ;  Variable size 
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+;  External 0x02002001 CMProfile 
+CM2Profile				RECORD 0
+header					 ds		CM2Header		; offset: $0 (0)
+tagTable				 ds		CMTagElemTable ; offset: $80 (128)
+elemData				 ds.b	1				; offset: $90 (144) <-- really an array of length one ;  Tagged element storage. Variable size 
+						 ORG 146
+sizeof					 EQU *					; size:   $92 (146)
+						ENDR
+; typedef struct CM2Profile *			CM2ProfilePtr
+
+; typedef CM2ProfilePtr *				CM2ProfileHandle
+
+;  Tag Type Definitions 
+CMCurveType				RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'curv' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+countValue				 ds.l	1				; offset: $8 (8)		;  number of entries in table that follows 
+data					 ds.w	1				; offset: $C (12) <-- really an array of length one ;  Tagged element storage. Variable size 
+sizeof					 EQU *					; size:   $E (14)
+						ENDR
+CMDataType				RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'data' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+dataFlag				 ds.l	1				; offset: $8 (8)		;  0 = ASCII, 1 = binary 
+data					 ds.b	1				; offset: $C (12) <-- really an array of length one ;  Tagged element storage. Variable size 
+						 ORG 14
+sizeof					 EQU *					; size:   $E (14)
+						ENDR
+CMDateTimeType			RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'dtim' 
+reserved				 ds.l	1				; offset: $4 (4)
+dateTime				 ds		CMDateTime		; offset: $8 (8)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+CMLut16Type				RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'mft2' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+inputChannels			 ds.b	1				; offset: $8 (8)		;  Number of input channels 
+outputChannels			 ds.b	1				; offset: $9 (9)		;  Number of output channels 
+gridPoints				 ds.b	1				; offset: $A (10)		;  Number of clutTable grid points 
+reserved2				 ds.b	1				; offset: $B (11)		;  fill with 0x00 
+matrix					 ds.l	3 * 3			; offset: $C (12)		;  
+inputTableEntries		 ds.w	1				; offset: $30 (48)		;  
+outputTableEntries		 ds.w	1				; offset: $32 (50)		;  
+inputTable				 ds.w	1				; offset: $34 (52) <-- really an array of length one ;  Variable size 
+CLUT					 ds.w	1				; offset: $36 (54) <-- really an array of length one ;  Variable size 
+outputTable				 ds.w	1				; offset: $38 (56) <-- really an array of length one ;  Variable size 
+sizeof					 EQU *					; size:   $3A (58)
+						ENDR
+CMLut8Type				RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'mft1' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+inputChannels			 ds.b	1				; offset: $8 (8)		;  
+outputChannels			 ds.b	1				; offset: $9 (9)		;  
+gridPoints				 ds.b	1				; offset: $A (10)		;  
+reserved2				 ds.b	1				; offset: $B (11)		;  fill with 0x00 
+matrix					 ds.l	3 * 3			; offset: $C (12)		;  
+inputTable				 ds.b	256				; offset: $30 (48)		;  fixed size of 256 
+CLUT					 ds.b	2				; offset: $130 (304)	;  Variable size 
+outputTable				 ds.b	256				; offset: $132 (306)	;  fixed size of 256 
+sizeof					 EQU *					; size:   $232 (562)
+						ENDR
+CMMeasurementType		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'meas' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+standardObserver		 ds.l	1				; offset: $8 (8)		;  0 : unknown, 1 : CIE 1931, 2 : CIE 1964 
+backingXYZ				 ds		CMFixedXYZColor ; offset: $C (12)		;  absolute XYZ values of backing 
+geometry				 ds.l	1				; offset: $18 (24)		;  0 : unknown, 1 : 0/45 or 45/0, 2 :0/d or d/0 
+flare					 ds.l	1				; offset: $1C (28)		;  0 : 0%, 1 : 100% flare 
+illuminant				 ds.l	1				; offset: $20 (32)		;  standard illuminant 
+sizeof					 EQU *					; size:   $24 (36)
+						ENDR
+CMNamedColorType		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'ncol' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+vendorFlag				 ds.l	1				; offset: $8 (8)		;  
+count					 ds.l	1				; offset: $C (12)		;  count of named colors in array that follows 
+prefixName				 ds.b	1				; offset: $10 (16) <-- really an array of length one ;  Variable size, max = 32, to access fields after this one, have to count bytes 
+suffixName				 ds.b	1				; offset: $11 (17) <-- really an array of length one ;  Variable size, max = 32 
+data					 ds.b	1				; offset: $12 (18) <-- really an array of length one ;  varaible size data as explained below 
+						 ORG 20
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+; 	
+;	A variable size array of structs appears as the last block of data
+;	in the above struct, CMNamedColorType.  The data structure
+;	is as follows: (example in C)
+;	
+;	struct {											 
+;		unsigned char	rootName[1];				 * Variable size, max = 32 
+;		unsigned char	colorCoords[1];				 * Variable size  
+;	} colorName[1];									 * Variable size  
+;
+
+CMNamedColor2Type		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'ncl2' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+vendorFlag				 ds.l	1				; offset: $8 (8)		;  lower 16 bits reserved for ICC use 
+count					 ds.l	1				; offset: $C (12)		;  count of named colors in array that follows 
+deviceChannelCount		 ds.l	1				; offset: $10 (16)		;  number of device channels, 0 indicates no device value available 
+prefixName				 ds.b	32				; offset: $14 (20)		;  32 byte field.  7 bit ASCII null terminated 
+suffixName				 ds.b	32				; offset: $34 (52)		;  32 byte field.  7 bit ASCII null terminated 
+data					 ds.b	1				; offset: $54 (84) <-- really an array of length one ;  varaible size data as definced below 
+						 ORG 86
+sizeof					 EQU *					; size:   $56 (86)
+						ENDR
+CMNamedColor2EntryType	RECORD 0
+rootName				 ds.b	32				; offset: $0 (0)		;  32 byte field.  7 bit ASCII null terminated 
+PCSColorCoords			 ds.w	3				; offset: $20 (32)		;  Lab or XYZ color 
+DeviceColorCoords		 ds.w	1				; offset: $26 (38) <-- really an array of length one ;  Variable size 
+sizeof					 EQU *					; size:   $28 (40)
+						ENDR
+CMTextDescriptionType	RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'desc' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+ASCIICount				 ds.l	1				; offset: $8 (8)		;  the count of "bytes" 
+ASCIIName				 ds.b	2				; offset: $C (12)		;  Variable size, to access fields after this one, have to count bytes 
+UniCodeCode				 ds.l	1				; offset: $E (14)
+UniCodeCount			 ds.l	1				; offset: $12 (18)		;  the count of characters, each character has two bytes 
+UniCodeName				 ds.b	2				; offset: $16 (22)		;  Variable size 
+ScriptCodeCode			 ds.w	1				; offset: $18 (24)
+ScriptCodeCount			 ds.b	1				; offset: $1A (26)		;  the count of "bytes" 
+ScriptCodeName			 ds.b	2				; offset: $1B (27)		;  Variable size 
+						 ORG 30
+sizeof					 EQU *					; size:   $1E (30)
+						ENDR
+CMTextType				RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'text' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+text					 ds.b	1				; offset: $8 (8) <-- really an array of length one ;  count of text is obtained from tag size element 
+						 ORG 10
+sizeof					 EQU *					; size:   $A (10)
+						ENDR
+CMUnicodeTextType		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'utxt' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+text					 ds.w	1				; offset: $8 (8) <-- really an array of length one ;  count of text is obtained from tag size element 
+sizeof					 EQU *					; size:   $A (10)
+						ENDR
+CMScreeningType			RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'scrn' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+screeningFlag			 ds.l	1				; offset: $8 (8)		;  bit 0 : use printer default screens, bit 1 : inch/cm 
+channelCount			 ds.l	1				; offset: $C (12)
+data					 ds.b	1				; offset: $10 (16) <-- really an array of length one ;  varaible size data as explained below 
+						 ORG 18
+sizeof					 EQU *					; size:   $12 (18)
+						ENDR
+; 
+;	A variable size array of structs appears as the last block of data
+;	in the above struct, CMScreeningType.  The data structure
+;	is as follows: (example in C)
+;	
+;	struct {
+;		Fixed			frequency;
+;		Fixed			angle;
+;		unsigned long	sportFunction;
+;	 }	channelScreening[1];						* Variable size 
+;
+
+CMSignatureType			RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'sig ' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+signature				 ds.l	1				; offset: $8 (8)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+CMS15Fixed16ArrayType	RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'sf32' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+value					 ds.l	1				; offset: $8 (8) <-- really an array of length one ;  Variable size 
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+CMU16Fixed16ArrayType	RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'uf32' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+value					 ds.l	1				; offset: $8 (8) <-- really an array of length one ;  Variable size 
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+CMUInt16ArrayType		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'ui16' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+value					 ds.w	1				; offset: $8 (8) <-- really an array of length one ;  Variable size 
+sizeof					 EQU *					; size:   $A (10)
+						ENDR
+CMUInt32ArrayType		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'ui32' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+value					 ds.l	1				; offset: $8 (8) <-- really an array of length one ;  Variable size 
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+CMUInt64ArrayType		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'ui64' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+value					 ds.l	1				; offset: $8 (8) <-- really an array of length one ;  Variable size (x2) 
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+CMUInt8ArrayType		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'ui08' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+value					 ds.b	1				; offset: $8 (8) <-- really an array of length one ;  Variable size 
+						 ORG 10
+sizeof					 EQU *					; size:   $A (10)
+						ENDR
+CMViewingConditionsType	RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'view' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+illuminant				 ds		CMFixedXYZColor ; offset: $8 (8)		;  absolute XYZs of illuminant  in cd/m^2 
+surround				 ds		CMFixedXYZColor ; offset: $14 (20)		;  absolute XYZs of surround in cd/m^2 
+stdIlluminant			 ds.l	1				; offset: $20 (32)		;  see definitions of std illuminants 
+sizeof					 EQU *					; size:   $24 (36)
+						ENDR
+CMXYZType				RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'XYZ ' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+XYZ						 ds		CMFixedXYZColor ; offset: $8 (8) <-- really an array of length one ;  variable size XYZ tristimulus values 
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+;  Profile sequence description type 
+CMProfileSequenceDescType RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'pseq ' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+count					 ds.l	1				; offset: $8 (8)		;  Number of descriptions 
+data					 ds.b	1				; offset: $C (12) <-- really an array of length one ;  varaible size data as explained below 
+						 ORG 14
+sizeof					 EQU *					; size:   $E (14)
+						ENDR
+; 
+;	A variable size array of structs appears as the last block of data
+;	in the above struct, CMProfileSequenceDescType.  The data structure
+;	is as follows: (example in C)
+;	
+;	struct {											 
+;		OSType			deviceMfg;					 * Device Manufacturer 
+;		OSType			deviceModel;				 * Decvice Model 
+;		unsigned long	attributes[2];				 * Device attributes 
+;		OSType			technology;					 * Technology signature 
+;		unsigned long	mfgDescASCIICount;			 * the count of "bytes" 
+;		unsigned char	mfgDescASCIIName[2];		 * Variable size 
+;		unsigned long	mfgDescUniCodeCode;			 
+;		unsigned long	mfgDescUniCodeCount;		 * the count of characters, each character has two bytes 
+;		unsigned char	mfgDescUniCodeName[2];		 * Variable size 
+;		unsigned long	mfgDescScriptCodeCode;		 
+;		unsigned long	mfgDescScriptCodeCount;		 * the count of "bytes" 
+;		unsigned char	mfgDescScriptCodeName[2];	 * Variable size 
+;		unsigned long	modelDescASCIICount;		 * the count of "bytes" 
+;		unsigned char	modelDescASCIIName[2];		 * Variable size 
+;		unsigned long	modelDescUniCodeCode;		 
+;		unsigned long	modelDescUniCodeCount;		 * the count of characters, each character has two bytes 
+;		unsigned char	modelDescUniCodeName[2];	 * Variable size 
+;		short			modelDescScriptCodeCode;	 
+;		unsigned char	modelDescScriptCodeCount;	 * the count of "bytes" 
+;		SInt8			filler;						 * For proper alignment across languages 
+;		unsigned char	modelDescScriptCodeName[2];	 * Variable size 
+;	}	profileDescription[1];						 
+;
+
+
+;  Under color removal, black generation type 
+CMUcrBgType				RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'bfd  ' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+ucrCount				 ds.l	1				; offset: $8 (8)		;  Number of UCR entries 
+ucrValues				 ds.w	1				; offset: $C (12) <-- really an array of length one ;  variable size 
+bgCount					 ds.l	1				; offset: $E (14)		;  Number of BG entries 
+bgValues				 ds.w	1				; offset: $12 (18) <-- really an array of length one ;  variable size 
+ucrbgASCII				 ds.b	1				; offset: $14 (20) <-- really an array of length one ;  null terminated ASCII string 
+						 ORG 22
+sizeof					 EQU *					; size:   $16 (22)
+						ENDR
+CMIntentCRDVMSize		RECORD 0
+renderingIntent			 ds.l	1				; offset: $0 (0)		;  rendering intent 
+VMSize					 ds.l	1				; offset: $4 (4)		;  VM size taken up by the CRD 
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+CMPS2CRDVMSizeType		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'psvm' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+count					 ds.l	1				; offset: $8 (8)		;  number of intent entries 
+intentCRD				 ds		CMIntentCRDVMSize ; offset: $C (12) <-- really an array of length one ;  variable size 
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+;  Video Card Gamma type 
+
+cmVideoCardGammaTableType		EQU		0
+cmVideoCardGammaFormulaType		EQU		1
+
+CMVideoCardGammaTable	RECORD 0
+channels				 ds.w	1				; offset: $0 (0)		;  # of gamma channels (1 or 3) 
+entryCount				 ds.w	1				; offset: $2 (2)		;  1-based number of entries per channel 
+entrySize				 ds.w	1				; offset: $4 (4)		;  size on bytes of each entry 
+data					 ds.b	1				; offset: $6 (6) <-- really an array of length one ;  variable size data follows 
+						 ORG 8
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+CMVideoCardGammaFormula	RECORD 0
+redGamma				 ds.l	1				; offset: $0 (0)		;  must be > 0.0 
+redMin					 ds.l	1				; offset: $4 (4)		;  must be > 0.0 and < 1.0 
+redMax					 ds.l	1				; offset: $8 (8)		;  must be > 0.0 and < 1.0 
+greenGamma				 ds.l	1				; offset: $C (12)		;  must be > 0.0 
+greenMin				 ds.l	1				; offset: $10 (16)		;  must be > 0.0 and < 1.0 
+greenMax				 ds.l	1				; offset: $14 (20)		;  must be > 0.0 and < 1.0 
+blueGamma				 ds.l	1				; offset: $18 (24)		;  must be > 0.0 
+blueMin					 ds.l	1				; offset: $1C (28)		;  must be > 0.0 and < 1.0 
+blueMax					 ds.l	1				; offset: $20 (32)		;  must be > 0.0 and < 1.0 
+sizeof					 EQU *					; size:   $24 (36)
+						ENDR
+CMVideoCardGamma		RECORD 0
+tagType					 ds.l	1				; offset: $0 (0)
+table					 ds		CMVideoCardGammaTable ; offset: $4 (4)
+						 ORG 4
+formula					 ds		CMVideoCardGammaFormula ; offset: $4 (4)
+sizeof					 EQU *					; size:   $28 (40)
+						ENDR
+CMVideoCardGammaType	RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'vcgt' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+gamma					 ds		CMVideoCardGamma ; offset: $8 (8)
+sizeof					 EQU *					; size:   $30 (48)
+						ENDR
+CMMakeAndModel			RECORD 0
+manufacturer			 ds.l	1				; offset: $0 (0)
+model					 ds.l	1				; offset: $4 (4)
+serialNumber			 ds.l	1				; offset: $8 (8)
+manufactureDate			 ds.l	1				; offset: $C (12)
+reserved1				 ds.l	1				; offset: $10 (16)		;  fill with 0x00 
+reserved2				 ds.l	1				; offset: $14 (20)		;  fill with 0x00 
+reserved3				 ds.l	1				; offset: $18 (24)		;  fill with 0x00 
+reserved4				 ds.l	1				; offset: $1C (28)		;  fill with 0x00 
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+CMMakeAndModelType		RECORD 0
+typeDescriptor			 ds.l	1				; offset: $0 (0)		;  'mmod' 
+reserved				 ds.l	1				; offset: $4 (4)		;  fill with 0x00 
+makeAndModel			 ds		CMMakeAndModel ; offset: $8 (8)
+sizeof					 EQU *					; size:   $28 (40)
+						ENDR
+; ***********************************************************************
+; *************** ColorSync 1.0 profile specification *******************
+; ***********************************************************************
+
+cmGrayResponse					EQU		0
+cmRedResponse					EQU		1
+cmGreenResponse					EQU		2
+cmBlueResponse					EQU		3
+cmCyanResponse					EQU		4
+cmMagentaResponse				EQU		5
+cmYellowResponse				EQU		6
+cmUcrResponse					EQU		7
+cmBgResponse					EQU		8
+cmOnePlusLastResponse			EQU		9
+
+;  Device types 
+
+cmMonitorDevice					EQU		'mntr'
+cmScannerDevice					EQU		'scnr'
+cmPrinterDevice					EQU		'prtr'
+
+CMIString				RECORD 0
+theScript				 ds.w	1				; offset: $0 (0)
+theString				 ds		Str63			; offset: $2 (2)
+sizeof					 EQU *					; size:   $42 (66)
+						ENDR
+;  Profile options 
+
+cmPerceptualMatch				EQU		$0000				; Default. For photographic images 
+cmColorimetricMatch				EQU		$0001				; Exact matching when possible 
+cmSaturationMatch				EQU		$0002				; For solid colors 
+;  Profile flags 
+
+cmNativeMatchingPreferred		EQU		$00000001			; Default to native not preferred 
+cmTurnOffCache					EQU		$00000002			; Default to turn on CMM cache 
+; typedef long 							CMMatchOption
+
+; typedef long 							CMMatchFlag
+
+CMHeader				RECORD 0
+size					 ds.l	1				; offset: $0 (0)
+CMMType					 ds.l	1				; offset: $4 (4)
+applProfileVersion		 ds.l	1				; offset: $8 (8)
+dataType				 ds.l	1				; offset: $C (12)
+deviceType				 ds.l	1				; offset: $10 (16)
+deviceManufacturer		 ds.l	1				; offset: $14 (20)
+deviceModel				 ds.l	1				; offset: $18 (24)
+deviceAttributes		 ds.l	2				; offset: $1C (28)
+profileNameOffset		 ds.l	1				; offset: $24 (36)
+customDataOffset		 ds.l	1				; offset: $28 (40)
+flags					 ds.l	1				; offset: $2C (44)
+options					 ds.l	1				; offset: $30 (48)
+white					 ds		CMXYZColor		; offset: $34 (52)
+black					 ds		CMXYZColor		; offset: $3A (58)
+sizeof					 EQU *					; size:   $40 (64)
+						ENDR
+CMProfileChromaticities	RECORD 0
+red						 ds		CMXYZColor		; offset: $0 (0)
+green					 ds		CMXYZColor		; offset: $6 (6)
+blue					 ds		CMXYZColor		; offset: $C (12)
+cyan					 ds		CMXYZColor		; offset: $12 (18)
+magenta					 ds		CMXYZColor		; offset: $18 (24)
+yellow					 ds		CMXYZColor		; offset: $1E (30)
+sizeof					 EQU *					; size:   $24 (36)
+						ENDR
+CMProfileResponse		RECORD 0
+counts					 ds.w	9				; offset: $0 (0)
+data					 ds.w	1				; offset: $12 (18) <-- really an array of length one ;  Variable size 
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+CMProfile				RECORD 0
+header					 ds		CMHeader		; offset: $0 (0)
+profile					 ds		CMProfileChromaticities ; offset: $40 (64)
+response				 ds		CMProfileResponse ; offset: $64 (100)
+profileName				 ds		CMIString		; offset: $78 (120)
+customData				 ds.b	1				; offset: $BA (186) <-- really an array of length one ;  Variable size 
+						 ORG 188
+sizeof					 EQU *					; size:   $BC (188)
+						ENDR
+; typedef struct CMProfile *			CMProfilePtr
+
+; typedef CMProfilePtr *				CMProfileHandle
+
+	IF OLDROUTINENAMES THEN
+
+kCMApplProfileVersion			EQU		$00000100
+
+grayResponse					EQU		0
+redResponse						EQU		1
+greenResponse					EQU		2
+blueResponse					EQU		3
+cyanResponse					EQU		4
+magentaResponse					EQU		5
+yellowResponse					EQU		6
+ucrResponse						EQU		7
+bgResponse						EQU		8
+onePlusLastResponse				EQU		9
+
+rgbData							EQU		'RGB '
+cmykData						EQU		'CMYK'
+grayData						EQU		'GRAY'
+xyzData							EQU		'XYZ '
+
+monitorDevice					EQU		'mntr'
+scannerDevice					EQU		'scnr'
+printerDevice					EQU		'prtr'
+; typedef unsigned short 				XYZComponent
+
+XYZColor				RECORD 0
+f						 ds		CMXYZColor
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+
+
+; typedef unsigned short 				CMResponseData
+
+IString					RECORD 0
+f						 ds		CMIString
+sizeof					 EQU *					; size:   $42 (66)
+						ENDR
+
+
+; typedef long 							CMResponseColor
+
+; typedef CMResponseColor 				responseColor
+
+	ENDIF	; OLDROUTINENAMES
+
+	ENDIF ; __CMICCPROFILE__ 
+

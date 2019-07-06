@@ -1,0 +1,1054 @@
+;
+;	File:		MediaHandlers.a
+;
+;	Contains:	QuickTime Interfaces.
+;
+;	Version:	Technology:	QuickTime 3.0
+;				Release:	Universal Interfaces 3.2
+;
+;	Copyright:	© 1990-1998 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__MEDIAHANDLERS__') = 'UNDEFINED' THEN
+__MEDIAHANDLERS__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__COMPONENTS__') = 'UNDEFINED' THEN
+	include 'Components.a'
+	ENDIF
+	IF &TYPE('__MOVIES__') = 'UNDEFINED' THEN
+	include 'Movies.a'
+	ENDIF
+
+
+handlerHasSpatial				EQU		$01
+handlerCanClip					EQU		$02
+handlerCanMatte					EQU		$04
+handlerCanTransferMode			EQU		$08
+handlerNeedsBuffer				EQU		$10
+handlerNoIdle					EQU		$20
+handlerNoScheduler				EQU		$40
+handlerWantsTime				EQU		$80
+handlerCGrafPortOnly			EQU		$0100
+handlerCanSend					EQU		$0200
+handlerCanHandleComplexMatrix	EQU		$0400
+handlerWantsDestinationPixels	EQU		$0800				; DNC Code: New flag to indicate the handler sends image data to modifier tracks
+handlerCanSendImageData			EQU		$1000
+;  media task flags 
+
+mMustDraw						EQU		$08
+mAtEnd							EQU		$10
+mPreflightDraw					EQU		$20
+mSyncDrawing					EQU		$40
+;  media task result flags 
+
+mDidDraw						EQU		$01
+mNeedsToDraw					EQU		$04
+mDrawAgain						EQU		$08
+mPartialDraw					EQU		$10
+
+forceUpdateRedraw				EQU		$01
+forceUpdateNewBuffer			EQU		$02
+;  media hit test flags 
+
+mHitTestBounds					EQU		$00000001			;	point must only be within targetRefCon's bounding box 
+mHitTestImage					EQU		$00000002			;  point must be within the shape of the targetRefCon's image 
+mHitTestInvisible				EQU		$00000004			;  invisible targetRefCon's may be hit tested 
+mHitTestIsClick					EQU		$00000008			;  for codecs that want mouse events 
+;  media is opaque flags 
+
+mOpaque							EQU		$00000001
+mInvisible						EQU		$00000002
+
+
+
+
+
+GetMovieCompleteParams	RECORD 0
+version					 ds.w	1				; offset: $0 (0)
+theMovie				 ds.l	1				; offset: $2 (2)
+theTrack				 ds.l	1				; offset: $6 (6)
+theMedia				 ds.l	1				; offset: $A (10)
+movieScale				 ds.l	1				; offset: $E (14)
+mediaScale				 ds.l	1				; offset: $12 (18)
+movieDuration			 ds.l	1				; offset: $16 (22)
+trackDuration			 ds.l	1				; offset: $1A (26)
+mediaDuration			 ds.l	1				; offset: $1E (30)
+effectiveRate			 ds.l	1				; offset: $22 (34)
+timeBase				 ds.l	1				; offset: $26 (38)
+volume					 ds.w	1				; offset: $2A (42)
+width					 ds.l	1				; offset: $2C (44)
+height					 ds.l	1				; offset: $30 (48)
+trackMovieMatrix		 ds		MatrixRecord	; offset: $34 (52)
+moviePort				 ds.l	1				; offset: $58 (88)
+movieGD					 ds.l	1				; offset: $5C (92)
+trackMatte				 ds.l	1				; offset: $60 (96)
+inputMap				 ds.l	1				; offset: $64 (100)
+sizeof					 EQU *					; size:   $68 (104)
+						ENDR
+
+kMediaVideoParamBrightness		EQU		1
+kMediaVideoParamContrast		EQU		2
+kMediaVideoParamHue				EQU		3
+kMediaVideoParamSharpness		EQU		4
+kMediaVideoParamSaturation		EQU		5
+kMediaVideoParamBlackLevel		EQU		6
+kMediaVideoParamWhiteLevel		EQU		7
+; typedef Handle *						dataHandlePtr
+
+; typedef dataHandlePtr *				dataHandleHandle
+
+
+
+
+;  MediaCallRange2 
+;  These are unique to each type of media handler 
+;  They are also included in the public interfaces 
+
+
+; ***** These are the calls for dealing with the Generic media handler ****
+;
+; pascal ComponentResult MediaInitialize(MediaHandler mh, GetMovieCompleteParams *gmc)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaInitialize
+			move.l              #$00040501,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaInitialize
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetHandlerCapabilities(MediaHandler mh, long flags, long flagsMask)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetHandlerCapabilities
+			move.l              #$00080502,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetHandlerCapabilities
+	ENDIF
+
+;
+; pascal ComponentResult MediaIdle(MediaHandler mh, TimeValue atMediaTime, long flagsIn, long *flagsOut, const TimeRecord *movieTime)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaIdle
+			move.l              #$00100503,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaIdle
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetMediaInfo(MediaHandler mh, Handle h)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetMediaInfo
+			move.l              #$00040504,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetMediaInfo
+	ENDIF
+
+;
+; pascal ComponentResult MediaPutMediaInfo(MediaHandler mh, Handle h)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaPutMediaInfo
+			move.l              #$00040505,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaPutMediaInfo
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetActive(MediaHandler mh, Boolean enableMedia)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetActive
+			move.l              #$00020506,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetActive
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetRate(MediaHandler mh, Fixed rate)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetRate
+			move.l              #$00040507,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetRate
+	ENDIF
+
+;
+; pascal ComponentResult MediaGGetStatus(MediaHandler mh, ComponentResult *statusErr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGGetStatus
+			move.l              #$00040508,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGGetStatus
+	ENDIF
+
+;
+; pascal ComponentResult MediaTrackEdited(MediaHandler mh)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaTrackEdited
+			move.l              #$00000509,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaTrackEdited
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetMediaTimeScale(MediaHandler mh, TimeScale newTimeScale)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetMediaTimeScale
+			move.l              #$0004050A,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetMediaTimeScale
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetMovieTimeScale(MediaHandler mh, TimeScale newTimeScale)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetMovieTimeScale
+			move.l              #$0004050B,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetMovieTimeScale
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetGWorld(MediaHandler mh, CGrafPtr aPort, GDHandle aGD)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetGWorld
+			move.l              #$0008050C,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetGWorld
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetDimensions(MediaHandler mh, Fixed width, Fixed height)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetDimensions
+			move.l              #$0008050D,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetDimensions
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetClip(MediaHandler mh, RgnHandle theClip)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetClip
+			move.l              #$0004050E,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetClip
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetMatrix(MediaHandler mh, MatrixRecord *trackMovieMatrix)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetMatrix
+			move.l              #$0004050F,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetMatrix
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetTrackOpaque(MediaHandler mh, Boolean *trackIsOpaque)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetTrackOpaque
+			move.l              #$00040510,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetTrackOpaque
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetGraphicsMode(MediaHandler mh, long mode, const RGBColor *opColor)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetGraphicsMode
+			move.l              #$00080511,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetGraphicsMode
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetGraphicsMode(MediaHandler mh, long *mode, RGBColor *opColor)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetGraphicsMode
+			move.l              #$00080512,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetGraphicsMode
+	ENDIF
+
+;
+; pascal ComponentResult MediaGSetVolume(MediaHandler mh, short volume)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGSetVolume
+			move.l              #$00020513,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGSetVolume
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetSoundBalance(MediaHandler mh, short balance)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetSoundBalance
+			move.l              #$00020514,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetSoundBalance
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetSoundBalance(MediaHandler mh, short *balance)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetSoundBalance
+			move.l              #$00040515,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetSoundBalance
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetNextBoundsChange(MediaHandler mh, TimeValue *when)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetNextBoundsChange
+			move.l              #$00040516,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetNextBoundsChange
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetSrcRgn(MediaHandler mh, RgnHandle rgn, TimeValue atMediaTime)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetSrcRgn
+			move.l              #$00080517,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetSrcRgn
+	ENDIF
+
+;
+; pascal ComponentResult MediaPreroll(MediaHandler mh, TimeValue time, Fixed rate)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaPreroll
+			move.l              #$00080518,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaPreroll
+	ENDIF
+
+;
+; pascal ComponentResult MediaSampleDescriptionChanged(MediaHandler mh, long index)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSampleDescriptionChanged
+			move.l              #$00040519,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSampleDescriptionChanged
+	ENDIF
+
+;
+; pascal ComponentResult MediaHasCharacteristic(MediaHandler mh, OSType characteristic, Boolean *hasIt)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaHasCharacteristic
+			move.l              #$0008051A,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaHasCharacteristic
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetOffscreenBufferSize(MediaHandler mh, Rect *bounds, short depth, CTabHandle ctab)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetOffscreenBufferSize
+			move.l              #$000A051B,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetOffscreenBufferSize
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetHints(MediaHandler mh, long hints)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetHints
+			move.l              #$0004051C,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetHints
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetName(MediaHandler mh, Str255 name, long requestedLanguage, long *actualLanguage)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetName
+			move.l              #$000C051D,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetName
+	ENDIF
+
+;
+; pascal ComponentResult MediaForceUpdate(MediaHandler mh, long forceUpdateFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaForceUpdate
+			move.l              #$0004051E,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaForceUpdate
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetDrawingRgn(MediaHandler mh, RgnHandle *partialRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetDrawingRgn
+			move.l              #$0004051F,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetDrawingRgn
+	ENDIF
+
+;
+; pascal ComponentResult MediaGSetActiveSegment(MediaHandler mh, TimeValue activeStart, TimeValue activeDuration)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGSetActiveSegment
+			move.l              #$00080520,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGSetActiveSegment
+	ENDIF
+
+;
+; pascal ComponentResult MediaInvalidateRegion(MediaHandler mh, RgnHandle invalRgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaInvalidateRegion
+			move.l              #$00040521,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaInvalidateRegion
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetNextStepTime(MediaHandler mh, short flags, TimeValue mediaTimeIn, TimeValue *mediaTimeOut, Fixed rate)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetNextStepTime
+			move.l              #$000E0522,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetNextStepTime
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetNonPrimarySourceData(MediaHandler mh, long inputIndex, long dataDescriptionSeed, Handle dataDescription, void *data, long dataSize, ICMCompletionProcRecordPtr asyncCompletionProc, UniversalProcPtr transferProc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetNonPrimarySourceData
+			move.l              #$00200523,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetNonPrimarySourceData
+	ENDIF
+
+;
+; pascal ComponentResult MediaChangedNonPrimarySource(MediaHandler mh, long inputIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaChangedNonPrimarySource
+			move.l              #$00040524,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaChangedNonPrimarySource
+	ENDIF
+
+;
+; pascal ComponentResult MediaTrackReferencesChanged(MediaHandler mh)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaTrackReferencesChanged
+			move.l              #$00000525,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaTrackReferencesChanged
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetSampleDataPointer(MediaHandler mh, long sampleNum, Ptr *dataPtr, long *dataSize, long *sampleDescIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetSampleDataPointer
+			move.l              #$00100526,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetSampleDataPointer
+	ENDIF
+
+;
+; pascal ComponentResult MediaReleaseSampleDataPointer(MediaHandler mh, long sampleNum)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaReleaseSampleDataPointer
+			move.l              #$00040527,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaReleaseSampleDataPointer
+	ENDIF
+
+;
+; pascal ComponentResult MediaTrackPropertyAtomChanged(MediaHandler mh)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaTrackPropertyAtomChanged
+			move.l              #$00000528,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaTrackPropertyAtomChanged
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetTrackInputMapReference(MediaHandler mh, QTAtomContainer inputMap)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetTrackInputMapReference
+			move.l              #$00040529,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetTrackInputMapReference
+	ENDIF
+
+
+;
+; pascal ComponentResult MediaSetVideoParam(MediaHandler mh, long whichParam, unsigned short *value)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetVideoParam
+			move.l              #$0008052B,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetVideoParam
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetVideoParam(MediaHandler mh, long whichParam, unsigned short *value)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetVideoParam
+			move.l              #$0008052C,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetVideoParam
+	ENDIF
+
+;
+; pascal ComponentResult MediaCompare(MediaHandler mh, Boolean *isOK, Media srcMedia, ComponentInstance srcMediaComponent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaCompare
+			move.l              #$000C052D,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaCompare
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetClock(MediaHandler mh, ComponentInstance *clock)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetClock
+			move.l              #$0004052E,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetClock
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetSoundOutputComponent(MediaHandler mh, Component outputComponent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetSoundOutputComponent
+			move.l              #$0004052F,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetSoundOutputComponent
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetSoundOutputComponent(MediaHandler mh, Component *outputComponent)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetSoundOutputComponent
+			move.l              #$00040530,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetSoundOutputComponent
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetSoundLocalizationData(MediaHandler mh, Handle data)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetSoundLocalizationData
+			move.l              #$00040531,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetSoundLocalizationData
+	ENDIF
+
+
+
+
+;
+; pascal ComponentResult MediaGetInvalidRegion(MediaHandler mh, RgnHandle rgn)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetInvalidRegion
+			move.l              #$0004053C,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetInvalidRegion
+	ENDIF
+
+
+;
+; pascal ComponentResult MediaSampleDescriptionB2N(MediaHandler mh, SampleDescriptionHandle sampleDescriptionH)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSampleDescriptionB2N
+			move.l              #$0004053E,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSampleDescriptionB2N
+	ENDIF
+
+;
+; pascal ComponentResult MediaSampleDescriptionN2B(MediaHandler mh, SampleDescriptionHandle sampleDescriptionH)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSampleDescriptionN2B
+			move.l              #$0004053F,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSampleDescriptionN2B
+	ENDIF
+
+;
+; pascal ComponentResult MediaQueueNonPrimarySourceData(MediaHandler mh, long inputIndex, long dataDescriptionSeed, Handle dataDescription, void *data, long dataSize, ICMCompletionProcRecordPtr asyncCompletionProc, const ICMFrameTimeRecord *frameTime, UniversalProcPtr transferProc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaQueueNonPrimarySourceData
+			move.l              #$00240540,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaQueueNonPrimarySourceData
+	ENDIF
+
+;
+; pascal ComponentResult MediaFlushNonPrimarySourceData(MediaHandler mh, long inputIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaFlushNonPrimarySourceData
+			move.l              #$00040541,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaFlushNonPrimarySourceData
+	ENDIF
+
+
+;
+; pascal ComponentResult MediaGetURLLink(MediaHandler mh, Point displayWhere, Handle *urlLink)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetURLLink
+			move.l              #$00080543,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetURLLink
+	ENDIF
+
+
+;
+; pascal ComponentResult MediaMakeMediaTimeTable(MediaHandler mh, long **offsets, TimeValue startTime, TimeValue endTime, TimeValue timeIncrement, short firstDataRefIndex, short lastDataRefIndex, long *retDataRefSkew)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaMakeMediaTimeTable
+			move.l              #$00180545,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaMakeMediaTimeTable
+	ENDIF
+
+;
+; pascal ComponentResult MediaHitTestForTargetRefCon(MediaHandler mh, long flags, Point loc, long *targetRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaHitTestForTargetRefCon
+			move.l              #$000C0546,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaHitTestForTargetRefCon
+	ENDIF
+
+;
+; pascal ComponentResult MediaHitTestTargetRefCon(MediaHandler mh, long targetRefCon, long flags, Point loc, Boolean *wasHit)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaHitTestTargetRefCon
+			move.l              #$00100547,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaHitTestTargetRefCon
+	ENDIF
+
+;
+; pascal ComponentResult MediaGetActionsForQTEvent(MediaHandler mh, QTEventRecordPtr event, long targetRefCon, QTAtomContainer *container, QTAtom *atom)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaGetActionsForQTEvent
+			move.l              #$00100548,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaGetActionsForQTEvent
+	ENDIF
+
+;
+; pascal ComponentResult MediaDisposeTargetRefCon(MediaHandler mh, long targetRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaDisposeTargetRefCon
+			move.l              #$00040549,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaDisposeTargetRefCon
+	ENDIF
+
+;
+; pascal ComponentResult MediaTargetRefConsEqual(MediaHandler mh, long firstRefCon, long secondRefCon, Boolean *equal)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaTargetRefConsEqual
+			move.l              #$000C054A,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaTargetRefConsEqual
+	ENDIF
+
+;
+; pascal ComponentResult MediaSetActionsCallback(MediaHandler mh, ActionsUPP actionsCallbackProc, void *refcon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaSetActionsCallback
+			move.l              #$0008054B,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaSetActionsCallback
+	ENDIF
+
+;
+; pascal ComponentResult MediaPrePrerollBegin(MediaHandler mh, TimeValue time, Fixed rate, PrePrerollCompleteUPP completeProc, void *refcon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaPrePrerollBegin
+			move.l              #$0010054C,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaPrePrerollBegin
+	ENDIF
+
+;
+; pascal ComponentResult MediaPrePrerollCancel(MediaHandler mh, void *refcon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaPrePrerollCancel
+			move.l              #$0004054D,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaPrePrerollCancel
+	ENDIF
+
+;
+; pascal ComponentResult MediaExecuteOneAction(MediaHandler mh, QTAtomContainer container, QTAtom actionAtom)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaExecuteOneAction
+			move.l              #$0008054E,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaExecuteOneAction
+	ENDIF
+
+;
+; pascal ComponentResult MediaEnterEmptyEdit(MediaHandler mh)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaEnterEmptyEdit
+			move.l              #$0000054F,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaEnterEmptyEdit
+	ENDIF
+
+;
+; pascal ComponentResult MediaCurrentMediaQueuedData(MediaHandler mh, long *milliSecs)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_MediaCurrentMediaQueuedData
+			move.l              #$00040550,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION MediaCurrentMediaQueuedData
+	ENDIF
+
+
+
+	ENDIF ; __MEDIAHANDLERS__ 
+

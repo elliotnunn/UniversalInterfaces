@@ -1,0 +1,81 @@
+;
+;	File:		ATSLayoutTypes.a
+;
+;	Contains:	Apple Text Services layout public structures and constants.
+;
+;	Version:	Technology:	Allegro
+;				Release:	Universal Interfaces 3.2
+;
+;	Copyright:	© 1994-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__ATSLAYOUTTYPES__') = 'UNDEFINED' THEN
+__ATSLAYOUTTYPES__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__SFNTTYPES__') = 'UNDEFINED' THEN
+	include 'SFNTTypes.a'
+	ENDIF
+	IF &TYPE('__SFNTLAYOUTTYPES__') = 'UNDEFINED' THEN
+	include 'SFNTLayoutTypes.a'
+	ENDIF
+
+;  ----------------------------------------------------------------------------------------- 
+;  CONSTANTS 
+;  LineOptions flags 
+
+kATSLineNoLayoutOptions			EQU		$00000000
+kATSLineIsDisplayOnly			EQU		$00000001
+kATSLineHasNoHangers			EQU		$00000002
+kATSLineHasNoOpticalAlignment	EQU		$00000004
+kATSLineKeepSpacesOutOfMargin	EQU		$00000008
+kATSLineNoSpecialJustification	EQU		$00000010
+kATSLineLastNoJustification		EQU		$00000020
+;  Miscellaneous constants 
+
+kATSExtendedQDScale				EQU		81920				; fixed value of 1.25 
+kATSCondensedQDScale			EQU		52428				; fixed value of approx. 0.8 
+kATSItalicQDSkew				EQU		$00004000			; fixed value of 0.25 
+kATSRadiansFactor				EQU		1144				; fixed value of approx. pi/180 (0.0174560546875) 
+kATSNoTracking					EQU		$80000000			; negativeInfinity 
+kATSDeletedGlyphcode			EQU		$FFFF
+kATSSelectToEnd					EQU		$FFFFFFFF
+kATSOffsetToNoData				EQU		$FFFFFFFF
+;  --------------------------------------------------------------------------- 
+;  TYPES 
+;  --------------------------------------------------------------------------- 
+; typedef UInt32 						ATSLineLayoutOptions
+
+; 
+;	The JustWidthDeltaEntryOverride structure specifies values for the grow and shrink case during
+;	justification, both on the left and on the right. It also contains flags.  This particular structure
+;	is used for passing justification overrides to LLC.  For further sfnt resource 'just' table
+;	constants and structures, see SFNTLayoutTypes.h.
+;
+
+ATSJustWidthDeltaEntryOverride RECORD 0
+beforeGrowLimit			 ds.l	1				; offset: $0 (0)		;  ems AW can grow by at most on LT 
+beforeShrinkLimit		 ds.l	1				; offset: $4 (4)		;  ems AW can shrink by at most on LT 
+afterGrowLimit			 ds.l	1				; offset: $8 (8)		;  ems AW can grow by at most on RB 
+afterShrinkLimit		 ds.l	1				; offset: $C (12)		;  ems AW can shrink by at most on RB 
+growFlags				 ds.w	1				; offset: $10 (16)		;  flags controlling grow case 
+shrinkFlags				 ds.w	1				; offset: $12 (18)		;  flags controlling shrink case 
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+;  The JustPriorityOverrides type is an array of 4 width delta records, one per priority level override. 
+ATSJustPriorityWidthDeltaOverrides RECORD 0
+elements				 ds.b	4 * ATSJustWidthDeltaEntryOverride.sizeof
+sizeof					 EQU *					; size:   $50 (80)
+						ENDR
+
+
+;  --------------------------------------------------------------------------- 
+	ENDIF ; __ATSLAYOUTTYPES__ 
+

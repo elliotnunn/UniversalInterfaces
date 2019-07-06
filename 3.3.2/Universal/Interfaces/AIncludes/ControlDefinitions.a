@@ -1,0 +1,950 @@
+;
+;    File:       ControlDefinitions.a
+;
+;    Contains:   Definitions of controls used by Control Mgr
+;
+;    Version:    Technology: Mac OS 9
+;                Release:    Universal Interfaces 3.3.2
+;
+;    Copyright:  © 1999-2000 by Apple Computer, Inc., all rights reserved.
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__CONTROLDEFINITIONS__') = 'UNDEFINED' THEN
+__CONTROLDEFINITIONS__ SET 1
+
+	IF &TYPE('__APPEARANCE__') = 'UNDEFINED' THEN
+	include 'Appearance.a'
+	ENDIF
+	IF &TYPE('__CONTROLS__') = 'UNDEFINED' THEN
+	include 'Controls.a'
+	ENDIF
+	IF &TYPE('__LISTS__') = 'UNDEFINED' THEN
+	include 'Lists.a'
+	ENDIF
+	IF &TYPE('__MACHELP__') = 'UNDEFINED' THEN
+	include 'MacHelp.a'
+	ENDIF
+	IF &TYPE('__MENUS__') = 'UNDEFINED' THEN
+	include 'Menus.a'
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+;   • Resource Types                                                                                    
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+
+
+kControlTabListResType			EQU		'tab#'				; used for tab control (Appearance 1.0 and later)
+kControlListDescResType			EQU		'ldes'				; used for list box control (Appearance 1.0 and later)
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • Check Box Values                                                                  
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kControlCheckBoxUncheckedValue	EQU		0
+kControlCheckBoxCheckedValue	EQU		1
+kControlCheckBoxMixedValue		EQU		2
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • Radio Button Values                                                               
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kControlRadioButtonUncheckedValue EQU	0
+kControlRadioButtonCheckedValue	EQU		1
+kControlRadioButtonMixedValue	EQU		2
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • Pop-Up Menu Control Constants                                                     
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  Variant codes for the System 7 pop-up menu
+
+popupFixedWidth					EQU		$01
+popupVariableWidth				EQU		$02
+popupUseAddResMenu				EQU		$04
+popupUseWFont					EQU		$08
+;  Menu label styles for the System 7 pop-up menu
+
+popupTitleBold					EQU		$0100
+popupTitleItalic				EQU		$0200
+popupTitleUnderline				EQU		$0400
+popupTitleOutline				EQU		$0800
+popupTitleShadow				EQU		$1000
+popupTitleCondense				EQU		$2000
+popupTitleExtend				EQU		$4000
+popupTitleNoStyle				EQU		$8000
+;  Menu label justifications for the System 7 pop-up menu
+
+popupTitleLeftJust				EQU		$00000000
+popupTitleCenterJust			EQU		$00000001
+popupTitleRightJust				EQU		$000000FF
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+;   • PopUp Menu Private Data Structure                                                                 
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+	IF ¬ OPAQUE_TOOLBOX_STRUCTS THEN
+PopupPrivateData		RECORD 0
+mHandle					 ds.l	1				; offset: $0 (0)
+mID						 ds.w	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct PopupPrivateData *		PopupPrivateDataPtr
+
+; typedef PopupPrivateDataPtr *			PopupPrivateDataHandle
+
+	ENDIF
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+;   • Control Definition ID’s                                                                           
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+;  Standard System 7 procIDs
+
+
+pushButProc						EQU		0
+checkBoxProc					EQU		1
+radioButProc					EQU		2
+scrollBarProc					EQU		16
+popupMenuProc					EQU		1008
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • Control Part Codes                                                                
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+kControlLabelPart				EQU		1
+kControlMenuPart				EQU		2
+kControlTrianglePart			EQU		4
+kControlEditTextPart			EQU		5					; Appearance 1.0 and later
+kControlPicturePart				EQU		6					; Appearance 1.0 and later
+kControlIconPart				EQU		7					; Appearance 1.0 and later
+kControlClockPart				EQU		8					; Appearance 1.0 and later
+kControlListBoxPart				EQU		24					; Appearance 1.0 and later
+kControlListBoxDoubleClickPart	EQU		25					; Appearance 1.0 and later
+kControlImageWellPart			EQU		26					; Appearance 1.0 and later
+kControlRadioGroupPart			EQU		27					; Appearance 1.0.2 and later
+kControlButtonPart				EQU		10
+kControlCheckBoxPart			EQU		11
+kControlRadioButtonPart			EQU		11
+kControlUpButtonPart			EQU		20
+kControlDownButtonPart			EQU		21
+kControlPageUpPart				EQU		22
+kControlPageDownPart			EQU		23
+kControlClockHourDayPart		EQU		9					; Appearance 1.1 and later
+kControlClockMinuteMonthPart	EQU		10					; Appearance 1.1 and later
+kControlClockSecondYearPart		EQU		11					; Appearance 1.1 and later
+kControlClockAMPMPart			EQU		12					; Appearance 1.1 and later
+kControlDataBrowserPart			EQU		24					; CarbonLib 1.0 and later
+kControlDataBrowserDraggedPart	EQU		25					; CarbonLib 1.0 and later
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+;   • Control Types and ID’s available only with Appearance 1.0 and later                               
+; ——————————————————————————————————————————————————————————————————————————————————————————————————————
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • BEVEL BUTTON INTERFACE (CDEF 2)                                                   
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   Bevel buttons allow you to control the content type (pict/icon/etc.), the behavior  
+;  (pushbutton/toggle/sticky), and the bevel size. You also have the option of          
+;   attaching a menu to it. When a menu is present, you can specify which way the       
+;   popup arrow is facing (down or right).                                              
+;                                                                                       
+;   This is all made possible by overloading the Min, Max, and Value parameters for the 
+;   control, as well as adjusting the variant. Here's the breakdown of what goes where: 
+;                                                                                       
+;   Parameter                   What Goes Here                                          
+;   ———————————————————         ————————————————————————————————————————————————————    
+;   Min                         Hi Byte = Behavior, Lo Byte = content type.             
+;   Max                         ResID for resource-based content types.                 
+;   Value                       MenuID to attach, 0 = no menu, please.                  
+;                                                                                       
+;   The variant is broken down into two halfs. The low 2 bits control the bevel type.   
+;   Bit 2 controls the popup arrow direction (if a menu is present) and bit 3 controls  
+;   whether or not to use the control's owning window's font.                           
+;                                                                                       
+;   Constants for all you need to put this together are below. The values for behaviors 
+;   are set up so that you can simply add them to the content type and pass them into   
+;   the Min parameter of NewControl.                                                    
+;                                                                                       
+;   An example call:                                                                    
+;                                                                                       
+;   control = NewControl( window, &bounds, "\p", true, 0, kContentIconSuiteRes +        
+;                           kBehaviorToggles, myIconSuiteID, bevelButtonSmallBevelProc, 
+;                           0L );                                                       
+;                                                                                       
+;   Attaching a menu:                                                                   
+;                                                                                       
+;   control = NewControl( window, &bounds, "\p", true, kMyMenuID, kContentIconSuiteRes, 
+;           myIconSuiteID, bevelButtonSmallBevelProc + kBevelButtonMenuOnRight, 0L );   
+;                                                                                       
+;   This will attach menu ID kMyMenuID to the button, with the popup arrow facing right.
+;   This also puts the menu up to the right of the button. You can also specify that a  
+;   menu can have multiple items checked at once by adding kBehaviorMultiValueMenus     
+;   into the Min parameter. If you do use multivalue menus, the GetBevelButtonMenuValue 
+;   helper function will return the last item chosen from the menu, whether or not it   
+;   was checked.                                                                        
+;                                                                                       
+;   NOTE:   Bevel buttons with menus actually have *two* values. The value of the       
+;           button (on/off), and the value of the menu. The menu value can be gotten    
+;           with the GetBevelButtonMenuValue helper function.                           
+;                                                                                       
+;   Handle-based Content                                                                
+;   ————————————————————                                                                
+;   You can create your control and then set the content to an existing handle to an    
+;   icon suite, etc. using the macros below. Please keep in mind that resource-based    
+;   content is owned by the control, handle-based content is owned by you. The CDEF will
+;   not try to dispose of handle-based content. If you are changing the content type of 
+;   the button on the fly, you must make sure that if you are replacing a handle-       
+;   based content with a resource-based content to properly dispose of the handle,      
+;   else a memory leak will ensue.                                                      
+;                                                                                       
+;  Bevel Button Proc IDs 
+
+kControlBevelButtonSmallBevelProc EQU	32
+kControlBevelButtonNormalBevelProc EQU	33
+kControlBevelButtonLargeBevelProc EQU	34
+;  Add these variant codes to kBevelButtonSmallBevelProc to change the type of button 
+
+kControlBevelButtonSmallBevelVariant EQU 0
+kControlBevelButtonNormalBevelVariant EQU $01
+kControlBevelButtonLargeBevelVariant EQU $02
+kControlBevelButtonMenuOnRightVariant EQU $04
+;  Bevel Thicknesses 
+
+; typedef UInt16						ControlBevelThickness
+kControlBevelButtonSmallBevel	EQU		0
+kControlBevelButtonNormalBevel	EQU		1
+kControlBevelButtonLargeBevel	EQU		2
+;  Behaviors of bevel buttons. These are set up so you can add  
+;  them together with the content types.                        
+
+kControlBehaviorPushbutton		EQU		0
+kControlBehaviorToggles			EQU		$0100
+kControlBehaviorSticky			EQU		$0200
+kControlBehaviorSingleValueMenu	EQU		0
+kControlBehaviorMultiValueMenu	EQU		$4000				; only makes sense when a menu is attached.
+kControlBehaviorOffsetContents	EQU		$8000
+;  Behaviors for 1.0.1 or later 
+
+kControlBehaviorCommandMenu		EQU		$2000				; menu holds commands, not choices. Overrides multi-value bit.
+; typedef UInt16 						ControlBevelButtonBehavior
+
+; typedef UInt16 						ControlBevelButtonMenuBehavior
+
+;  Bevel Button Menu Placements 
+
+; typedef UInt16						ControlBevelButtonMenuPlacement
+kControlBevelButtonMenuOnBottom	EQU		0
+kControlBevelButtonMenuOnRight	EQU		$04
+
+;  Graphic Alignments 
+
+; typedef SInt16						ControlButtonGraphicAlignment
+kControlBevelButtonAlignSysDirection EQU -1					; only left or right
+kControlBevelButtonAlignCenter	EQU		0
+kControlBevelButtonAlignLeft	EQU		1
+kControlBevelButtonAlignRight	EQU		2
+kControlBevelButtonAlignTop		EQU		3
+kControlBevelButtonAlignBottom	EQU		4
+kControlBevelButtonAlignTopLeft	EQU		5
+kControlBevelButtonAlignBottomLeft EQU	6
+kControlBevelButtonAlignTopRight EQU	7
+kControlBevelButtonAlignBottomRight EQU	8
+;  Text Alignments 
+
+; typedef SInt16						ControlButtonTextAlignment
+kControlBevelButtonAlignTextSysDirection EQU 0
+kControlBevelButtonAlignTextCenter EQU	1
+kControlBevelButtonAlignTextFlushRight EQU -1
+kControlBevelButtonAlignTextFlushLeft EQU -2
+;  Text Placements 
+
+; typedef SInt16						ControlButtonTextPlacement
+kControlBevelButtonPlaceSysDirection EQU -1					; if graphic on right, then on left
+kControlBevelButtonPlaceNormally EQU	0
+kControlBevelButtonPlaceToRightOfGraphic EQU 1
+kControlBevelButtonPlaceToLeftOfGraphic EQU 2
+kControlBevelButtonPlaceBelowGraphic EQU 3
+kControlBevelButtonPlaceAboveGraphic EQU 4
+
+;  Data tags supported by the bevel button controls 
+
+kControlBevelButtonContentTag	EQU		'cont'				; ButtonContentInfo
+kControlBevelButtonTransformTag	EQU		'tran'				; IconTransformType
+kControlBevelButtonTextAlignTag	EQU		'tali'				; ButtonTextAlignment
+kControlBevelButtonTextOffsetTag EQU	'toff'				; SInt16
+kControlBevelButtonGraphicAlignTag EQU	'gali'				; ButtonGraphicAlignment
+kControlBevelButtonGraphicOffsetTag EQU	'goff'				; Point
+kControlBevelButtonTextPlaceTag	EQU		'tplc'				; ButtonTextPlacement
+kControlBevelButtonMenuValueTag	EQU		'mval'				; SInt16
+kControlBevelButtonMenuHandleTag EQU	'mhnd'				; MenuHandle
+kControlBevelButtonCenterPopupGlyphTag EQU 'pglc'			; Boolean: true = center, false = bottom right
+;  These are tags in 1.0.1 or later 
+
+kControlBevelButtonLastMenuTag	EQU		'lmnu'				; SInt16: menuID of last menu item selected from
+kControlBevelButtonMenuDelayTag	EQU		'mdly'				; SInt32: ticks to delay before menu appears
+;  tags available with Appearance 1.1 or later 
+
+															; Boolean: True = if an icon of the ideal size for
+															; the button isn't available, scale a larger or
+															; smaller icon to the ideal size. False = don't
+															; scale; draw a smaller icon or clip a larger icon.
+															; Default is false. Only applies to IconSuites and
+kControlBevelButtonScaleIconTag	EQU		'scal'				; IconRefs.
+;  Helper routines are available only thru the shared library/glue. 
+;
+; pascal OSErr GetBevelButtonMenuValue(ControlHandle inButton, SInt16 *outValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetBevelButtonMenuValue
+	ENDIF
+
+;
+; pascal OSErr SetBevelButtonMenuValue(ControlHandle inButton, SInt16 inValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetBevelButtonMenuValue
+	ENDIF
+
+;
+; pascal OSErr GetBevelButtonMenuHandle(ControlHandle inButton, MenuHandle *outHandle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetBevelButtonMenuHandle
+	ENDIF
+
+;
+; pascal OSErr GetBevelButtonContentInfo(ControlHandle inButton, ControlButtonContentInfoPtr outContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetBevelButtonContentInfo
+	ENDIF
+
+;
+; pascal OSErr SetBevelButtonContentInfo(ControlHandle inButton, ControlButtonContentInfoPtr inContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetBevelButtonContentInfo
+	ENDIF
+
+;
+; pascal OSErr SetBevelButtonTransform(ControlHandle inButton, IconTransformType transform)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetBevelButtonTransform
+	ENDIF
+
+;
+; pascal OSErr SetBevelButtonGraphicAlignment(ControlHandle inButton, ControlButtonGraphicAlignment inAlign, SInt16 inHOffset, SInt16 inVOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetBevelButtonGraphicAlignment
+	ENDIF
+
+;
+; pascal OSErr SetBevelButtonTextAlignment(ControlHandle inButton, ControlButtonTextAlignment inAlign, SInt16 inHOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetBevelButtonTextAlignment
+	ENDIF
+
+;
+; pascal OSErr SetBevelButtonTextPlacement(ControlHandle inButton, ControlButtonTextPlacement inWhere)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetBevelButtonTextPlacement
+	ENDIF
+
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • SLIDER (CDEF 3)                                                                   
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   There are several variants that control the behavior of the slider control. Any     
+;   combination of the following three constants can be added to the basic CDEF ID      
+;   (kSliderProc).                                                                      
+;                                                                                       
+;   Variants:                                                                           
+;                                                                                       
+;       kSliderLiveFeedback     Slider does not use "ghosted" indicator when tracking.  
+;                               ActionProc is called (set via SetControlAction) as the  
+;                               indicator is dragged. The value is updated so that the  
+;                               actionproc can adjust some other property based on the  
+;                               value each time the action proc is called. If no action 
+;                               proc is installed, it reverts to the ghost indicator.   
+;                                                                                       
+;       kSliderHasTickMarks     Slider is drawn with 'tick marks'. The control          
+;                               rectangle must be large enough to accomidate the tick   
+;                               marks.                                                  
+;                                                                                       
+;       kSliderReverseDirection Slider thumb points in opposite direction than normal.  
+;                               If the slider is vertical, the thumb will point to the  
+;                               left, if the slider is horizontal, the thumb will point 
+;                               upwards.                                                
+;                                                                                       
+;       kSliderNonDirectional   This option overrides the kSliderReverseDirection and   
+;                               kSliderHasTickMarks variants. It creates an indicator   
+;                               which is rectangular and doesn't point in any direction 
+;                               like the normal indicator does.                         
+;  Slider proc ID and variants 
+
+kControlSliderProc				EQU		48
+kControlSliderLiveFeedback		EQU		$01
+kControlSliderHasTickMarks		EQU		$02
+kControlSliderReverseDirection	EQU		$04
+kControlSliderNonDirectional	EQU		$08
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • DISCLOSURE TRIANGLE (CDEF 4)                                                      
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   This control can be used as either left or right facing. It can also handle its own 
+;   tracking if you wish. This means that when the 'autotoggle' variant is used, if the 
+;   user clicks the control, it's state will change automatically from open to closed   
+;   and vice-versa depending on its initial state. After a successful call to Track-    
+;   Control, you can just check the current value to see what state it was switched to. 
+;  Triangle proc IDs 
+
+kControlTriangleProc			EQU		64
+kControlTriangleLeftFacingProc	EQU		65
+kControlTriangleAutoToggleProc	EQU		66
+kControlTriangleLeftFacingAutoToggleProc EQU 67
+;  Tagged data supported by disclosure triangles 
+
+kControlTriangleLastValueTag	EQU		'last'				; SInt16
+;  Helper routines are available only thru the shared library/glue. 
+;
+; pascal OSErr SetDisclosureTriangleLastValue(ControlHandle inTabControl, SInt16 inValue)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetDisclosureTriangleLastValue
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • PROGRESS INDICATOR (CDEF 5)                                                       
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   This CDEF implements both determinate and indeterminate progress bars. To switch,   
+;   just use SetControlData to set the indeterminate flag to make it indeterminate call 
+;   IdleControls to step thru the animation. IdleControls should be called at least     
+;   once during your event loop.                                                        
+;                                                                                       
+;  Progress Bar proc IDs 
+
+kControlProgressBarProc			EQU		80
+;  Tagged data supported by progress bars 
+
+kControlProgressBarIndeterminateTag EQU	'inde'				; Boolean
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • LITTLE ARROWS (CDEF 6)                                                            
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   This control implements the little up and down arrows you'd see in the Memory       
+;   control panel for adjusting the cache size.                                         
+;  Little Arrows proc IDs 
+
+kControlLittleArrowsProc		EQU		96
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • CHASING ARROWS (CDEF 7)                                                           
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   To animate this control, make sure to call IdleControls repeatedly.                 
+;                                                                                       
+;  Chasing Arrows proc IDs 
+
+kControlChasingArrowsProc		EQU		112
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • TABS (CDEF 8)                                                                     
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   Tabs use an auxiliary resource (tab#) to hold tab information such as the tab name  
+;   and an icon suite ID for each tab.                                                  
+;                                                                                       
+;   The ID of the tab# resource that you wish to associate with a tab control should    
+;   be passed in as the Value parameter of the control. If you are using GetNewControl, 
+;   then the Value slot in the CNTL resource should have the ID of the 'tab#' resource  
+;   on creation.                                                                        
+;                                                                                       
+;   Passing zero in for the tab# resource tells the control not to read in a tab# res.  
+;   You can then use SetControlMaximum to add tabs, followed by a call to SetControlData
+;   with the kControlTabInfoTag, passing in a pointer to a ControlTabInfoRec. This sets 
+;   the name and optionally an icon for a tab.                                          
+;  Tabs proc IDs 
+
+kControlTabLargeProc			EQU		128					; Large tab size, north facing   
+kControlTabSmallProc			EQU		129					; Small tab size, north facing   
+kControlTabLargeNorthProc		EQU		128					; Large tab size, north facing   
+kControlTabSmallNorthProc		EQU		129					; Small tab size, north facing   
+kControlTabLargeSouthProc		EQU		130					; Large tab size, south facing   
+kControlTabSmallSouthProc		EQU		131					; Small tab size, south facing   
+kControlTabLargeEastProc		EQU		132					; Large tab size, east facing    
+kControlTabSmallEastProc		EQU		133					; Small tab size, east facing    
+kControlTabLargeWestProc		EQU		134					; Large tab size, west facing    
+kControlTabSmallWestProc		EQU		135					; Small tab size, west facing    
+;  Tagged data supported by tabs 
+
+kControlTabContentRectTag		EQU		'rect'				; Rect
+kControlTabEnabledFlagTag		EQU		'enab'				; Boolean
+kControlTabFontStyleTag			EQU		'font'				; ControlFontStyleRec
+;  New tags in 1.0.1 or later 
+
+kControlTabInfoTag				EQU		'tabi'				; ControlTabInfoRec
+
+kControlTabInfoVersionZero		EQU		0
+ControlTabInfoRec		RECORD 0
+version					 ds.w	1				; offset: $0 (0)		;  version of this structure.
+iconSuiteID				 ds.w	1				; offset: $2 (2)		;  icon suite to use. Zero indicates no icon
+name					 ds		Str255			; offset: $4 (4)		;  name to be displayed on the tab
+sizeof					 EQU *					; size:   $104 (260)
+						ENDR
+;  Helper routines are available only thru the shared library/glue. 
+;
+; pascal OSErr GetTabContentRect(ControlHandle inTabControl, Rect *outContentRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTabContentRect
+	ENDIF
+
+;
+; pascal OSErr SetTabEnabled(ControlHandle inTabControl, SInt16 inTabToHilite, Boolean inEnabled)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetTabEnabled
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • VISUAL SEPARATOR (CDEF 9)                                                         
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   Separator lines determine their orientation (horizontal or vertical) automatically  
+;   based on the relative height and width of their contrlRect.                         
+;  Visual separator proc IDs 
+
+kControlSeparatorLineProc		EQU		144
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • GROUP BOX (CDEF 10)                                                               
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   The group box CDEF can be use in several ways. It can have no title, a text title,  
+;   a check box as the title, or a popup button as a title. There are two versions of   
+;   group boxes, primary and secondary, which look slightly different.                  
+;  Group Box proc IDs 
+
+kControlGroupBoxTextTitleProc	EQU		160
+kControlGroupBoxCheckBoxProc	EQU		161
+kControlGroupBoxPopupButtonProc	EQU		162
+kControlGroupBoxSecondaryTextTitleProc EQU 164
+kControlGroupBoxSecondaryCheckBoxProc EQU 165
+kControlGroupBoxSecondaryPopupButtonProc EQU 166
+;  Tagged data supported by group box 
+
+kControlGroupBoxMenuHandleTag	EQU		'mhan'				; MenuHandle (popup title only)
+kControlGroupBoxFontStyleTag	EQU		'font'				; ControlFontStyleRec
+;  tags available with Appearance 1.1 or later 
+
+kControlGroupBoxTitleRectTag	EQU		'trec'				; Rect. Rectangle that the title text/control is drawn in. (get only)
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • IMAGE WELL (CDEF 11)                                                              
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   Image Wells allow you to control the content type (pict/icon/etc.) shown in the     
+;   well.                                                                               
+;                                                                                       
+;   This is made possible by overloading the Min and Value parameters for the control.  
+;                                                                                       
+;   Parameter                   What Goes Here                                          
+;   ———————————————————         ——————————————————————————————————————————————————      
+;   Min                         content type (see constants for bevel buttons)          
+;   Value                       Resource ID of content type, if resource-based.         
+;                                                                                       
+;                                                                                       
+;   Handle-based Content                                                                
+;   ————————————————————                                                                
+;   You can create your control and then set the content to an existing handle to an    
+;   icon suite, etc. using the macros below. Please keep in mind that resource-based    
+;   content is owned by the control, handle-based content is owned by you. The CDEF will
+;   not try to dispose of handle-based content. If you are changing the content type of 
+;   the button on the fly, you must make sure that if you are replacing a handle-       
+;   based content with a resource-based content to properly dispose of the handle,      
+;   else a memory leak will ensue.                                                      
+;                                                                                       
+;  Image Well proc IDs 
+
+kControlImageWellProc			EQU		176
+;  Tagged data supported by image wells 
+
+kControlImageWellContentTag		EQU		'cont'				; ButtonContentInfo
+kControlImageWellTransformTag	EQU		'tran'				; IconTransformType
+;  Helper routines are available only thru the shared library/glue. 
+;
+; pascal OSErr GetImageWellContentInfo(ControlHandle inButton, ControlButtonContentInfoPtr outContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetImageWellContentInfo
+	ENDIF
+
+;
+; pascal OSErr SetImageWellContentInfo(ControlHandle inButton, ControlButtonContentInfoPtr inContent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetImageWellContentInfo
+	ENDIF
+
+;
+; pascal OSErr SetImageWellTransform(ControlHandle inButton, IconTransformType inTransform)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION SetImageWellTransform
+	ENDIF
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • POPUP ARROW (CDEF 12)                                                             
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   The popup arrow CDEF is used to draw the small arrow normally associated with a     
+;   popup control. The arrow can point in four directions, and a small or large version 
+;   can be used. This control is provided to allow clients to draw the arrow in a       
+;   normalized fashion which will take advantage of themes automatically.               
+;                                                                                       
+;  Popup Arrow proc IDs 
+
+kControlPopupArrowEastProc		EQU		192
+kControlPopupArrowWestProc		EQU		193
+kControlPopupArrowNorthProc		EQU		194
+kControlPopupArrowSouthProc		EQU		195
+kControlPopupArrowSmallEastProc	EQU		196
+kControlPopupArrowSmallWestProc	EQU		197
+kControlPopupArrowSmallNorthProc EQU	198
+kControlPopupArrowSmallSouthProc EQU	199
+;  Popup Arrow Orientations 
+
+kControlPopupArrowOrientationEast EQU	0
+kControlPopupArrowOrientationWest EQU	1
+kControlPopupArrowOrientationNorth EQU	2
+kControlPopupArrowOrientationSouth EQU	3
+; typedef UInt16 						ControlPopupArrowOrientation
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • PLACARD (CDEF 14)                                                                 
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  Placard proc IDs 
+
+kControlPlacardProc				EQU		224
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • CLOCK (CDEF 15)                                                                   
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   NOTE:   You can specify more options in the Value paramter when creating the clock. 
+;           See below.                                                                  
+;                                                                                       
+;   NOTE:   Under Appearance 1.1, the clock control knows and returns more part codes.  
+;           The new clock-specific part codes are defined with the other control parts. 
+;           Besides these clock-specific parts, we also return kControlUpButtonPart     
+;           and kControlDownButtonPart when they hit the up and down arrows.            
+;           The new part codes give you more flexibility for focusing and hit testing.  
+;                                                                                       
+;           The original kControlClockPart is still valid. When hit testing, it means   
+;           that some non-editable area of the clock's whitespace has been clicked.     
+;           When focusing a currently unfocused clock, it changes the focus to the      
+;           first part; it is the same as passing kControlFocusNextPart. When           
+;           re-focusing a focused clock, it will not change the focus at all.           
+;  Clock proc IDs 
+
+kControlClockTimeProc			EQU		240
+kControlClockTimeSecondsProc	EQU		241
+kControlClockDateProc			EQU		242
+kControlClockMonthYearProc		EQU		243
+;  Clock Types 
+
+; typedef UInt16						ControlClockType
+kControlClockTypeHourMinute		EQU		0
+kControlClockTypeHourMinuteSecond EQU	1
+kControlClockTypeMonthDay		EQU		2
+kControlClockTypeMonthDayYear	EQU		3
+;  Clock Flags 
+;   These flags can be passed into 'value' field on creation of the control.            
+;   Value is set to 0 after control is created.                                         
+
+; typedef UInt32						ControlClockFlags
+kControlClockFlagStandard		EQU		0					; editable, non-live
+kControlClockNoFlags			EQU		0
+kControlClockFlagDisplayOnly	EQU		1					; add this to become non-editable
+kControlClockIsDisplayOnly		EQU		1
+kControlClockFlagLive			EQU		2					; automatically shows current time on idle. only valid with display only.
+kControlClockIsLive				EQU		2
+;  Tagged data supported by clocks 
+
+kControlClockLongDateTag		EQU		'date'				; LongDateRec
+kControlClockFontStyleTag		EQU		'font'				; ControlFontStyleRec
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • USER PANE (CDEF 16)                                                               
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  User Pane proc IDs 
+
+kControlUserPaneProc			EQU		256
+;  Tagged data supported by user panes 
+;  Currently, they are all proc ptrs for doing things like drawing and hit testing, etc. 
+
+kControlUserItemDrawProcTag		EQU		'uidp'				; UserItemUPP
+kControlUserPaneDrawProcTag		EQU		'draw'				; ControlUserPaneDrawingUPP
+kControlUserPaneHitTestProcTag	EQU		'hitt'				; ControlUserPaneHitTestUPP
+kControlUserPaneTrackingProcTag	EQU		'trak'				; ControlUserPaneTrackingUPP
+kControlUserPaneIdleProcTag		EQU		'idle'				; ControlUserPaneIdleUPP
+kControlUserPaneKeyDownProcTag	EQU		'keyd'				; ControlUserPaneKeyDownUPP
+kControlUserPaneActivateProcTag	EQU		'acti'				; ControlUserPaneActivateUPP
+kControlUserPaneFocusProcTag	EQU		'foci'				; ControlUserPaneFocusUPP
+kControlUserPaneBackgroundProcTag EQU	'back'				; ControlUserPaneBackgroundUPP
+
+;  ——————————————————————————————————————————————————————————————————————————————————————————
+;    • EDIT TEXT (CDEF 17)
+;  ——————————————————————————————————————————————————————————————————————————————————————————
+
+
+;  Edit Text proc IDs 
+
+kControlEditTextProc			EQU		272
+kControlEditTextPasswordProc	EQU		274
+;  proc IDs available with Appearance 1.1 or later 
+
+kControlEditTextInlineInputProc	EQU		276					; Can't combine with the other variants
+;  Tagged data supported by edit text 
+
+kControlEditTextStyleTag		EQU		'font'				; ControlFontStyleRec
+kControlEditTextTextTag			EQU		'text'				; Buffer of chars - you supply the buffer
+kControlEditTextTEHandleTag		EQU		'than'				; The TEHandle of the text edit record
+kControlEditTextKeyFilterTag	EQU		'fltr'
+kControlEditTextSelectionTag	EQU		'sele'				; EditTextSelectionRec
+kControlEditTextPasswordTag		EQU		'pass'				; The clear text password text
+;  tags available with Appearance 1.1 or later 
+
+kControlEditTextKeyScriptBehaviorTag EQU 'kscr'				; ControlKeyScriptBehavior. Defaults to "PrefersRoman" for password fields,
+															;       or "AllowAnyScript" for non-password fields.
+kControlEditTextLockedTag		EQU		'lock'				; Boolean. Locking disables editability.
+kControlEditTextFixedTextTag	EQU		'ftxt'				; Like the normal text tag, but fixes inline input first
+kControlEditTextValidationProcTag EQU	'vali'				; ControlEditTextValidationUPP. Called when a key filter can't be: after cut, paste, etc.
+kControlEditTextInlinePreUpdateProcTag EQU 'prup'			; TSMTEPreUpdateUPP and TSMTEPostUpdateUpp. For use with inline input variant...
+kControlEditTextInlinePostUpdateProcTag EQU 'poup'			; ...The refCon parameter will contain the ControlHandle.
+;  Structure for getting the edit text selection 
+ControlEditTextSelectionRec RECORD 0
+selStart				 ds.w	1				; offset: $0 (0)
+selEnd					 ds.w	1				; offset: $2 (2)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; typedef struct ControlEditTextSelectionRec * ControlEditTextSelectionPtr
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • STATIC TEXT (CDEF 18)                                                             
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  Static Text proc IDs 
+
+kControlStaticTextProc			EQU		288
+;  Tagged data supported by static text 
+
+kControlStaticTextStyleTag		EQU		'font'				; ControlFontStyleRec
+kControlStaticTextTextTag		EQU		'text'				; Copy of text
+kControlStaticTextTextHeightTag	EQU		'thei'				; SInt16
+;  Tags available with appearance 1.1 or later 
+
+kControlStaticTextTruncTag		EQU		'trun'				; TruncCode (-1 means no truncation)
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • PICTURE CONTROL (CDEF 19)                                                         
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   Value parameter should contain the ID of the picture you wish to display when       
+;   creating controls of this type. If you don't want the control tracked at all, use   
+;   the 'no track' variant.                                                             
+;  Picture control proc IDs 
+
+kControlPictureProc				EQU		304
+kControlPictureNoTrackProc		EQU		305					; immediately returns kControlPicturePart
+;  Tagged data supported by picture controls 
+
+kControlPictureHandleTag		EQU		'pich'				; PicHandle
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • ICON CONTROL (CDEF 20)                                                            
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   Value parameter should contain the ID of the ICON or cicn you wish to display when  
+;   creating controls of this type. If you don't want the control tracked at all, use   
+;   the 'no track' variant.                                                             
+;  Icon control proc IDs 
+
+kControlIconProc				EQU		320
+kControlIconNoTrackProc			EQU		321					; immediately returns kControlIconPart
+kControlIconSuiteProc			EQU		322
+kControlIconSuiteNoTrackProc	EQU		323					; immediately returns kControlIconPart
+
+															; icon ref controls may have either an icon, color icon, icon suite, or icon ref.
+															; for data other than icon, you must set the data by passing a
+															; ControlButtonContentInfo to SetControlData
+kControlIconRefProc				EQU		324
+kControlIconRefNoTrackProc		EQU		325					; immediately returns kControlIconPart
+;  Tagged data supported by icon controls 
+
+kControlIconTransformTag		EQU		'trfm'				; IconTransformType
+kControlIconAlignmentTag		EQU		'algn'				; IconAlignmentType
+;  Tags available with appearance 1.1 or later 
+
+kControlIconResourceIDTag		EQU		'ires'				; SInt16 resource ID of icon to use
+kControlIconContentTag			EQU		'cont'				; accepts a ControlButtonContentInfo
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • WINDOW HEADER (CDEF 21)                                                           
+; ——————————————————————————————————————————————————————————————————————————————————————
+;  Window Header proc IDs 
+
+kControlWindowHeaderProc		EQU		336					; normal header
+kControlWindowListViewHeaderProc EQU	337					; variant for list views - no bottom line
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • LIST BOX (CDEF 22)                                                                
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   Lists use an auxiliary resource to define their format. The resource type used is   
+;   'ldes' and a definition for it can be found in Appearance.r. The resource ID for    
+;   the ldes is passed in the 'value' parameter when creating the control. You may pass 
+;   zero in value. This tells the List Box control to not use a resource. The list will 
+;   be created with default values, and will use the standard LDEF (0). You can change  
+;   the list by getting the list handle. You can set the LDEF to use by using the tag   
+;   below (kControlListBoxLDEFTag)                                                      
+;  List Box proc IDs 
+
+kControlListBoxProc				EQU		352
+kControlListBoxAutoSizeProc		EQU		353
+;  Tagged data supported by list box 
+
+kControlListBoxListHandleTag	EQU		'lhan'				; ListHandle
+kControlListBoxKeyFilterTag		EQU		'fltr'				; ControlKeyFilterUPP
+kControlListBoxFontStyleTag		EQU		'font'				; ControlFontStyleRec
+;  New tags in 1.0.1 or later 
+
+kControlListBoxDoubleClickTag	EQU		'dblc'				; Boolean. Was last click a double-click?
+kControlListBoxLDEFTag			EQU		'ldef'				; SInt16. ID of LDEF to use.
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • PUSH BUTTON (CDEF 23)                                                             
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   The new standard checkbox and radio button controls support a "mixed" value that    
+;   indicates that the current setting contains a mixed set of on and off values. The   
+;   control value used to display this indication is defined in Controls.h:             
+;                                                                                       
+;       kControlCheckBoxMixedValue = 2                                                  
+;                                                                                       
+;   Two new variants of the standard pushbutton have been added to the standard control 
+;   suite that draw a color icon next to the control title. One variant draws the icon  
+;   on the left side, the other draws it on the right side (when the system justifica-  
+;   tion is right to left, these are reversed).                                         
+;                                                                                       
+;   When either of the icon pushbuttons are created, the contrlMax field of the control 
+;   record is used to determine the ID of the 'cicn' resource drawn in the pushbutton.  
+;                                                                                       
+;   In addition, a push button can now be told to draw with a default outline using the 
+;   SetControlData routine with the kPushButtonDefaultTag below.                        
+;                                                                                       
+;   A push button may also be marked using the kControlPushButtonCancelTag. This has    
+;   no visible representation, but does cause the button to play the CancelButton theme 
+;   sound instead of the regular pushbutton theme sound when pressed.                   
+;                                                                                       
+;  Theme Push Button/Check Box/Radio Button proc IDs 
+
+kControlPushButtonProc			EQU		368
+kControlCheckBoxProc			EQU		369
+kControlRadioButtonProc			EQU		370
+kControlPushButLeftIconProc		EQU		374					; Standard pushbutton with left-side icon
+kControlPushButRightIconProc	EQU		375					; Standard pushbutton with right-side icon
+;  Variants with Appearance 1.1 or later 
+
+kControlCheckBoxAutoToggleProc	EQU		371
+kControlRadioButtonAutoToggleProc EQU	372
+;  Tagged data supported by standard buttons 
+
+kControlPushButtonDefaultTag	EQU		'dflt'				; default ring flag
+kControlPushButtonCancelTag		EQU		'cncl'				; cancel button flag (1.1 and later)
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • SCROLL BAR (CDEF 24)                                                              
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   This is the new Appearance scroll bar.                                              
+;                                                                                       
+;  Theme Scroll Bar proc IDs 
+
+kControlScrollBarProc			EQU		384					; normal scroll bar
+kControlScrollBarLiveProc		EQU		386					; live scrolling variant
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • POPUP BUTTON (CDEF 25)                                                            
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   This is the new Appearance Popup Button. It takes the same variants and does the    
+;   same overloading as the previous popup menu control. There are some differences:    
+;                                                                                       
+;   Passing in a menu ID of -12345 causes the popup not to try and get the menu from a  
+;   resource. Instead, you can build the menu and later stuff the menuhandle field in   
+;   the popup data information.                                                         
+;                                                                                       
+;   You can pass -1 in the Max parameter to have the control calculate the width of the 
+;   title on its own instead of guessing and then tweaking to get it right. It adds the 
+;   appropriate amount of space between the title and the popup.                        
+;                                                                                       
+;  Theme Popup Button proc IDs 
+
+kControlPopupButtonProc			EQU		400
+kControlPopupFixedWidthVariant	EQU		$01
+kControlPopupVariableWidthVariant EQU	$02
+kControlPopupUseAddResMenuVariant EQU	$04
+kControlPopupUseWFontVariant	EQU		$08
+;  These tags are available in 1.0.1 or later of Appearance 
+
+kControlPopupButtonMenuHandleTag EQU	'mhan'				; MenuHandle
+kControlPopupButtonMenuIDTag	EQU		'mnid'				; SInt16
+;  These tags are available in 1.1 or later of Appearance 
+
+kControlPopupButtonExtraHeightTag EQU	'exht'				; SInt16 extra vertical whitespace within the button
+
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • RADIO GROUP (CDEF 26)                                                             
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   This control implements a radio group. It is an embedding control and can therefore 
+;   only be used when a control hierarchy is established for its owning window. You     
+;   should only embed radio buttons within it. As radio buttons are embedded into it,   
+;   the group sets up its value, min, and max to represent the number of embedded items.
+;   The current value of the control is the index of the sub-control that is the current
+;   'on' radio button. To get the current radio button control handle, you can use the  
+;   control manager call GetIndSubControl, passing in the value of the radio group.     
+;                                                                                       
+;   NOTE: This control is only available with Appearance 1.0.1.                         
+;  Radio Group Proc ID 
+
+kControlRadioGroupProc			EQU		416
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • SCROLL TEXT BOX (CDEF 27)                                                         
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   This control implements a scrolling box of (non-editable) text. This is useful for  
+;   credits in about boxes, etc.                                                        
+;   The standard version of this control has a scroll bar, but the autoscrolling        
+;   variant does not. The autoscrolling variant needs two pieces of information to      
+;   work: delay (in ticks) before the scrolling starts, and time (in ticks) between     
+;   scrolls. It will scroll one pixel at a time, unless changed via SetControlData.     
+;                                                                                       
+;   Parameter                   What Goes Here                                          
+;   ———————————————————         ————————————————————————————————————————————————————    
+;   Value                       Resource ID of 'TEXT'/'styl' content.                   
+;   Min                         Scroll start delay (in ticks)                       .   
+;   Max                         Delay (in ticks) between scrolls.                       
+;                                                                                       
+;   NOTE: This control is only available with Appearance 1.1.                           
+;  Scroll Text Box Proc IDs 
+
+kControlScrollTextBoxProc		EQU		432
+kControlScrollTextBoxAutoScrollProc EQU	433
+;  Tagged data supported by Scroll Text Box 
+
+kControlScrollTextBoxDelayBeforeAutoScrollTag EQU 'stdl'	; UInt32 (ticks until autoscrolling starts)
+kControlScrollTextBoxDelayBetweenAutoScrollTag EQU 'scdl'	; UInt32 (ticks between scrolls)
+kControlScrollTextBoxAutoScrollAmountTag EQU 'samt'			; UInt16 (pixels per scroll) -- defaults to 1
+kControlScrollTextBoxContentsTag EQU	'tres'				; SInt16 (resource ID of 'TEXT'/'styl') -- write only!
+	IF OLDROUTINENAMES THEN
+; ——————————————————————————————————————————————————————————————————————————————————————
+;   • OLDROUTINENAMES                                                                   
+; ——————————————————————————————————————————————————————————————————————————————————————
+
+inLabel							EQU		1
+inMenu							EQU		2
+inTriangle						EQU		4
+inButton						EQU		10
+inCheckBox						EQU		11
+inUpButton						EQU		20
+inDownButton					EQU		21
+inPageUp						EQU		22
+inPageDown						EQU		23
+
+kInLabelControlPart				EQU		1
+kInMenuControlPart				EQU		2
+kInTriangleControlPart			EQU		4
+kInButtonControlPart			EQU		10
+kInCheckBoxControlPart			EQU		11
+kInUpButtonControlPart			EQU		20
+kInDownButtonControlPart		EQU		21
+kInPageUpControlPart			EQU		22
+kInPageDownControlPart			EQU		23
+
+	ENDIF	; OLDROUTINENAMES
+
+
+
+	ENDIF ; __CONTROLDEFINITIONS__ 
+

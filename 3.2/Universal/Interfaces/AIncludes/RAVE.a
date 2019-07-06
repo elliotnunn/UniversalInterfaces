@@ -1,0 +1,816 @@
+;
+;	File:		RAVE.a
+;
+;	Contains:	Interface for RAVE (Renderer Acceleration Virtual Engine)							
+;
+;	Version:	Technology:	Quickdraw 3D 1.5.4
+;				Release:	Universal Interfaces 3.2
+;
+;	Copyright:	© 1995-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__RAVE__') = 'UNDEFINED' THEN
+__RAVE__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+
+	IF TARGET_OS_MAC THEN
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__QDOFFSCREEN__') = 'UNDEFINED' THEN
+	include 'QDOffscreen.a'
+	ENDIF
+
+	ENDIF	; TARGET_OS_MAC
+	IF TARGET_OS_WIN32 THEN
+	IF &TYPE('RAVE_NO_DIRECTDRAW') = 'UNDEFINED' THEN
+	ENDIF
+	ENDIF	; TARGET_OS_WIN32
+; ******************************************************************************
+; *
+; * Platform dependent datatypes: TQAImagePixelType, TQADevice, TQAClip, and TQARect.
+; *
+; ****************************************************************************
+
+
+; typedef long							TQAImagePixelType
+kQAPixel_Alpha1					EQU		0					; 1 bit/pixel alpha 
+kQAPixel_RGB16					EQU		1					; 16 bit/pixel, R=14:10, G=9:5, B=4:0 
+kQAPixel_ARGB16					EQU		2					; 16 bit/pixel, A=15, R=14:10, G=9:5, B=4:0 
+kQAPixel_RGB32					EQU		3					; 32 bit/pixel, R=23:16, G=15:8, B=7:0 
+kQAPixel_ARGB32					EQU		4					; 32 bit/pixel, A=31:24, R=23:16, G=15:8, B=7:0 
+kQAPixel_CL4					EQU		5					; 4 bit color look up table, always big endian, ie high 4 bits effect left pixel 
+kQAPixel_CL8					EQU		6					; 8 bit color look up table 
+kQAPixel_RGB16_565				EQU		7					; 16 bits/pixel, no alpha, R:5, G:6, B:5 WINDOWS ONLY 
+kQAPixel_RGB24					EQU		8					; 24 bits/pixel, no alpha, R:8, G:8, B:8 WINDOWS ONLY 
+
+; typedef long							TQAColorTableType
+kQAColorTable_CL8_RGB32			EQU		0					; 256 entry, 32 bit/pixel, R=23:16, G=15:8, B=7:0 
+kQAColorTable_CL4_RGB32			EQU		1					; 16 entry, 32 bit/pixel, R=23:16, G=15:8, B=7:0 
+;  Selects target device type 
+
+; typedef long							TQADeviceType
+kQADeviceMemory					EQU		0					; Memory draw context 
+kQADeviceGDevice				EQU		1					; Macintosh GDevice draw context 
+kQADeviceWin32DC				EQU		2					; Win32 DC 
+kQADeviceDDSurface				EQU		3					; Win32 DirectDraw Surface 
+;  Generic memory pixmap device 
+TQADeviceMemory			RECORD 0
+rowBytes				 ds.l	1				; offset: $0 (0)		;  Rowbytes 
+pixelType				 ds.l	1				; offset: $4 (4)		;  Depth, color space, etc. 
+width					 ds.l	1				; offset: $8 (8)		;  Width in pixels 
+height					 ds.l	1				; offset: $C (12)		;  Height in pixels 
+baseAddr				 ds.l	1				; offset: $10 (16)		;  Base address of pixmap 
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+;  Selects target clip type 
+
+; typedef long							TQAClipType
+kQAClipRgn						EQU		0					; Macintosh clipRgn with serial number 
+kQAClipWin32Rgn					EQU		1					; Win32 clip region 
+TQARect					RECORD 0
+left					 ds.l	1				; offset: $0 (0)
+right					 ds.l	1				; offset: $4 (4)
+top						 ds.l	1				; offset: $8 (8)
+bottom					 ds.l	1				; offset: $C (12)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+	IF TARGET_OS_MAC THEN
+TQAPlatformDevice		RECORD 0
+memoryDevice			 ds		TQADeviceMemory ; offset: $0 (0)
+						 ORG 0
+gDevice					 ds.l	1				; offset: $0 (0)
+						 ORG 20
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+TQAPlatformClip			RECORD 0
+clipRgn					 ds.l	1				; offset: $0 (0)
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; typedef long 							TQADrawNotificationProcRefNum
+
+;  used to unregister your proc 
+	ELSEIF TARGET_OS_WIN32 THEN
+	ELSE
+; 
+;	 * Generic platform supports memory device only. TQARect is generic. TQAClip is ???.
+;	 
+
+TQAPlatformDevice		RECORD 0
+memoryDevice			 ds		TQADeviceMemory ; offset: $0 (0)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+TQAPlatformClip			RECORD 0
+region					 ds.l	1				; offset: $0 (0)		;  ??? 
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+	ENDIF	; 
+TQADevice				RECORD 0
+deviceType				 ds.l	1				; offset: $0 (0)
+device					 ds		TQAPlatformDevice ; offset: $4 (4)
+sizeof					 EQU *					; size:   $18 (24)
+						ENDR
+TQAClip					RECORD 0
+clipType				 ds.l	1				; offset: $0 (0)
+clip					 ds		TQAPlatformClip ; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; ******************************************************************************
+; *
+; * Basic data types.
+; *
+; ****************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;  A single triangle element for QADrawTriMesh 
+TQAIndexedTriangle		RECORD 0
+triangleFlags			 ds.l	1				; offset: $0 (0)		;  Triangle flags, see kQATriFlags_ 
+vertices				 ds.l	3				; offset: $4 (4)		;  Indices into a vertex array 
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+;  An image for use as texture or bitmap 
+TQAImage				RECORD 0
+width					 ds.l	1				; offset: $0 (0)		;  Width of pixmap 
+height					 ds.l	1				; offset: $4 (4)		;  Height of pixmap 
+rowBytes				 ds.l	1				; offset: $8 (8)		;  Rowbytes of pixmap 
+pixmap					 ds.l	1				; offset: $C (12)		;  Pixmap 
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+;  Standard error type 
+
+; typedef long							TQAError
+kQANoErr						EQU		0					; No error 
+kQAError						EQU		1					; Generic error flag 
+kQAOutOfMemory					EQU		2					; Insufficient memory 
+kQANotSupported					EQU		3					; Requested feature is not supported 
+kQAOutOfDate					EQU		4					; A newer drawing engine was registered 
+kQAParamErr						EQU		5					; Error in passed parameters 
+kQAGestaltUnknown				EQU		6					; Requested gestalt type isn't available 
+kQADisplayModeUnsupported		EQU		7					; Engine cannot render to the display in its current , 
+															; mode, but could if it were in some other mode 
+kQAOutOfVideoMemory				EQU		8					; There is not enough VRAM to support the desired context dimensions 
+; ************************************************************************************************
+; *
+; * Vertex data types.
+; *
+; **********************************************************************************************
+
+; 
+; * TQAVGouraud is used for Gouraud shading. Each vertex specifies position, color and Z.
+; *
+; * Alpha is always treated as indicating transparency. Drawing engines which don't
+; * support Z-sorted rendering use the back-to-front transparency blending functions
+; * shown below. (ARGBsrc are the source (new) values, ARGBdest are  the destination
+; * (previous) pixel values.)
+; *
+; *		Premultiplied							Interpolated
+; *
+; *		A = 1 - (1 - Asrc) * (1 - Adest)		A = 1 - (1 - Asrc) * (1 - Adest) 
+; *		R = (1 - Asrc) * Rdest + Rsrc			R = (1 - Asrc) * Rdest + Asrc * Rsrc
+; *		G = (1 - Asrc) * Gdest + Gsrc			G = (1 - Asrc) * Gdest + Asrc * Gsrc
+; *		B = (1 - Asrc) * Bdest + Bsrc			B = (1 - Asrc) * Bdest + Asrc * Bsrc
+; *
+; * Note that the use of other blending modes to implement antialiasing is performed
+; * automatically by the drawing engine when the kQATag_Antialias variable !=
+; * kQAAntiAlias_Fast. The driving software should continue to use the alpha fields
+; * for transparency even when antialiasing is being used (the drawing engine will
+; * resolve the multiple blending requirements as best as it can).
+; *
+; * Drawing engines which perform front-to-back Z-sorted rendering should replace
+; * the blending function shown above with the equivalent front-to-back formula.
+; 
+
+TQAVGouraud				RECORD 0
+x						 ds		Float32			; offset: $0 (0)		;  X pixel coordinate, 0.0 <= x < width 
+y						 ds		Float32			; offset: $4 (4)		;  Y pixel coordinate, 0.0 <= y < height 
+z						 ds		Float32			; offset: $8 (8)		;  Z coordinate, 0.0 <= z <= 1.0 
+invW					 ds		Float32			; offset: $C (12)		;  1 / w; required only when kQAPerspectiveZ_On is set 
+r						 ds		Float32			; offset: $10 (16)		;  Red, 0.0 <= r <= 1.0 
+g						 ds		Float32			; offset: $14 (20)		;  Green, 0.0 <= g <= 1.0 
+b						 ds		Float32			; offset: $18 (24)		;  Blue, 0.0 <= b <= 1.0 
+a						 ds		Float32			; offset: $1C (28)		;  Alpha, 0.0 <= a <= 1.0, 1.0 is opaque 
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+; 
+; * TQAVTexture is used for texture mapping. The texture mapping operation
+; * is controlled by the kQATag_TextureOp variable, which is a mask of
+; * kQATextureOp_None/Modulate/Highlight/Decal. Below is pseudo-code for the
+; * texture shading operation:
+; *
+; *		texPix = TextureLookup (uq/q, vq/q);
+; *		if (kQATextureOp_Decal)
+; *		{
+; *			texPix.r = texPix.a * texPix.r + (1 - texPix.a) * r;
+; *			texPix.g = texPix.a * texPix.g + (1 - texPix.a) * g;
+; *			texPix.b = texPix.a * texPix.b + (1 - texPix.a) * b;
+; *			texPix.a = a;
+; *		}
+; *		else
+; *		{
+; *			texPix.a = texPix.a * a;
+; *		}
+; *		if (kQATextureOp_Modulate)
+; *		{
+; *			texPix.r *= kd_r;		// Clamped to prevent overflow
+; *			texPix.g *= kd_g;		// Clamped to prevent overflow
+; *			texPix.b *= kd_b;		// Clamped to prevent overflow
+; *		}
+; *		if (kQATextureOp_Highlight)
+; *		{
+; *			texPix.r += ks_r;		// Clamped to prevent overflow
+; *			texPix.g += ks_g;		// Clamped to prevent overflow
+; *			texPix.b += ks_b;		// Clamped to prevent overflow
+; *		}
+; *
+; * After computation of texPix, transparency blending (as shown
+; * above for TQAVGouraud) is performed.
+; 
+
+TQAVTexture				RECORD 0
+x						 ds		Float32			; offset: $0 (0)		;  X pixel coordinate, 0.0 <= x < width 
+y						 ds		Float32			; offset: $4 (4)		;  Y pixel coordinate, 0.0 <= y < height 
+z						 ds		Float32			; offset: $8 (8)		;  Z coordinate, 0.0 <= z <= 1.0 
+invW					 ds		Float32			; offset: $C (12)		;  1 / w (always required) 
+;  rgb are used only when kQATextureOp_Decal is set. a is always required 
+r						 ds		Float32			; offset: $10 (16)		;  Red, 0.0 <= r <= 1.0 
+g						 ds		Float32			; offset: $14 (20)		;  Green, 0.0 <= g <= 1.0 
+b						 ds		Float32			; offset: $18 (24)		;  Blue, 0.0 <= b <= 1.0 
+a						 ds		Float32			; offset: $1C (28)		;  Alpha, 0.0 <= a <= 1.0, 1.0 is opaque 
+;  uOverW and vOverW are required by all modes 
+uOverW					 ds		Float32			; offset: $20 (32)		;  u / w 
+vOverW					 ds		Float32			; offset: $24 (36)		;  v / w 
+;  kd_r/g/b are used only when kQATextureOp_Modulate is set 
+kd_r					 ds		Float32			; offset: $28 (40)		;  Scale factor for texture red, 0.0 <= kd_r 
+kd_g					 ds		Float32			; offset: $2C (44)		;  Scale factor for texture green, 0.0 <= kd_g 
+kd_b					 ds		Float32			; offset: $30 (48)		;  Scale factor for texture blue, 0.0 <= kd_b 
+;  ks_r/g/b are used only when kQATextureOp_Highlight is set 
+ks_r					 ds		Float32			; offset: $34 (52)		;  Red specular highlight, 0.0 <= ks_r <= 1.0 
+ks_g					 ds		Float32			; offset: $38 (56)		;  Green specular highlight, 0.0 <= ks_g <= 1.0 
+ks_b					 ds		Float32			; offset: $3C (60)		;  Blue specular highlight, 0.0 <= ks_b <= 1.0 
+sizeof					 EQU *					; size:   $40 (64)
+						ENDR
+; ************************************************************************************************
+; *
+; * Constants used for the state variables.
+; *
+; **********************************************************************************************
+
+; 
+; * kQATag_xxx is used to select a state variable when calling QASetFloat(), QASetInt(),
+; * QAGetFloat() and QAGetInt(). The kQATag values are split into two separate
+; * enumerated types: TQATagInt and TQATagFloat. TQATagInt is used for the QASet/GetInt()
+; * functions, and TQATagFloat is used for the QASet/GetFloat() functions. (This is so
+; * that a compiler that typechecks enums can flag a float/int tag mismatch during compile.)
+; *
+; * These variables are required by all drawing engines:
+; *		kQATag_ZFunction			(Int)	One of kQAZFunction_xxx
+; *		kQATag_ColorBG_a			(Float)	Background color alpha
+; *		kQATag_ColorBG_r			(Float)	Background color red
+; *		kQATag_ColorBG_g			(Float)	Background color green
+; *		kQATag_ColorBG_b			(Float)	Background color blue
+; *		kQATag_Width				(Float)	Line and point width (pixels)
+; *		kQATag_ZMinOffset			(Float)	Min offset to Z to guarantee visibility (Read only!)
+; *		kQATag_ZMinScale			(Float)	Min scale to Z to guarantee visibility (Read only!)
+; 
+; * These variables are used for optional features:
+; *		kQATag_Antialias			(Int)	One of kQAAntiAlias_xxx
+; *		kQATag_Blend				(Int)	One of kQABlend_xxx
+; *		kQATag_PerspectiveZ			(Int)	One of kQAPerspectiveZ_xxx
+; *		kQATag_TextureFilter		(Int)	One of kQATextureFilter_xxx
+; *		kQATag_TextureOp			(Int)	Mask of kQATextureOp_xxx
+; *		kQATag_Texture				(Int)	Pointer to current TQATexture
+; *		kQATag_CSGTag				(Int)	One of kQACSGTag_xxx
+; *		kQATag_CSGEquation			(Int)	32 bit CSG truth table
+; *
+; * These variables are used for OpenGL™ support:
+; *		kQATagGL_DrawBuffer			(Int)	Mask of kQAGL_DrawBuffer_xxx
+; *		kQATagGL_TextureWrapU		(Int)	kQAGL_Clamp or kQAGL_Repeat
+; *		kQATagGL_TextureWrapV		(Int)	kQAGL_Clamp or kQAGL_Repeat
+; *		kQATagGL_TextureMagFilter	(Int)	kQAGL_Nearest or kQAGL_Linear
+; *		kQATagGL_TextureMinFilter	(Int)	kQAGL_Nearest, etc.
+; *		kQATagGL_ScissorXMin		(Int)	Minimum X value for scissor rectangle
+; *		kQATagGL_ScissorYMin		(Int)	Minimum Y value for scissor rectangle
+; *		kQATagGL_ScissorXMax		(Int)	Maximum X value for scissor rectangle
+; *		kQATagGL_ScissorYMax		(Int)	Maximum Y value for scissor rectangle
+; *		kQATagGL_BlendSrc			(Int)	Source blending operation
+; *		kQATagGL_BlendDst			(Int)	Destination blending operation
+; *		kQATagGL_LinePattern		(Int)	Line rasterization pattern
+; *		kQATagGL_AreaPattern0		(Int)	First of 32 area pattern registers
+; *		kQATagGL_AreaPattern31		(Int)	Last of 32 area pattern registers
+; *		kQATagGL_DepthBG			(Float)	Background Z
+; *		kQATagGL_TextureBorder_a	(Float)	Texture border color alpha
+; *		kQATagGL_TextureBorder_r	(Float)	Texture border color red
+; *		kQATagGL_TextureBorder_g	(Float)	Texture border color green
+; *		kQATagGL_TextureBorder_b	(Float)	Texture border color blue
+; *
+; * Tags >= kQATag_EngineSpecific_Minimum may be assigned by the vendor for use as
+; * engine-specific variables. NOTE: These should be used only in exceptional circumstances,
+; * as functions performed by these variables won't be generally accessible. All other tag
+; * values are reserved.
+; *
+; *		kQATag_EngineSpecific_Minimum	Minimum tag value for drawing-engine specific variables
+; 
+
+
+; typedef long							TQATagInt
+kQATag_ZFunction				EQU		0
+kQATag_Antialias				EQU		8
+kQATag_Blend					EQU		9
+kQATag_PerspectiveZ				EQU		10
+kQATag_TextureFilter			EQU		11
+kQATag_TextureOp				EQU		12
+kQATag_CSGTag					EQU		14
+kQATag_CSGEquation				EQU		15
+kQATag_BufferComposite			EQU		16
+kQATagGL_DrawBuffer				EQU		100
+kQATagGL_TextureWrapU			EQU		101
+kQATagGL_TextureWrapV			EQU		102
+kQATagGL_TextureMagFilter		EQU		103
+kQATagGL_TextureMinFilter		EQU		104
+kQATagGL_ScissorXMin			EQU		105
+kQATagGL_ScissorYMin			EQU		106
+kQATagGL_ScissorXMax			EQU		107
+kQATagGL_ScissorYMax			EQU		108
+kQATagGL_BlendSrc				EQU		109
+kQATagGL_BlendDst				EQU		110
+kQATagGL_LinePattern			EQU		111
+kQATagGL_AreaPattern0			EQU		117					; ...1-30 
+kQATagGL_AreaPattern31			EQU		148
+kQATag_EngineSpecific_Minimum	EQU		1000
+
+; typedef long							TQATagPtr
+kQATag_Texture					EQU		13
+
+; typedef long							TQATagFloat
+kQATag_ColorBG_a				EQU		1
+kQATag_ColorBG_r				EQU		2
+kQATag_ColorBG_g				EQU		3
+kQATag_ColorBG_b				EQU		4
+kQATag_Width					EQU		5
+kQATag_ZMinOffset				EQU		6
+kQATag_ZMinScale				EQU		7
+kQATagGL_DepthBG				EQU		112
+kQATagGL_TextureBorder_a		EQU		113
+kQATagGL_TextureBorder_r		EQU		114
+kQATagGL_TextureBorder_g		EQU		115
+kQATagGL_TextureBorder_b		EQU		116
+;  kQATag_ZFunction 
+
+kQAZFunction_None				EQU		0					; Z is neither tested nor written (same as no Z buffer) 
+kQAZFunction_LT					EQU		1					; Znew < Zbuffer is visible 
+kQAZFunction_EQ					EQU		2					; OpenGL Only: Znew == Zbuffer is visible 
+kQAZFunction_LE					EQU		3					; OpenGL Only: Znew <= Zbuffer is visible 
+kQAZFunction_GT					EQU		4					; OpenGL Only: Znew > Zbuffer is visible 
+kQAZFunction_NE					EQU		5					; OpenGL Only: Znew != Zbuffer is visible 
+kQAZFunction_GE					EQU		6					; OpenGL Only: Znew >= Zbuffer is visible 
+kQAZFunction_True				EQU		7					; Znew is always visible 
+;  kQATag_Width 
+;  kQATag_Antialias 
+
+kQAAntiAlias_Off				EQU		0
+kQAAntiAlias_Fast				EQU		1
+kQAAntiAlias_Mid				EQU		2
+kQAAntiAlias_Best				EQU		3
+;  kQATag_Blend 
+
+kQABlend_PreMultiply			EQU		0
+kQABlend_Interpolate			EQU		1
+kQABlend_OpenGL					EQU		2
+;  kQATag_BufferComposite 
+
+kQABufferComposite_None			EQU		0					; Default: New pixels overwrite initial buffer contents 
+kQABufferComposite_PreMultiply	EQU		1					; New pixels are blended with initial buffer contents via PreMultiply 
+kQABufferComposite_Interpolate	EQU		2					; New pixels are blended with initial buffer contents via Interpolate 
+;  kQATag_PerspectiveZ 
+
+kQAPerspectiveZ_Off				EQU		0					; Use Z for hidden surface removal 
+kQAPerspectiveZ_On				EQU		1					; Use InvW for hidden surface removal 
+;  kQATag_TextureFilter 
+
+															; suggested meanings of these values 
+kQATextureFilter_Fast			EQU		0					; No filtering, pick nearest 
+kQATextureFilter_Mid			EQU		1					; Fastest method that does some filtering 
+kQATextureFilter_Best			EQU		2					; Highest quality renderer can do 
+;  kQATag_TextureOp (mask of one or more) 
+
+kQATextureOp_None				EQU		0					; Default texture mapping mode 
+kQATextureOp_Modulate			EQU		$01					; Modulate texture color with kd_r/g/b 
+kQATextureOp_Highlight			EQU		$02					; Add highlight value ks_r/g/b 
+kQATextureOp_Decal				EQU		$04					; When texture alpha == 0, use rgb instead 
+kQATextureOp_Shrink				EQU		$08					; This is a non-wrapping texture, so the ??? 
+;  kQATag_CSGTag 
+
+kQACSGTag_0						EQU		0					; Submitted tris have CSG ID 0 
+kQACSGTag_1						EQU		1					; Submitted tris have CSG ID 1 
+kQACSGTag_2						EQU		2					; Submitted tris have CSG ID 2 
+kQACSGTag_3						EQU		3					; Submitted tris have CSG ID 3 
+kQACSGTag_4						EQU		4					; Submitted tris have CSG ID 4 
+;  kQATagGL_TextureWrapU/V 
+
+kQAGL_Repeat					EQU		0
+kQAGL_Clamp						EQU		1
+;  kQATagGL_BlendSrc 
+
+kQAGL_SourceBlend_XXX			EQU		0
+;  kQATagGL_BlendDst 
+
+kQAGL_DestBlend_XXX				EQU		0
+;  kQATagGL_DrawBuffer (mask of one or more) 
+
+kQAGL_DrawBuffer_None			EQU		0
+kQAGL_DrawBuffer_FrontLeft		EQU		$01
+kQAGL_DrawBuffer_FrontRight		EQU		$02
+kQAGL_DrawBuffer_BackLeft		EQU		$04
+kQAGL_DrawBuffer_BackRight		EQU		$08
+kQAGL_DrawBuffer_Front			EQU		$03
+kQAGL_DrawBuffer_Back			EQU		$0C
+; ************************************************************************************************
+; *
+; * Constants used as function parameters.
+; *
+; **********************************************************************************************
+
+; 
+; * TQAVertexMode is a parameter to QADrawVGouraud() and QADrawVTexture() that specifies how
+; * to interpret and draw the vertex array.
+; 
+
+
+; typedef long							TQAVertexMode
+kQAVertexMode_Point				EQU		0					; Draw nVertices points 
+kQAVertexMode_Line				EQU		1					; Draw nVertices/2 line segments 
+kQAVertexMode_Polyline			EQU		2					; Draw nVertices-1 connected line segments 
+kQAVertexMode_Tri				EQU		3					; Draw nVertices/3 triangles 
+kQAVertexMode_Strip				EQU		4					; Draw nVertices-2 triangles as a strip 
+kQAVertexMode_Fan				EQU		5					; Draw nVertices-2 triangles as a fan from v0 
+kQAVertexMode_NumModes			EQU		6
+; 
+; * TQAGestaltSelector is a parameter to QAEngineGestalt(). It selects which gestalt
+; * parameter will be copied into 'response'.
+; 
+
+
+; typedef long							TQAGestaltSelector
+kQAGestalt_OptionalFeatures		EQU		0					; Mask of one or more kQAOptional_xxx 
+kQAGestalt_FastFeatures			EQU		1					; Mask of one or more kQAFast_xxx 
+kQAGestalt_VendorID				EQU		2					; Vendor ID 
+kQAGestalt_EngineID				EQU		3					; Engine ID 
+kQAGestalt_Revision				EQU		4					; Revision number of this engine 
+kQAGestalt_ASCIINameLength		EQU		5					; strlen (asciiName) 
+kQAGestalt_ASCIIName			EQU		6					; Causes strcpy (response, asciiName) 
+kQAGestalt_TextureMemory		EQU		7					; amount of texture RAM currently available 
+kQAGestalt_FastTextureMemory	EQU		8					; amount of texture RAM currently available 
+kQAGestalt_NumSelectors			EQU		9
+; 
+; * TQAMethodSelector is a parameter to QASetNoticeMethod to select the notice method
+; 
+
+
+; typedef long							TQAMethodSelector
+kQAMethod_RenderCompletion		EQU		0					; Called when rendering has completed and buffers swapped 
+kQAMethod_DisplayModeChanged	EQU		1					; Called when a display mode has changed 
+kQAMethod_ReloadTextures		EQU		2					; Called when texture memory has been invalidated 
+kQAMethod_BufferInitialize		EQU		3					; Called when a buffer needs to be initialized 
+kQAMethod_BufferComposite		EQU		4					; Called when rendering is finished and its safe to composite 
+kQAMethod_NumSelectors			EQU		5
+; 
+; * kQATriFlags_xxx are ORed together to generate the 'flags' parameter
+; * to QADrawTriGouraud() and QADrawTriTexture().
+; 
+
+
+kQATriFlags_None				EQU		0					; No flags (triangle is front-facing or don't care) 
+kQATriFlags_Backfacing			EQU		$01					; Triangle is back-facing 
+; 
+; * kQATexture_xxx are ORed together to generate the 'flags' parameter to QATextureNew().
+; 
+
+
+kQATexture_None					EQU		0					; No flags 
+kQATexture_Lock					EQU		$01					; Don't swap this texture out 
+kQATexture_Mipmap				EQU		$02					; This texture is mipmapped 
+kQATexture_NoCompression		EQU		$04					; Do not compress this texture 
+kQATexture_HighCompression		EQU		$08					; Compress texture, even if it takes a while 
+; 
+; * kQABitmap_xxx are ORed together to generate the 'flags' parameter to QABitmapNew().
+; 
+
+
+kQABitmap_None					EQU		0					; No flags 
+kQABitmap_Lock					EQU		$02					; Don't swap this bitmap out 
+kQABitmap_NoCompression			EQU		$04					; Do not compress this bitmap 
+kQABitmap_HighCompression		EQU		$08					; Compress bitmap, even if it takes a while 
+; 
+; * kQAContext_xxx are ORed together to generate the 'flags' parameter for QADrawContextNew().
+; 
+
+
+kQAContext_None					EQU		0					; No flags 
+kQAContext_NoZBuffer			EQU		$01					; No hidden surface removal 
+kQAContext_DeepZ				EQU		$02					; Hidden surface precision >= 24 bits 
+kQAContext_DoubleBuffer			EQU		$04					; Double buffered window 
+kQAContext_Cache				EQU		$08					; This is a cache context 
+kQAContext_NoDither				EQU		$10					; No dithering, straight color banding 
+; 
+; * kQAOptional_xxx are ORed together to generate the kQAGestalt_OptionalFeatures response
+; * from QAEngineGestalt().
+; 
+
+
+kQAOptional_None				EQU		0					; No optional features 
+kQAOptional_DeepZ				EQU		$01					; Hidden surface precision >= 24 bits 
+kQAOptional_Texture				EQU		$02					; Texture mapping 
+kQAOptional_TextureHQ			EQU		$04					; High quality texture (tri-linear mip or better) 
+kQAOptional_TextureColor		EQU		$08					; Full color modulation and highlight of textures 
+kQAOptional_Blend				EQU		$10					; Transparency blending of RGB 
+kQAOptional_BlendAlpha			EQU		$20					; Transparency blending includes alpha channel 
+kQAOptional_Antialias			EQU		$40					; Antialiased rendering 
+kQAOptional_ZSorted				EQU		$80					; Z sorted rendering (for transparency, etc.) 
+kQAOptional_PerspectiveZ		EQU		$0100				; Hidden surface removal using InvW instead of Z 
+kQAOptional_OpenGL				EQU		$0200				; Extended rasterization features for OpenGL™ 
+kQAOptional_NoClear				EQU		$0400				; This drawing engine doesn't clear before drawing 
+kQAOptional_CSG					EQU		$0800				; kQATag_CSGxxx are implemented 
+kQAOptional_BoundToDevice		EQU		$1000				; This engine is tightly bound to GDevice 
+kQAOptional_CL4					EQU		$2000				; This engine suports kQAPixel_CL4 
+kQAOptional_CL8					EQU		$4000				; This engine suports kQAPixel_CL8 
+kQAOptional_BufferComposite		EQU		$8000				; This engine can composite with initial buffer contents 
+kQAOptional_NoDither			EQU		$00010000			; This engine can draw with no dithering 
+; 
+; * kQAFast_xxx are ORed together to generate the kQAGestalt_FastFeatures response
+; * from QAEngineGestalt().
+; 
+
+
+kQAFast_None					EQU		0					; No accelerated features 
+kQAFast_Line					EQU		$01					; Line drawing 
+kQAFast_Gouraud					EQU		$02					; Gouraud shaded triangles 
+kQAFast_Texture					EQU		$04					; Texture mapped triangles 
+kQAFast_TextureHQ				EQU		$08					; High quality texture (tri-linear mip or better) 
+kQAFast_Blend					EQU		$10					; Transparency blending 
+kQAFast_Antialiasing			EQU		$20					; Antialiased rendering 
+kQAFast_ZSorted					EQU		$40					; Z sorted rendering of non-opaque objects 
+kQAFast_CL4						EQU		$80					; This engine accelerates kQAPixel_CL4 
+kQAFast_CL8						EQU		$0100				; This engine accelerates kQAPixel_CL8 
+
+
+
+; ********************************************************************
+; * TQAVersion sets the TQADrawContext 'version' field. It is set by
+; * the manager to indicate the version of the TQADrawContext structure.
+; ******************************************************************
+
+
+; typedef long							TQAVersion
+kQAVersion_Prerelease			EQU		0
+kQAVersion_1_0					EQU		1
+kQAVersion_1_0_5				EQU		2					; Added tri mesh functions, color tables 
+kQAVersion_1_5					EQU		3					; Added call backs, texture compression, and new error return code 
+
+
+; ***********************************************************************
+; * TQADrawContext structure holds method pointers.
+; * This is a forward refrence. The structure is defined later.
+; *********************************************************************
+
+
+
+; ************************************************************************************************
+; *
+; * Typedefs of draw method functions provided by the drawing engine. One function pointer
+; * for each of these function types in stored in the TQADrawContext public data structure.
+; *
+; * These functions should be accessed through the QA<function>(context,...) macros,
+; * defined above.
+; *
+; **********************************************************************************************
+
+TQANoticeMethod			RECORD 0
+standardNoticeMethod	 ds.l	1				; offset: $0 (0)		;  Used for non-buffer related methods 
+						 ORG 0
+bufferNoticeMethod		 ds.l	1				; offset: $0 (0)		;  Used for buffer handling methods 
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; ************************************************************************************************
+; *
+; * Public TQADrawContext structure. This contains function pointers for the chosen
+; * drawing engine.
+; *
+; **********************************************************************************************
+
+TQADrawContext			RECORD 0
+drawPrivate				 ds.l	1				; offset: $0 (0)		;  Engine's private data for this context 
+version					 ds.l	1				; offset: $4 (4)		;  Version number 
+setFloat				 ds.l	1				; offset: $8 (8)		;  Method: Set a float state variable 
+setInt					 ds.l	1				; offset: $C (12)		;  Method: Set an unsigned long state variable 
+setPtr					 ds.l	1				; offset: $10 (16)		;  Method: Set an unsigned long state variable 
+getFloat				 ds.l	1				; offset: $14 (20)		;  Method: Get a float state variable 
+getInt					 ds.l	1				; offset: $18 (24)		;  Method: Get an unsigned long state variable 
+getPtr					 ds.l	1				; offset: $1C (28)		;  Method: Get an pointer state variable 
+drawPoint				 ds.l	1				; offset: $20 (32)		;  Method: Draw a point 
+drawLine				 ds.l	1				; offset: $24 (36)		;  Method: Draw a line 
+drawTriGouraud			 ds.l	1				; offset: $28 (40)		;  Method: Draw a Gouraud shaded triangle 
+drawTriTexture			 ds.l	1				; offset: $2C (44)		;  Method: Draw a texture mapped triangle 
+drawVGouraud			 ds.l	1				; offset: $30 (48)		;  Method: Draw Gouraud vertices 
+drawVTexture			 ds.l	1				; offset: $34 (52)		;  Method: Draw texture vertices 
+drawBitmap				 ds.l	1				; offset: $38 (56)		;  Method: Draw a bitmap 
+renderStart				 ds.l	1				; offset: $3C (60)		;  Method: Initialize for rendering 
+renderEnd				 ds.l	1				; offset: $40 (64)		;  Method: Complete rendering and display 
+renderAbort				 ds.l	1				; offset: $44 (68)		;  Method: Abort any outstanding rendering (blocking) 
+flush					 ds.l	1				; offset: $48 (72)		;  Method: Start render of any queued commands (non-blocking) 
+sync					 ds.l	1				; offset: $4C (76)		;  Method: Wait for completion of all rendering (blocking) 
+submitVerticesGouraud	 ds.l	1				; offset: $50 (80)		;  Method: Submit Gouraud vertices for trimesh 
+submitVerticesTexture	 ds.l	1				; offset: $54 (84)		;  Method: Submit Texture vertices for trimesh 
+drawTriMeshGouraud		 ds.l	1				; offset: $58 (88)		;  Method: Draw a Gouraud triangle mesh 
+drawTriMeshTexture		 ds.l	1				; offset: $5C (92)		;  Method: Draw a Texture triangle mesh 
+setNoticeMethod			 ds.l	1				; offset: $60 (96)		;  Method: Set a notice method 
+getNoticeMethod			 ds.l	1				; offset: $64 (100)		;  Method: Get a notice method 
+sizeof					 EQU *					; size:   $68 (104)
+						ENDR
+; ************************************************************************************************
+; *
+; * Acceleration manager function prototypes.
+; *
+; **********************************************************************************************
+
+;
+; extern TQAError QADrawContextNew(const TQADevice *device, const TQARect *rect, const TQAClip *clip, const TQAEngine *engine, unsigned long flags, TQADrawContext **newDrawContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QADrawContextNew
+	ENDIF
+
+;
+; extern void QADrawContextDelete(TQADrawContext *drawContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QADrawContextDelete
+	ENDIF
+
+;
+; extern TQAError QAColorTableNew(const TQAEngine *engine, TQAColorTableType tableType, void *pixelData, long transparentIndexFlag, TQAColorTable **newTable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QAColorTableNew
+	ENDIF
+
+;
+; extern void QAColorTableDelete(const TQAEngine *engine, TQAColorTable *colorTable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QAColorTableDelete
+	ENDIF
+
+;
+; extern TQAError QATextureNew(const TQAEngine *engine, unsigned long flags, TQAImagePixelType pixelType, const TQAImage images[2147483647], TQATexture **newTexture)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QATextureNew
+	ENDIF
+
+;
+; extern TQAError QATextureDetach(const TQAEngine *engine, TQATexture *texture)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QATextureDetach
+	ENDIF
+
+;
+; extern void QATextureDelete(const TQAEngine *engine, TQATexture *texture)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QATextureDelete
+	ENDIF
+
+;
+; extern TQAError QATextureBindColorTable(const TQAEngine *engine, TQATexture *texture, TQAColorTable *colorTable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QATextureBindColorTable
+	ENDIF
+
+;
+; extern TQAError QABitmapNew(const TQAEngine *engine, unsigned long flags, TQAImagePixelType pixelType, const TQAImage *image, TQABitmap **newBitmap)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QABitmapNew
+	ENDIF
+
+;
+; extern TQAError QABitmapDetach(const TQAEngine *engine, TQABitmap *bitmap)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QABitmapDetach
+	ENDIF
+
+;
+; extern void QABitmapDelete(const TQAEngine *engine, TQABitmap *bitmap)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QABitmapDelete
+	ENDIF
+
+;
+; extern TQAError QABitmapBindColorTable(const TQAEngine *engine, TQABitmap *bitmap, TQAColorTable *colorTable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QABitmapBindColorTable
+	ENDIF
+
+;
+; extern TQAEngine *QADeviceGetFirstEngine(const TQADevice *device)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QADeviceGetFirstEngine
+	ENDIF
+
+;
+; extern TQAEngine *QADeviceGetNextEngine(const TQADevice *device, const TQAEngine *currentEngine)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QADeviceGetNextEngine
+	ENDIF
+
+;
+; extern TQAError QAEngineCheckDevice(const TQAEngine *engine, const TQADevice *device)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QAEngineCheckDevice
+	ENDIF
+
+;
+; extern TQAError QAEngineGestalt(const TQAEngine *engine, TQAGestaltSelector selector, void *response)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QAEngineGestalt
+	ENDIF
+
+;
+; extern TQAError QAEngineEnable(long vendorID, long engineID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QAEngineEnable
+	ENDIF
+
+;
+; extern TQAError QAEngineDisable(long vendorID, long engineID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QAEngineDisable
+	ENDIF
+
+
+	IF TARGET_OS_MAC THEN
+;
+; extern TQAError QARegisterDrawNotificationProc(Rect *globalRect, TQADrawNotificationProcPtr proc, long refCon, TQADrawNotificationProcRefNum *refNum)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QARegisterDrawNotificationProc
+	ENDIF
+
+;
+; extern TQAError QAUnregisterDrawNotificationProc(TQADrawNotificationProcRefNum refNum)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QAUnregisterDrawNotificationProc
+	ENDIF
+
+	ENDIF	; TARGET_OS_MAC
+
+
+
+
+
+
+	ENDIF ; __RAVE__ 
+

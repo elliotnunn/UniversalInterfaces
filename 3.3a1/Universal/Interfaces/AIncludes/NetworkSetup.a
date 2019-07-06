@@ -1,0 +1,1520 @@
+;
+;	File:		NetworkSetup.a
+;
+;	Contains:	Network Setup Interfaces
+;
+;	Version:	Technology:	1.1.0
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1998-1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__NETWORKSETUP__') = 'UNDEFINED' THEN
+__NETWORKSETUP__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+	IF &TYPE('__OPENTRANSPORT__') = 'UNDEFINED' THEN
+	include 'OpenTransport.a'
+	ENDIF
+	IF &TYPE('__OPENTRANSPORTPROVIDERS__') = 'UNDEFINED' THEN
+	include 'OpenTransportProviders.a'
+	ENDIF
+
+
+
+; typedef UInt32 						CfgAreaID
+
+; typedef OSType 						CfgEntityClass
+
+; typedef OSType 						CfgEntityType
+
+CfgEntityRef			RECORD 0
+fLoc					 ds.l	1				; offset: $0 (0)
+fReserved				 ds.l	1				; offset: $4 (4)
+fID						 ds		Str255			; offset: $8 (8)
+sizeof					 EQU *					; size:   $108 (264)
+						ENDR
+CfgResourceLocator		RECORD 0
+fFile					 ds		FSSpec			; offset: $0 (0)
+fResID					 ds.w	1				; offset: $46 (70)
+sizeof					 EQU *					; size:   $48 (72)
+						ENDR
+CfgEntityInfo			RECORD 0
+fClass					 ds.l	1				; offset: $0 (0)
+fType					 ds.l	1				; offset: $4 (4)
+fName					 ds		Str255			; offset: $8 (8)
+fIcon					 ds		CfgResourceLocator ; offset: $108 (264)
+sizeof					 EQU *					; size:   $150 (336)
+						ENDR
+; typedef void *						CfgEntityAccessID
+
+CfgPrefsHeader			RECORD 0
+fSize					 ds.w	1				; offset: $0 (0)		;  size includes this header
+fVersion				 ds.w	1				; offset: $2 (2)
+fType					 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; 	-------------------------------------------------------------------------
+;	Error codes
+;	------------------------------------------------------------------------- 
+
+
+kCfgErrDatabaseChanged			EQU		-3290				; database has changed since last call - close and reopen DB
+kCfgErrAreaNotFound				EQU		-3291				; Area doesn't exist
+kCfgErrAreaAlreadyExists		EQU		-3292				; Area already exists
+kCfgErrAreaNotOpen				EQU		-3293				; Area needs to open first
+kCfgErrConfigLocked				EQU		-3294				; Access conflict - retry later
+kCfgErrEntityNotFound			EQU		-3295				; An entity with this name doesn't exist
+kCfgErrEntityAlreadyExists		EQU		-3296				; An entity with this name already exists
+kCfgErrPrefsTypeNotFound		EQU		-3297				; An record with this PrefsType doesn't exist
+kCfgErrDataTruncated			EQU		-3298				; Data truncated when read buffer too small
+kCfgErrFileCorrupted			EQU		-3299				; The database format appears to be corrupted.
+; 	reserve a 'free' tag for free blocks
+
+kCfgTypefree					EQU		'free'
+; 	-------------------------------------------------------------------------
+;	CfgEntityClass / CfgEntityType
+;
+;	The database can distinguish between several classes of objects and 
+;	several types withing each class
+;	Use of different classes allow to store type of information in the same database
+;
+;	Other entity classes and types can be defined by developers.
+;	they should be unique and registered with Developer Tech Support (DTS)
+;	------------------------------------------------------------------------- 
+
+
+kCfgClassAnyEntity				EQU		'****'
+kCfgClassUnknownEntity			EQU		'????'
+kCfgTypeAnyEntity				EQU		'****'
+kCfgTypeUnknownEntity			EQU		'????'
+; 	-------------------------------------------------------------------------
+;	For CfgIsSameEntityRef
+;	------------------------------------------------------------------------- 
+
+
+kCfgIgnoreArea					EQU		1
+kCfgDontIgnoreArea				EQU		0
+; *******************************************************************************
+;**	Configuration Information Access API 
+;*******************************************************************************
+
+; 	-------------------------------------------------------------------------
+;	Database access
+;	------------------------------------------------------------------------- 
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal OSStatus OTCfgOpenDatabase(CfgDatabaseRef *dbRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgOpenDatabase
+	ENDIF
+
+; 
+;	OTCfgOpenDatabase()
+;
+;	Inputs:		none
+;	Outputs:	CfgDatabaseRef* dbRef			Reference to opened database
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Opens the Configuration API for a given client. This call should be made prior to any other call.
+;
+
+;
+; pascal OSStatus OTCfgCloseDatabase(CfgDatabaseRef *dbRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgCloseDatabase
+	ENDIF
+
+; 
+;	OTCfgCloseDatabase()
+;
+;	Inputs:		CfgDatabaseRef* dbRef			Reference to opened database
+;	Outputs:	CfgDatabaseRef* dbRef			Reference to opened database is cleared
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Closes the Configuration API for a given client. This call should be made when the client no 
+;	longer wants to use the Configuration API.  
+;
+
+; 	-------------------------------------------------------------------------
+;	Area management
+;	------------------------------------------------------------------------- 
+
+;
+; pascal OSStatus OTCfgGetAreasCount(CfgDatabaseRef dbRef, ItemCount *itemCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetAreasCount
+	ENDIF
+
+; 
+;	OTCfgGetAreasCount()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;	Outputs:	ItemCount* itemCount			Number of entities defined
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Returns the number of areas currently defined.
+;
+
+;
+; pascal OSStatus OTCfgGetAreasList(CfgDatabaseRef dbRef, ItemCount *itemCount, CfgAreaID areaID[], Str255 areaName[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetAreasList
+	ENDIF
+
+; 
+;	OTCfgGetAreasList()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				ItemCount* itemCount			Number of entities requested
+;	Outputs:	ItemCount* itemCount			Number of entities defined
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Returns a list of area IDs and names. On entry, count should be set to whatever OTCfgGetAreasCount 
+;	returned.  On exit, count contains the actual number of areas found. This can be less than the 
+;	initial count value if areas were deleted in the meantime.  The id and name parameters are stored 
+;	in arrays that should each be able to contain count values.
+;
+
+;
+; pascal OSStatus OTCfgGetCurrentArea(CfgDatabaseRef dbRef, CfgAreaID *areaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetCurrentArea
+	ENDIF
+
+; 
+;	OTCfgGetCurrentArea()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;	Outputs:	CfgAreaID* areaID				ID of current area
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Returns the id of the current area.
+;
+
+;
+; pascal OSStatus OTCfgSetCurrentArea(CfgDatabaseRef dbRef, CfgAreaID areaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgSetCurrentArea
+	ENDIF
+
+; 
+;	OTCfgSetCurrentArea()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID areaID				ID of area to make active
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Sets the current area. If the area doesn’t exist kCfgErrAreaNotFound is returned.
+;
+
+;
+; pascal OSStatus OTCfgCreateArea(CfgDatabaseRef dbRef, ConstStr255Param areaName, CfgAreaID *areaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgCreateArea
+	ENDIF
+
+; 
+;	OTCfgCreateArea()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				ConstStr255Param areaName		Name of area to create
+;	Outputs:	CfgAreaID* areaID				ID of newly created area
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Creates a new area with the specified name. Then name must be unique or kCfgErrAreaAlreadyExists 
+;	will be returned.
+;
+
+;
+; pascal OSStatus OTCfgDeleteArea(CfgDatabaseRef dbRef, CfgAreaID areaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgDeleteArea
+	ENDIF
+
+; 
+;	OTCfgDeleteArea()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID areaID				ID of area to delete
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Deletes the specified area. If the area doesn’t exist kCfgErrAreaNotFound is returned.
+;
+
+;
+; pascal OSStatus OTCfgDuplicateArea(CfgDatabaseRef dbRef, CfgAreaID sourceAreaID, CfgAreaID destAreaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgDuplicateArea
+	ENDIF
+
+; 
+;	OTCfgDuplicateArea()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID sourceAreaID			Area to duplicate
+;				CfgAreaID destAreaID			Area to contain duplicate
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Duplicates the source area content into the destination area. Both areas should exist prior to 
+;	making this call. If either area doesn’t exist kCfgErrAreaNotFound is returned.
+;
+
+;
+; pascal OSStatus OTCfgSetAreaName(CfgDatabaseRef dbRef, CfgAreaID areaID, ConstStr255Param areaName, CfgAreaID *newAreaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgSetAreaName
+	ENDIF
+
+; 
+;	OTCfgSetAreaName()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID areaID				ID of area being named
+;				ConstStr255Param areaName		New name for area
+;	Outputs:	CfgAreaID* newAreaID			ID of renamed area
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Renames the specified area. A new id is returned: it should be used from now on. If the area 
+;	doesn’t exist kCfgErrAreaNotFound is returned.
+;
+
+;
+; pascal OSStatus OTCfgGetAreaName(CfgDatabaseRef dbRef, CfgAreaID areaID, Str255 areaName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetAreaName
+	ENDIF
+
+; 
+;	OTCfgGetAreaName()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID areaID				ID of area being queried
+;	Outputs:	Str255 areaName					Name of area
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Gets the name of the specified area. If the area doesn’t exist kCfgErrAreaNotFound is returned.
+;
+
+; 	-------------------------------------------------------------------------
+;	Configuration Database API
+;	
+;	Single Writer ONLY!!!
+;	------------------------------------------------------------------------- 
+
+; 	-------------------------------------------------------------------------
+;	Opening an area for reading
+;	------------------------------------------------------------------------- 
+
+;
+; pascal OSStatus OTCfgOpenArea(CfgDatabaseRef dbRef, CfgAreaID areaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgOpenArea
+	ENDIF
+
+; 
+;	OTCfgOpenArea()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID areaID				ID of area to open
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Opens the specified area for reading. If the area doesn’t exist kCfgErrAreaNotFound is returned.
+;
+
+;
+; pascal OSStatus OTCfgCloseArea(CfgDatabaseRef dbRef, CfgAreaID areaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgCloseArea
+	ENDIF
+
+; 
+;	OTCfgCloseArea()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID areaID				ID of area to close
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Closes an area opened for reading. If the area doesn’t exist kCfgErrAreaNotFound is returned.  
+;	Opening an area for writing All modifications to an area should be performed as part of a 
+;	transaction.
+;
+
+; 
+;	For write access
+;
+
+;
+; pascal OSStatus OTCfgBeginAreaModifications(CfgDatabaseRef dbRef, CfgAreaID readAreaID, CfgAreaID *writeAreaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgBeginAreaModifications
+	ENDIF
+
+; 
+;	OTCfgBeginAreaModifications()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID readAreaID			ID of area opened for reading
+;	Outputs:	CfgAreaID* writeAreaID			ID of area opened for modification
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Opens the specified area for writing. A new area id is provided.  This area id should be used to 
+;	enumerate, add, delete, read and write to the modified data. The original id can still be used to 
+;	access the original unmodified data. If the area doesn’t exist kCfgErrAreaNotFound is returned.
+;
+
+;
+; pascal OSStatus OTCfgCommitAreaModifications(CfgDatabaseRef dbRef, CfgAreaID readAreaID, CfgAreaID writeAreaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgCommitAreaModifications
+	ENDIF
+
+; 
+;	OTCfgCommitAreaModifications()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID readAreaID			ID of area opened for reading
+;				CfgAreaID writeAreaID			ID of area opened for modification
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Closes an area opened for writing.  All modifications are committed and readers are informed that 
+;	the database changed state ( kCfgStateChangedErr ). The areaID should be the id of the original 
+;	area.  If the area doesn’t exist or the wrong id is passed, kCfgErrAreaNotFound is returned.
+;
+
+;
+; pascal OSStatus OTCfgAbortAreaModifications(CfgDatabaseRef dbRef, CfgAreaID readAreaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgAbortAreaModifications
+	ENDIF
+
+; 
+;	OTCfgAbortAreaModifications()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID readAreaID			ID of area opened for reading
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Closes an area opened for writing, discarding any modification. The areaID should be the id of 
+;	the original area. If the area doesn’t exist or the wrong id is passed kCfgErrAreaNotFound is 
+;	returned.
+;
+
+; 
+;	Working with entities
+;
+;	Entities can be manipulated as soon as an area has been opened.  The same calls work both for 
+;	areas opened for reading or for modification. In the latter case, the calls can be used on the 
+;	original or new area id to access the original data or the modified data.
+;
+
+; 
+;	For everybody
+;	Count receives the actual number of entities
+;
+
+;
+; pascal OSStatus OTCfgGetEntitiesCount(CfgDatabaseRef dbRef, CfgAreaID areaID, CfgEntityClass entityClass, CfgEntityType entityType, ItemCount *itemCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetEntitiesCount
+	ENDIF
+
+; 
+;	OTCfgGetEntitiesCount()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID areaID				ID of area to count
+;				CfgEntityClass entityClass		Class of entities to count
+;				CfgEntityType entityType		Type of entities to count
+;	Outputs:	ItemCount* itemCount			Count of matching entities
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Returns the number of entities of the specified class and type in the specified area. To obtain 
+;	all entities regardless of their class or type pass kCfgClassAnyEntity or kCfgTypeAnyEntity. If 
+;	the area doesn’t exist or the wrong id is passed kCfgErrAreaNotFound is returned.
+;
+
+
+; 
+;	Count as input, is the number of entities to read;
+;	count as output, receives the actual number of entities or the number you specified. 
+;
+
+;
+; pascal OSStatus OTCfgGetEntitiesList(CfgDatabaseRef dbRef, CfgAreaID areaID, CfgEntityClass entityClass, CfgEntityType entityType, ItemCount *itemCount, CfgEntityRef entityRef[], CfgEntityInfo entityInfo[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetEntitiesList
+	ENDIF
+
+; 
+;	OTCfgGetEntitiesList()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID areaID				ID of area to list
+;				CfgEntityClass entityClass		Class of entities to list
+;				CfgEntityType entityType		Type of entities to list
+;				ItemCount* itemCount			Count of entities requested
+;	Outputs:	ItemCount* itemCount			Count of entities listed
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Returns the list of entities of the specified class and type in the specified area. To obtain all 
+;	entities regardless of their class or type pass kCfgClassAnyEntity or kCfgTypeAnyEntity. The 
+;	count parameter should have the value obtained by CfgGetEntitiesCount.  On exit count may be less 
+;	if some entities were deleted in the meantime. The id and info parameters should be arrays large 
+;	enough to hold count entries. If the area doesn’t exist or the wrong id is passed 
+;	kCfgErrAreaNotFound is returned.  The info array contains information about each entity, 
+;	including its class, type, name and the area of its icon:
+;
+;	struct CfgEntityInfo
+;	{
+;		CfgEntityClass		fClass;
+;		CfgEntityType		fType;
+;		ConstStr255Param	fName;
+;		CfgResourceLocator	fIcon;
+;	};
+;
+
+;
+; pascal OSStatus OTCfgCreateEntity(CfgDatabaseRef dbRef, CfgAreaID areaID, const CfgEntityInfo *entityInfo, CfgEntityRef *entityRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgCreateEntity
+	ENDIF
+
+; 
+;	OTCfgCreateEntity()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgAreaID areaID				ID of area to contain entity
+;				CfgEntityInfo* entityInfo		Information that defines the entity
+;	Outputs:	CfgEntityRef* entityRef			Reference to entity created
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Creates a new entity with the specified class, type and name and returns an id for it. If the 
+;	area doesn’t exist or the wrong id is passed kCfgErrAreaNotFound is returned. If there is already 
+;	an entity with the same name kCfgErrEntityAlreadyExists is returned.
+;
+
+;
+; pascal OSStatus OTCfgDeleteEntity(CfgDatabaseRef dbRef, const CfgEntityRef *entityRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgDeleteEntity
+	ENDIF
+
+; 
+;	OTCfgDeleteEntity()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgEntityRef* entityRef			Reference to entity to delete
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Deletes the specified entity. If there is no entity with this id kCfgEntityNotfoundErr is returned
+;
+
+;
+; pascal OSStatus OTCfgDuplicateEntity(CfgDatabaseRef dbRef, const CfgEntityRef *entityRef, const CfgEntityRef *newEntityRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgDuplicateEntity
+	ENDIF
+
+; 
+;	OTCfgDuplicateEntity()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgEntityRef* entityRef			Reference to entity to duplicate
+;	Outputs:	CfgEntityRef* newEntityRef		Reference to duplicate entity
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Duplicates the specified entity. Both entities should exit. If any entity doesn’t exist 
+;	kCfgErrEntityNotFound is returned.
+;
+
+;
+; pascal OSStatus OTCfgSetEntityName(CfgDatabaseRef dbRef, const CfgEntityRef *entityRef, ConstStr255Param entityName, CfgEntityRef *newEntityRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgSetEntityName
+	ENDIF
+
+; 
+;	OTCfgSetEntityName()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgEntityRef* entityRef			Reference to entity to duplicate
+;				ConstStr255Param entityName		New name for entity
+;	Outputs:	CfgEntityRef* newEntityRef		Reference to renamed entity
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Renames the specified entity. If the entity doesn’t exist kCfgEntityNotfoundErr is returned. If 
+;	there is already an entity with that name kCfgErrEntityAlreadyExists is returned.
+;
+
+;
+; pascal void OTCfgGetEntityArea(const CfgEntityRef *entityRef, CfgAreaID *areaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetEntityArea
+	ENDIF
+
+; 
+;	OTCfgGetEntityArea()
+;
+;	Inputs:		CfgEntityRef *entityRef			Reference to an entity
+;	Outputs:	CfgAreaID *areaID				ID of area that contains the entity
+;	Returns:	none
+;
+;	Returns the area ID associated with the specified entity reference.
+;
+
+;
+; pascal void OTCfgGetEntityName(const CfgEntityRef *entityRef, Str255 entityName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetEntityName
+	ENDIF
+
+; 
+;	OTCfgGetEntityName()
+;
+;	Inputs:		CfgEntityRef *entityRef			Reference to an entity
+;	Outputs:	Str255 entityName				Name of the entity
+;	Returns:	none
+;
+;	Returns the entity name associated with the specified entity reference.
+;
+
+;
+; pascal void OTCfgChangeEntityArea(CfgEntityRef *entityRef, CfgAreaID newAreaID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgChangeEntityArea
+	ENDIF
+
+; 
+;	OTCfgChangeEntityArea()
+;
+;	Inputs:		CfgEntityRef *entityRef			Reference to an entity
+;				CfgAreaID newAreaID				ID of area to contain moved entity
+;	Outputs:	none
+;	Returns:	none
+;
+;	Changes the area ID associated with the specified entity reference. This effectively moves the 
+;	entity to a different area.
+;
+
+; 	-------------------------------------------------------------------------
+;	These API calls are for the protocol developers to compare the IDs.
+;	------------------------------------------------------------------------- 
+
+; 	-------------------------------------------------------------------------
+;	For OTCfgIsSameEntityRef
+;	------------------------------------------------------------------------- 
+
+	ENDIF	; CALL_NOT_IN_CARBON
+
+kOTCfgIgnoreArea				EQU		1
+kOTCfgDontIgnoreArea			EQU		0
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal Boolean OTCfgIsSameEntityRef(const CfgEntityRef *entityRef1, const CfgEntityRef *entityRef2, Boolean ignoreArea)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgIsSameEntityRef
+	ENDIF
+
+; 
+;	OTCfgIsSameEntityRef()
+;
+;	Inputs:		CfgEntityRef* entityRef1		Reference to an entity
+;				CfgEntityRef* entityRef2		Reference to another entity
+;				Boolean ignoreArea				If true, ignore the area ID
+;	Outputs:	none
+;	Returns:	Boolean							If true, entity references match
+;
+;	Compare two entity references. If ignoreArea is true, and the two entity names are the same, then return 
+;	true. If ignoreArea is false, then the area IDs must be the same, as well as the entity names 
+;	must be the same, then can return true.
+;
+
+;
+; pascal Boolean OTCfgIsSameAreaID(CfgAreaID areaID1, CfgAreaID areaID2)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgIsSameAreaID
+	ENDIF
+
+; 
+;	OTCfgIsSameAreaID()
+;
+;	Inputs:		CfgAreaID areaID1				ID of an area
+;				CfgAreaID areaID2				ID of another area
+;	Outputs:	none
+;	Returns:	Boolean							If true, area IDs match
+;
+;	Compare two area IDs. Return true for matching area IDs, and return false for the different area IDs.
+;
+
+; 	-------------------------------------------------------------------------
+;	Dealing with individual preferences
+;	------------------------------------------------------------------------- 
+
+; 	-------------------------------------------------------------------------
+;	Open Preferences
+;	if writer = true, GetPrefs and SetPrefs are allowed, else only GetPrefs is allowed.
+;	------------------------------------------------------------------------- 
+
+;
+; pascal OSStatus OTCfgOpenPrefs(CfgDatabaseRef dbRef, const CfgEntityRef *entityRef, Boolean writer, CfgEntityAccessID *accessID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgOpenPrefs
+	ENDIF
+
+; 
+;	OTCfgOpenPrefs()
+;
+;	Inputs:		CfgDatabaseRef dbRef			Reference to opened database
+;				CfgEntityRef* entityRef			Reference to an entity
+;				Boolean writer				If true, open for write
+;	Outputs:	CfgEntityAccessID* accessID		ID for entity access
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Open the specified entity and return the CfgEntityAccessID for the following access of the 
+;	content of the entity. If writer is true, CfgGetPrefs and CfgSetPrefs are allowed, otherwise only 
+;	CfgGetPrefs is allowed.
+;
+
+;
+; pascal OSStatus OTCfgClosePrefs(CfgEntityAccessID accessID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgClosePrefs
+	ENDIF
+
+; 
+;	OTCfgClosePrefs()
+;
+;	Inputs:		CfgEntityAccessID* accessID		ID for entity to close
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Close the entity with the specified CfgEntityAccessID.
+;
+
+; 	-------------------------------------------------------------------------
+;	Get/Set Preferences
+;
+;	Accessing the content of an entity
+;
+;	These API calls are for the protocol developers. It supports multiple records per entity. Each 
+;	record is identified by the prefsType and the size of the record. The protocol stack will provide 
+;	the STRUCT to view the content of each record.
+;	------------------------------------------------------------------------- 
+
+;
+; pascal OSStatus OTCfgSetPrefs(CfgEntityAccessID accessID, OSType prefsType, const void *data, ByteCount length)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgSetPrefs
+	ENDIF
+
+; 
+;	OTCfgSetPrefs()
+;
+;	Inputs:		CfgEntityAccessID* accessID		ID of entity to access
+;				OSType prefsType				Record type to set
+;				void* data						Address of data
+;				ByteCount length				Number of bytes of data
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Write the data to the specified record. The record is identified by the prefsType. If the entity 
+;	is not opened for the writer, an error code is returned.
+;
+
+;
+; pascal OSStatus OTCfgGetPrefs(CfgEntityAccessID accessID, OSType prefsType, void *data, ByteCount length)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetPrefs
+	ENDIF
+
+; 
+;	OTCfgGetPrefs()
+;
+;	Inputs:		CfgEntityAccessID* accessID		ID of entity to access
+;				OSType prefsType				Record type to get
+;				void* data						Address for data
+;				ByteCount length				Number of bytes of data requested
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Read the data from the specified record to the passed buffer. The record is identified by the 
+;	prefsType. If the passed buffer is too small, kCfgErrDataTruncated is returned, but will copy as 
+;	many data as possible to the buffer.
+;
+
+;
+; pascal OSStatus OTCfgGetPrefsSize(CfgEntityAccessID accessID, OSType prefsType, ByteCount *length)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetPrefsSize
+	ENDIF
+
+; 
+;	OTCfgGetPrefsSize()
+;
+;	Inputs:		CfgEntityAccessID* accessID		ID of entity to access
+;				OSType prefsType				Record type to get
+;				ByteCount length				Number of bytes of data available
+;	Outputs:	none
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Returns the length, in bytes, of the specified record. The record is identified by the prefsType.
+;
+
+; 	-------------------------------------------------------------------------
+;	Get table of contents for prefs
+;	------------------------------------------------------------------------- 
+
+;
+; pascal OSStatus OTCfgGetPrefsTOCCount(CfgEntityAccessID accessID, ItemCount *itemCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetPrefsTOCCount
+	ENDIF
+
+; 
+;	OTCfgGetPrefsTOCCount()
+;
+;	Inputs:		CfgEntityAccessID* accessID		ID of entity to access
+;	Outputs:	ItemCount* itemCount			Number of entries available
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Get the count of all the record headers in the entity. Return the number of records in the count. 
+;
+
+;
+; pascal OSStatus OTCfgGetPrefsTOC(CfgEntityAccessID accessID, ItemCount *itemCount, CfgPrefsHeader PrefsTOC[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetPrefsTOC
+	ENDIF
+
+; 
+;	OTCfgGetPrefsTOC()
+;
+;	Inputs:		CfgEntityAccessID* accessID		ID of entity to access
+;				ItemCount* itemCount			Number of entries requested
+;	Outputs:	ItemCount* itemCount			Number of entries available
+;				CfgPrefsHeader PrefsTOC[]		Table of entries
+;	Returns:	OSStatus						*** list errors ***
+;
+;	Get the list of all the record headers in the entity. Return the number of records in the count. 
+;	If the PrefsTOC is specified, it has to be big enough to hold all the record headers. If the 
+;	PrefsTOC is null, only the count is returned.
+;
+
+;
+; pascal SInt16 OTCfgEncrypt(UInt8 *key, UInt8 *data, SInt16 dataLen)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgEncrypt
+	ENDIF
+
+; 
+;	OTCfgEncrypt()
+;
+;	Inputs:		UInt8 *key						encryption key ( user name )
+;				UInt8 *data						data to encrypt ( password )
+;				SInt16 dataLen					length of data to encrypt
+;	Outputs:	UInt8 *data						encrypted data
+;	Returns:	SInt16							length of encrypted data
+;
+;	Encrypt the password, using the user name as the encryption key.  Return the encrypted password and its length.  
+;
+
+;
+; pascal SInt16 OTCfgDecrypt(UInt8 *key, UInt8 *data, SInt16 dataLen)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgDecrypt
+	ENDIF
+
+; 
+;	OTCfgDecrypt()
+;
+;	Inputs:		UInt8 *key						encryption key ( user name )
+;				UInt8 *data						data to decrypt ( password )
+;				SInt16 dataLen					length of data to decrypt
+;	Outputs:	UInt8 *data						decrypted data
+;	Returns:	SInt16							length of decrypted data
+;
+;	Decrypt the password, using the user name as the encryption key.  Return the decrypted password and its length.  
+;
+
+;
+; pascal Handle OTCfgGetDefault(ResType entityType, ResType entityClass, ResType recordType)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgGetDefault
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal OSStatus OTCfgInstallNotifier(CfgDatabaseRef dbRef, CfgEntityClass theClass, CfgEntityType theType, OTNotifyProcPtr notifier, void *contextPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgInstallNotifier
+	ENDIF
+
+;
+; pascal OSStatus OTCfgRemoveNotifier(CfgDatabaseRef dbRef, CfgEntityClass theClass, CfgEntityType theType)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION OTCfgRemoveNotifier
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+; typedef UInt16 						OTCfgIRPortSetting
+
+
+kOTCfgTypeStruct				EQU		'stru'
+kOTCfgTypeElement				EQU		'elem'
+kOTCfgTypeVector				EQU		'vect'
+; 	-------------------------------------------------------------------------
+;	CfgEntityClass / CfgEntityType
+;
+;	The database can distinguish between several classes of objects and 
+;	several types withing each class
+;	Use of different classes allow to store type of information in the same database
+;
+;	Other entity classes and types can be defined by developers.
+;	they should be unique and registered with Developer Tech Support (DTS)
+;	------------------------------------------------------------------------- 
+
+
+kOTCfgClassNetworkConnection	EQU		'otnc'
+kOTCfgClassGlobalSettings		EQU		'otgl'
+kOTCfgClassServer				EQU		'otsv'
+kOTCfgTypeGeneric				EQU		'otan'
+kOTCfgTypeAppleTalk				EQU		'atlk'
+kOTCfgTypeTCPv4					EQU		'tcp4'
+kOTCfgTypeTCPv6					EQU		'tcp6'
+kOTCfgTypeRemote				EQU		'ara '
+kOTCfgTypeDial					EQU		'dial'
+kOTCfgTypeModem					EQU		'modm'
+kOTCfgTypeInfrared				EQU		'infr'
+kOTCfgClassSetOfSettings		EQU		'otsc'
+kOTCfgTypeSetOfSettings			EQU		'otst'
+kOTCfgTypeDNS					EQU		'dns '
+; *******************************************************************************
+;** Preferences Structures
+;*******************************************************************************
+
+
+kOTCfgIndexSetsActive			EQU		0
+kOTCfgIndexSetsEdit				EQU		1
+kOTCfgIndexSetsLimit			EQU		2					;	last value, no comma
+CfgSetsStruct			RECORD 0
+fFlags					 ds.l	1				; offset: $0 (0)
+fTimes					 ds.l	2				; offset: $4 (4)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+CfgSetsElement			RECORD 0
+fEntityRef				 ds		CfgEntityRef	; offset: $0 (0)
+fEntityInfo				 ds		CfgEntityInfo	; offset: $108 (264)
+sizeof					 EQU *					; size:   $258 (600)
+						ENDR
+CfgSetsVector			RECORD 0
+fCount					 ds.l	1				; offset: $0 (0)
+fElements				 ds		CfgSetsElement ; offset: $4 (4) <-- really an array of length one
+sizeof					 EQU *					; size:   $25C (604)
+						ENDR
+; 	Common	
+
+															;	connection	
+kOTCfgTypeConfigName			EQU		'cnam'
+kOTCfgTypeConfigSelected		EQU		'ccfg'				;	transport options	
+kOTCfgTypeUserLevel				EQU		'ulvl'
+kOTCfgTypeWindowPosition		EQU		'wpos'
+; 	AppleTalk	
+
+															;	connection	
+kOTCfgTypeAppleTalkPrefs		EQU		'atpf'
+kOTCfgTypeAppleTalkVersion		EQU		'cvrs'
+kOTCfgTypeAppleTalkLocks		EQU		'lcks'
+kOTCfgTypeAppleTalkPort			EQU		'port'
+kOTCfgTypeAppleTalkProtocol		EQU		'prot'
+kOTCfgTypeAppleTalkPassword		EQU		'pwrd'
+kOTCfgTypeAppleTalkPortFamily	EQU		'ptfm'				;	transport options	
+
+kOTCfgIndexAppleTalkAARP		EQU		0
+kOTCfgIndexAppleTalkDDP			EQU		1
+kOTCfgIndexAppleTalkNBP			EQU		2
+kOTCfgIndexAppleTalkZIP			EQU		3
+kOTCfgIndexAppleTalkATP			EQU		4
+kOTCfgIndexAppleTalkADSP		EQU		5
+kOTCfgIndexAppleTalkPAP			EQU		6
+kOTCfgIndexAppleTalkASP			EQU		7
+kOTCfgIndexAppleTalkLast		EQU		7
+OTCfgAppleTalkPrefs		RECORD 0
+fVersion				 ds.w	1				; offset: $0 (0)
+fNumPrefs				 ds.w	1				; offset: $2 (2)
+fPort					 ds.l	1				; offset: $4 (4)
+fLink					 ds.l	1				; offset: $8 (8)
+fPrefs					 ds.l	8				; offset: $C (12)
+sizeof					 EQU *					; size:   $2C (44)
+						ENDR
+OTCfgAARPPrefs			RECORD 0
+fVersion				 ds.w	1				; offset: $0 (0)
+fSize					 ds.w	1				; offset: $2 (2)
+fAgingCount				 ds.l	1				; offset: $4 (4)
+fAgingInterval			 ds.l	1				; offset: $8 (8)
+fProtAddrLen			 ds.l	1				; offset: $C (12)
+fHWAddrLen				 ds.l	1				; offset: $10 (16)
+fMaxEntries				 ds.l	1				; offset: $14 (20)
+fProbeInterval			 ds.l	1				; offset: $18 (24)
+fProbeRetryCount		 ds.l	1				; offset: $1C (28)
+fRequestInterval		 ds.l	1				; offset: $20 (32)
+fRequestRetryCount		 ds.l	1				; offset: $24 (36)
+sizeof					 EQU *					; size:   $28 (40)
+						ENDR
+OTCfgDDPPrefs			RECORD 0
+fVersion				 ds.w	1				; offset: $0 (0)
+fSize					 ds.w	1				; offset: $2 (2)
+fTSDUSize				 ds.l	1				; offset: $4 (4)
+fLoadType				 ds.b	1				; offset: $8 (8)
+fNode					 ds.b	1				; offset: $9 (9)
+fNetwork				 ds.w	1				; offset: $A (10)
+fRTMPRequestLimit		 ds.w	1				; offset: $C (12)
+fRTMPRequestInterval	 ds.w	1				; offset: $E (14)
+fAddressGenLimit		 ds.l	1				; offset: $10 (16)
+fBRCAgingInterval		 ds.l	1				; offset: $14 (20)
+fRTMPAgingInterval		 ds.l	1				; offset: $18 (24)
+fMaxAddrTries			 ds.l	1				; offset: $1C (28)
+fDefaultChecksum		 ds.b	1				; offset: $20 (32)
+fIsFixedNode			 ds.b	1				; offset: $21 (33)
+fMyZone					 ds.b	33				; offset: $22 (34)
+						 ORG 68
+sizeof					 EQU *					; size:   $44 (68)
+						ENDR
+OTCfgATPFPrefs			RECORD 0
+fAT						 ds		OTCfgAppleTalkPrefs ; offset: $0 (0)
+fAARP					 ds		OTCfgAARPPrefs ; offset: $2C (44)
+fDDP					 ds		OTCfgDDPPrefs	; offset: $54 (84)
+fFill					 ds.b	122				; offset: $98 (152)
+sizeof					 EQU *					; size:   $112 (274)
+						ENDR
+; 	Infrared	
+
+kOTCfgTypeInfraredPrefs			EQU		'atpf'
+kOTCfgTypeInfraredGlobal		EQU		'irgo'
+OTCfgIRPrefs			RECORD 0
+fHdr					 ds		CfgPrefsHeader ; offset: $0 (0)
+fPort					 ds.l	1				; offset: $8 (8)		; 	OT port id
+fPortSetting			 ds.w	1				; offset: $C (12)		; 	Ir protocol,  irda or irtalk
+fNotifyOnDisconnect		 ds.b	1				; offset: $E (14)		; 	notify user on irda disconnect?
+fDisplayIRControlStrip	 ds.b	1				; offset: $F (15)		; 	show ir control strip?
+fWindowPosition			 ds		Point			; offset: $10 (16)		; 	The position of the editor window
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+OTCfgIRGlobal			RECORD 0
+fHdr					 ds		CfgPrefsHeader ; offset: $0 (0)			;  standard prefererences header
+fOptions				 ds.l	1				; offset: $8 (8)		;  options bitmask
+fNotifyMask				 ds.l	1				; offset: $C (12)		;  Notification options.
+fUnloadTimeout			 ds.l	1				; offset: $10 (16)		;  Unload timeout (in milliseconds)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+; 	TCP/IP v4	
+
+															;	connection	
+kOTCfgTypeTCPalis				EQU		'alis'
+kOTCfgTypeTCPcvrs				EQU		'cvrs'
+kOTCfgTypeTCPdcid				EQU		'dcid'
+kOTCfgTypeTCPdclt				EQU		'dclt'
+kOTCfgTypeTCPdtyp				EQU		'dtyp'
+kOTCfgTypeTCPidns				EQU		'idns'
+kOTCfgTypeTCPihst				EQU		'ihst'
+kOTCfgTypeTCPiitf				EQU		'iitf'
+kOTCfgTypeTCPara				EQU		'ipcp'
+kOTCfgTypeTCPirte				EQU		'irte'
+kOTCfgTypeTCPisdm				EQU		'isdm'
+kOTCfgTypeTCPstng				EQU		'stng'
+kOTCfgTypeTCPunld				EQU		'unld'
+kOTCfgTypeTCPVersion			EQU		'cvrs'				;	Version 
+kOTCfgTypeTCPDevType			EQU		'dvty'
+kOTCfgTypeTCPPrefs				EQU		'iitf'
+kOTCfgTypeTCPServersList		EQU		'idns'
+kOTCfgTypeTCPSearchList			EQU		'ihst'
+kOTCfgTypeTCPRoutersList		EQU		'irte'
+kOTCfgTypeTCPDomainsList		EQU		'isdm'
+kOTCfgTypeTCPPort				EQU		'port'				;	Ports 
+kOTCfgTypeTCPProtocol			EQU		'prot'
+kOTCfgTypeTCPPassword			EQU		'pwrd'				;	Password 
+kOTCfgTypeTCPLocks				EQU		'stng'				;	locks 
+kOTCfgTypeTCPUnloadType			EQU		'unld'				;	transport options	
+
+OTCfgIDNSPrefs			RECORD 0
+fCount					 ds.w	1				; offset: $0 (0)
+fAddressesList			 ds.l	1				; offset: $2 (2)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+OTCfgHSTFPrefs			RECORD 0
+fPrimaryInterfaceIndex	 ds.b	1				; offset: $0 (0)		; 	always 1 in OT 1.0 / 1.1
+; 	this structure IS packed!
+fLocalDomainName		 ds.b	256				; offset: $1 (1)
+; 	followed by 
+admindomain				 ds.b	256				; offset: $101 (257)
+						 ORG 514
+sizeof					 EQU *					; size:   $202 (514)
+						ENDR
+; 	This is your worst case, a fixed size structure, tacked on after a variable length string.
+
+;  	This structure also contains an IP address and subnet mask that are not aligned on a four byte boundary.  
+;  	In order to avoid compiler warnings, and the possibility of code that won't work, 
+;  	these fields are defined here as four character arrays.  
+;  	It is suggested that BlockMoveData be used to copy to and from a field of type InetHost.  
+
+
+OTCfgIITFPrefsPart		RECORD 0
+path					 ds.b	36				; offset: $0 (0)
+module					 ds.b	32				; offset: $24 (36)
+framing					 ds.l	1				; offset: $44 (68)
+sizeof					 EQU *					; size:   $48 (72)
+						ENDR
+OTCfgIITFPrefs			RECORD 0
+fCount					 ds.w	1				; offset: $0 (0)
+fConfigMethod			 ds.b	1				; offset: $2 (2)
+; 	this structure IS packed!
+; 	Followed by:
+fIPAddress				 ds.b	4				; offset: $3 (3)
+fSubnetMask				 ds.b	4				; offset: $7 (7)
+fAppleTalkZone			 ds.b	256				; offset: $B (11)
+; 	this structure IS packed!
+fFiller					 ds.b	1				; offset: $10B (267)
+part					 ds		OTCfgIITFPrefsPart ; offset: $10C (268)
+sizeof					 EQU *					; size:   $154 (340)
+						ENDR
+OTCfgIRTEEntry			RECORD 0
+fToHost					 ds.l	1				; offset: $0 (0)		; 	always 0;
+fViaHost				 ds.l	1				; offset: $4 (4)		; 	router address;
+fLocal					 ds.w	1				; offset: $8 (8)		; 	always 0
+fHost					 ds.w	1				; offset: $A (10)		; 	always 0
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+OTCfgIRTEPrefs			RECORD 0
+fCount					 ds.w	1				; offset: $0 (0)
+fList					 ds		OTCfgIRTEEntry ; offset: $2 (2) <-- really an array of length one
+sizeof					 EQU *					; size:   $E (14)
+						ENDR
+OTCfgISDMPrefs			RECORD 0
+fCount					 ds.w	1				; offset: $0 (0)
+fDomainsList			 ds		Str255			; offset: $2 (2)
+sizeof					 EQU *					; size:   $102 (258)
+						ENDR
+OTCfgDHCPRecord			RECORD 0
+ipIPAddr				 ds.l	1				; offset: $0 (0)
+ipConfigServer			 ds.l	1				; offset: $4 (4)
+ipLeaseGrantTime		 ds.l	1				; offset: $8 (8)
+ipLeaseExpirationTime	 ds.l	1				; offset: $C (12)
+sizeof					 EQU *					; size:   $10 (16)
+						ENDR
+; 	DNS	
+
+															;	connection	
+kOTCfgTypeDNSidns				EQU		'idns'
+kOTCfgTypeDNSisdm				EQU		'isdm'
+kOTCfgTypeDNSihst				EQU		'ihst'
+kOTCfgTypeDNSstng				EQU		'stng'
+kOTCfgTypeDNSPassword			EQU		'pwrd'				;	transport options	
+; 	Modem	
+
+															;	connection	
+kOTCfgTypeModemModem			EQU		'ccl '				;	Type for Modem configuration resource
+kOTCfgTypeModemLocks			EQU		'lkmd'				;	Types for lock resources
+kOTCfgTypeModemAdminPswd		EQU		'mdpw'				;	Password
+															;	transport options	
+kOTCfgTypeModemApp				EQU		'mapt'
+OTCfgRemoteConfigModem	RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+useModemScript			 ds.b	1				; offset: $4 (4)
+pad00					 ds.b	1				; offset: $5 (5)		; 	this structure is NOT packed!
+modemScript				 ds		FSSpec			; offset: $6 (6)
+modemSpeakerOn			 ds.b	1				; offset: $4C (76)
+modemPulseDial			 ds.b	1				; offset: $4D (77)
+modemDialToneMode		 ds.l	1				; offset: $4E (78)
+lowerLayerName			 ds.b	36				; offset: $52 (82)
+sizeof					 EQU *					; size:   $76 (118)
+						ENDR
+OTCfgModemLocks			RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+port					 ds.l	1				; offset: $4 (4)
+script					 ds.l	1				; offset: $8 (8)
+speaker					 ds.l	1				; offset: $C (12)
+dialing					 ds.l	1				; offset: $10 (16)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+OTCfgModemAppPrefs		RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+windowPos				 ds		Point			; offset: $4 (4)
+userMode				 ds.l	1				; offset: $8 (8)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+; 	Remote Access	
+
+															;	connection	
+kOTCfgTypeRemoteARAP			EQU		'arap'
+kOTCfgTypeRemoteAddress			EQU		'cadr'
+kOTCfgTypeRemoteChat			EQU		'ccha'
+kOTCfgTypeRemoteDialing			EQU		'cdia'
+kOTCfgTypeRemoteExtAddress		EQU		'cead'
+kOTCfgTypeRemoteClientLocks		EQU		'clks'
+kOTCfgTypeRemoteClientMisc		EQU		'cmsc'
+kOTCfgTypeRemoteConnect			EQU		'conn'
+kOTCfgTypeRemoteUser			EQU		'cusr'
+kOTCfgTypeRemoteDialAssist		EQU		'dass'
+kOTCfgTypeRemoteIPCP			EQU		'ipcp'
+kOTCfgTypeRemoteLCP				EQU		'lcp '				; trailing space is important! 
+kOTCfgTypeRemoteLogOptions		EQU		'logo'
+kOTCfgTypeRemotePassword		EQU		'pass'
+kOTCfgTypeRemotePort			EQU		'port'
+kOTCfgTypeRemoteServerLocks		EQU		'slks'
+kOTCfgTypeRemoteServer			EQU		'srvr'
+kOTCfgTypeRemoteUserMode		EQU		'usmd'
+kOTCfgTypeRemoteX25				EQU		'x25 '				; trailing space is important! 
+															;	transport options	
+kOTCfgTypeRemoteApp				EQU		'capt'
+; *******************************************************************************
+;*	OTCfgRemoteLogOptions
+;*
+;*	This structure is appended to OTCfgRemoteConnect records in the 
+;*	OTCfgRemoteConnect::additional list.
+;*
+;*	NOTE
+;*
+;*	All OTCfgRemoteConnect::additional structures MUST have the same fields up to
+;*	the "additional" field.  See OTCfgRemoteX25Info.
+;*******************************************************************************
+
+OTCfgRemoteLogOptions	RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+fType					 ds.l	1				; offset: $4 (4)		; 	kRAConnectAdditionalLogOptions
+additional				 ds.l	1				; offset: $8 (8)
+logLevel				 ds.l	1				; offset: $C (12)		; 	values defined above.
+reserved				 ds.l	4				; offset: $10 (16)		; 	for later use.
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+; *******************************************************************************
+;*	New structures for dialing mode, phone numbers, and configuration stats.
+;*	
+;*	
+;*******************************************************************************
+
+
+kOTCfgRemoteMaxAddressSize		EQU		256
+OTCfgRemoteAddress		RECORD 0
+next					 ds.l	1				; offset: $0 (0)
+address					 ds.b	256				; offset: $4 (4)
+sizeof					 EQU *					; size:   $104 (260)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteDialing
+;*
+;*	This structure is appended to OTCfgRemoteConnect records in the 
+;*	OTCfgRemoteConnect::additional list.
+;*
+;*	NOTE
+;*
+;*	All OTCfgRemoteConnect::additional structures MUST have the same fields up to
+;*	the "additional" field.  See OTCfgRemoteX25Info.
+;*******************************************************************************
+
+OTCfgRemoteDialing		RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+fType					 ds.l	1				; offset: $4 (4)		; 	kRAConnectAdditionalDialing
+additional				 ds.l	1				; offset: $8 (8)
+dialMode				 ds.l	1				; offset: $C (12)		; 	values defined above.
+redialTries				 ds.l	1				; offset: $10 (16)
+redialDelay				 ds.l	1				; offset: $14 (20)		; 	in seconds.
+addresses				 ds.l	1				; offset: $18 (24)
+sizeof					 EQU *					; size:   $1C (28)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteScript
+;*
+;*	This is appended to OTCfgRemoteConnect records in the "additional" list.
+;*	It is currently only used for passing in a modem script to override
+;*	the default script.  Connect scripts have their own field in OTCfgRemoteConnect.
+;*
+;*	NOTE
+;*
+;*	All OTCfgRemoteConnect::additional structures MUST have the same fields up to
+;*	the "additional" field.  See OTCfgRemoteX25Info and OTCfgRemoteDialing.
+;*******************************************************************************
+
+OTCfgRemoteScript		RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+fType					 ds.l	1				; offset: $4 (4)		; 	kRAConnectAdditionalScript
+additional				 ds.l	1				; offset: $8 (8)
+scriptType				 ds.l	1				; offset: $C (12)
+scriptLength			 ds.l	1				; offset: $10 (16)
+scriptData				 ds.l	1				; offset: $14 (20)
+sizeof					 EQU *					; size:   $18 (24)
+						ENDR
+; *******************************************************************************
+;*	Miscellaneous limits
+;*	The size limits for strings include a 1 byte for the string length or
+;*	a terminating NULL character.
+;*******************************************************************************
+
+
+kOTCfgRemoteMaxPasswordLength	EQU		255
+kOTCfgRemoteMaxPasswordSize		EQU		256
+kOTCfgRemoteMaxUserNameLength	EQU		255
+kOTCfgRemoteMaxUserNameSize		EQU		256
+kOTCfgRemoteMaxAddressLength	EQU		255					;	kOTCfgRemoteMaxAddressSize					= (255 + 1),
+kOTCfgRemoteMaxServerNameLength	EQU		32
+kOTCfgRemoteMaxServerNameSize	EQU		33
+kOTCfgRemoteMaxMessageLength	EQU		255
+kOTCfgRemoteMaxMessageSize		EQU		256
+kOTCfgRemoteMaxX25ClosedUserGroupLength EQU 4
+kOTCfgRemoteInfiniteSeconds		EQU		$FFFFFFFF
+kOTCfgRemoteMinReminderMinutes	EQU		1
+kOTCfgRemoteChatScriptFileCreator EQU	'ttxt'
+kOTCfgRemoteChatScriptFileType	EQU		'TEXT'
+kOTCfgRemoteMaxChatScriptLength	EQU		$8000
+; *******************************************************************************
+;*	X.25 connection information, added to OTCfgRemoteConnect's additional info list.
+;*
+;*	NOTE
+;*
+;*	All OTCfgRemoteConnect::additional structures MUST have the same fields up to
+;*	the "additional" field.  See OTCfgRemoteScript & OTCfgRemoteDialing.
+;*******************************************************************************
+
+OTCfgRemoteX25Info		RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+fType					 ds.l	1				; offset: $4 (4)		; 	kRAConnectAdditionalX25
+additional				 ds.l	1				; offset: $8 (8)		; 	Ptr to additional connect info
+script					 ds		FSSpec			; offset: $C (12)		; 	PAD's CCL script
+address					 ds.b	256				; offset: $52 (82)		; 	address of server
+userName				 ds.b	256				; offset: $152 (338)
+; 	network user ID
+closedUserGroup			 ds.b	5				; offset: $252 (594)
+; 	closed user group
+reverseCharge			 ds.b	1				; offset: $257 (599)	; 	request reverse charging
+sizeof					 EQU *					; size:   $258 (600)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteDisconnect
+;*
+;*	Use this structure to terminate Remote Access connections.
+;*******************************************************************************
+
+OTCfgRemoteDisconnect	RECORD 0
+whenSeconds				 ds.l	1				; offset: $0 (0)		; 	Number of seconds until disconnect
+showStatus				 ds.l	1				; offset: $4 (4)		; 	Show disconnect status window
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteIsRemote
+;*
+;*	Use this structure to find out if an AppleTalk address is on the 
+;*	remote side of the current ARA link. The "isRemote" field is set to
+;*	"true" if the address is remote. 
+;*******************************************************************************
+
+OTCfgRemoteIsRemote		RECORD 0
+net						 ds.l	1				; offset: $0 (0)		; 	AppleTalk network number
+node					 ds.l	1				; offset: $4 (4)		; 	AppleTalk node number
+isRemote				 ds.l	1				; offset: $8 (8)		; 	returned.
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteConnect
+;*
+;*	Use this structure to initiate Remote Access connections.
+;*******************************************************************************
+
+OTCfgRemoteConnect		RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+fType					 ds.l	1				; offset: $4 (4)		; 	RAConnectType defined above.
+isGuest					 ds.l	1				; offset: $8 (8)		; 	(boolean) True for guest login
+canInteract				 ds.l	1				; offset: $C (12)		; 	(boolean) True if dialogs can be displayed
+showStatus				 ds.l	1				; offset: $10 (16)		; 	(boolean) Display (dis)connection status dialogs?
+passwordSaved			 ds.l	1				; offset: $14 (20)		; 	(boolean) "Save Password" checked in doc.
+flashConnectedIcon		 ds.l	1				; offset: $18 (24)		; 	(boolean) Flash icon in menu bar
+issueConnectedReminders	 ds.l	1				; offset: $1C (28)		; 	(boolean) Use Notification Manager reminders
+reminderMinutes			 ds.l	1				; offset: $20 (32)		; 	How long between each reminder?
+connectManually			 ds.l	1				; offset: $24 (36)		; 	(boolean) True if we are connecting manually
+allowModemDataCompression  ds.l	1				; offset: $28 (40)		; 	(boolean) currently, only for kSerialProtoPPP
+chatMode				 ds.l	1				; offset: $2C (44)		; 	Flags defined above
+serialProtocolMode		 ds.l	1				; offset: $30 (48)		; 	Flags defined above
+password				 ds.l	1				; offset: $34 (52)
+userName				 ds.l	1				; offset: $38 (56)
+addressLength			 ds.l	1				; offset: $3C (60)		; 	Length of phone number or other address
+address					 ds.l	1				; offset: $40 (64)		; 	Phone number or address data
+chatScriptName			 ds		Str63			; offset: $44 (68)		; 	Name of imported chat script (informational only)
+chatScriptLength		 ds.l	1				; offset: $84 (132)		; 	Length of Chat script
+chatScript				 ds.l	1				; offset: $88 (136)		; 	Chat script data
+additional				 ds.l	1				; offset: $8C (140)		; 	Ptr to additional connect info,
+; 	such as OTCfgRemoteX25Info
+useSecurityModule		 ds.l	1				; offset: $90 (144)		; 	(boolean) use line-level security module ?
+securitySignature		 ds.l	1				; offset: $94 (148)		; 	signature of security module file
+securityDataLength		 ds.l	1				; offset: $98 (152)		; 	0..kSecurityMaxConfigData
+securityData			 ds.l	1				; offset: $9C (156)		; 	Ptr to data of size securityDataLength
+sizeof					 EQU *					; size:   $A0 (160)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteConnectInfo
+;*
+;*	If requestCode = kRAGetConnectInfo, "connectInfo" returns a pointer to a
+;*	new OTCfgRemoteConnect block that describes the current connection.
+;*
+;*	If requestCode = kRADisposeConnectInfo, the memory pointed to by
+;*	"connectInfo" is released for reuse.  "connectInfo" must point to a valid
+;*	OTCfgRemoteConnect structure previously returned by kRAGetConnectInfo.
+;*******************************************************************************
+
+OTCfgRemoteConnectInfo	RECORD 0
+connectInfo				 ds.l	1				; offset: $0 (0)		; 	Returned or disposed, depending on requestCode
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteStatus
+;*
+;*	Use this structure to get the status of Remote Access connections.
+;*******************************************************************************
+
+
+kOTCfgRemoteStatusIdle			EQU		1
+kOTCfgRemoteStatusConnecting	EQU		2
+kOTCfgRemoteStatusConnected		EQU		3
+kOTCfgRemoteStatusDisconnecting	EQU		4
+
+OTCfgRemoteStatus		RECORD 0
+status					 ds.l	1				; offset: $0 (0)		; 	values defined above
+answerEnabled			 ds.b	1				; offset: $4 (4)
+pad00					 ds.b	1				; offset: $5 (5)		; 	This structure is NOT packed
+secondsConnected		 ds.l	1				; offset: $6 (6)
+secondsRemaining		 ds.l	1				; offset: $A (10)
+userName				 ds.b	256				; offset: $E (14)		; 	Pascal format
+serverName				 ds.b	33				; offset: $10E (270)	; 	Pascal format
+pad01					 ds.b	1				; offset: $12F (303)	; 	This structure is NOT packed
+messageIndex			 ds.l	1				; offset: $130 (304)
+message					 ds.b	256				; offset: $134 (308)	; 	Pascal format
+serialProtocolMode		 ds.l	1				; offset: $234 (564)	; 	Flags defined above.
+baudMessage				 ds.b	256				; offset: $238 (568)	; 	Pascal format
+isServer				 ds.b	1				; offset: $338 (824)
+pad02					 ds.b	1				; offset: $339 (825)	; 	This structure is NOT packed
+bytesIn					 ds.l	1				; offset: $33A (826)
+bytesOut				 ds.l	1				; offset: $33E (830)
+linkSpeed				 ds.l	1				; offset: $342 (834)
+localIPAddress			 ds.l	1				; offset: $346 (838)
+remoteIPAddress			 ds.l	1				; offset: $34A (842)
+sizeof					 EQU *					; size:   $34E (846)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteUserMessage
+;*
+;*	Use this structure when converting result codes into user messages.
+;*******************************************************************************
+
+OTCfgRemoteUserMessage	RECORD 0
+version					 ds.l	1				; offset: $0 (0)
+messageID				 ds.l	1				; offset: $4 (4)
+userMessage				 ds.b	256				; offset: $8 (8)
+userDiagnostic			 ds.b	256				; offset: $108 (264)
+sizeof					 EQU *					; size:   $208 (520)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteNotifier
+;*
+;*	Use this structure to install a procedure to receive asynchronous 
+;*	Remote Access notifications.
+;*******************************************************************************
+
+; typedef UInt32 						OTCfgRemoteEventCode
+
+OTCfgRemoteNotifier		RECORD 0
+procPtr					 ds.l	1				; offset: $0 (0)
+contextPtr				 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; *******************************************************************************
+;*	OTCfgRemoteRequest
+;*
+;*	All Remote Access API calls must pass a pointer to an OTCfgRemoteRequest structure.
+;*******************************************************************************
+
+OTCfgRemoteRequest		RECORD 0
+reserved1				 ds.b	16				; offset: $0 (0)		; 	Do not use. 
+result					 ds.w	1				; offset: $10 (16)		; 	<--
+reserved2				 ds.b	8				; offset: $12 (18)		; 	Do not use.
+requestCode				 ds.w	1				; offset: $1A (26)		; 	 -->
+portId					 ds.w	1				; offset: $1C (28)		; 	<-->
+Notifier				 ds		OTCfgRemoteNotifier ; offset: $1E (30)
+						 ORG 30
+Connect					 ds		OTCfgRemoteConnect ; offset: $1E (30)
+						 ORG 30
+Disconnect				 ds		OTCfgRemoteDisconnect ; offset: $1E (30)
+						 ORG 30
+Status					 ds		OTCfgRemoteStatus ; offset: $1E (30)
+						 ORG 30
+IsRemote				 ds		OTCfgRemoteIsRemote ; offset: $1E (30)
+						 ORG 30
+ConnectInfo				 ds		OTCfgRemoteConnectInfo ; offset: $1E (30)
+						 ORG 876
+sizeof					 EQU *					; size:   $36C (876)
+						ENDR
+OTCfgRemoteConfigCAPT	RECORD 0
+fWord1					 ds.l	1				; offset: $0 (0)
+fWindowPosition			 ds		Point			; offset: $4 (4)
+fWord3					 ds.l	1				; offset: $8 (8)
+fUserLevel				 ds.l	1				; offset: $C (12)
+fSetupVisible			 ds.l	1				; offset: $10 (16)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+	ENDIF ; __NETWORKSETUP__ 
+

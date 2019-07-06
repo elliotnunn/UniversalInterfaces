@@ -1,0 +1,87 @@
+=================================================
+Installing Universal Interfaces into CodeWarrior
+=================================================
+
+Version: Universal Interfaces 3.4
+Date:    July 11, 2000
+Author:  Nick Kledzik
+
+
+For Pro 5:
+
+	Replace the folder:
+		'MacOS Support:Universal:' 
+	with the folder:
+		'UniversalInterfaces3.4d?:Universal:'
+	
+	Remove the following folder:
+	     'MacOS Support:OpenTransport:'
+	Or rename it to:
+	     'MacOS Support:(OpenTransport)'
+	
+	Most of OpenTransport is now integrated into Universal Interfaces.  If you 
+	are doing 68K or using the debug libraries from OpenTransport, you will
+	want to keep the OpenTransport folder.
+
+	If you are using PowerPlant, you'll need to update LStdControl.h to
+	#include <ControlDefinitions.h>
+
+	If you are using MacHeaders, you'll need to add MSL to the access path in
+	MacHeaders.mcp because some standard C library headers are now included
+	by Universal Interfaces.
+
+	Rebuild any pre-compiled headers you use that were built with older headers.
+	The most common is MacHeaders.mcp in MacOS Support:MacHeaders.  But you may
+	also need to rebuild MSL or custom precompiled headers in your own projects.
+	
+
+For Pro 4:
+
+	In the Finder, do the following:
+		
+		Universal C headers:
+			Drag contents of:
+				'UniversalInterfaces3.4d?:Universal:Interfaces:CIncludes:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Headers:Universal Headers:'
+
+
+		Universal Rez headers:
+			Drag contents of:
+				'UniversalInterfaces3.4d?:Universal:Interfaces:RIncludes:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Headers:Rez Headers:'
+			
+			
+		Universal Pascal Interfaces:
+			Drag contents of:
+				'UniversalInterfaces3.4d?:Universal:Interfaces:PInterfaces:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Interfaces:Universal Interfaces:'
+			
+			
+		Stub Libraries:
+			Drag contents of:
+				'UniversalInterfaces3.4d?:Universal:Libraries:StubLibraries:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Libraries:MacOS Common:'
+
+
+		PowerPC Libraries:
+			Drag contents of:
+				'UniversalInterfaces3.4d?:Universal:Libraries:PPCLibraries:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Libraries:MacOS PPC:'
+
+
+		68k Libraries:
+			Drag contents of:
+				'UniversalInterfaces3.4d?:Universal:Libraries:Classic68kLibraries:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Libraries:MacOS 68K:MacOS Files:'
+
+
+	Rebuild any pre-compiled headers you use that were built with older headers.
+	The most common is MacHeaders.mcp in MacOS Support:MacHeaders.  But you may
+	also need to rebuild MSL or custom precompiled headers in your own projects.
+

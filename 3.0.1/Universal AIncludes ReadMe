@@ -1,0 +1,68 @@
+    
+                                                   
+                                              Converting to 3.0 Universal AIncludes 
+
+∆ Note: The 3.0 and 2.x AIncludes are radically different than the pre-universal 68K AIncludes. They now parallel the C and Pascal headers. There is a one-to-one mapping between the files in AIncludes and those in CIncludes/PInterfaces. 
+
+Features and Changes
+
+• 	Every struct in C is now a RECORD in Asm. 
+• 	Every integer constant in C is now an EQU in Asm. 
+• 	Every function prototype in C is now a MACRO or IMPORT in Asm. 
+• 	Every typedef in C is now a comment in Asm.
+• 	SysEqu.a is gone. The replacement is LowMem.a. There is an accessor macro for each low-mem location. In CFM, it is a regular function call. In classic 68K, it is a macro which defaults to a function call using Pascal calling conventions; alternatively,you can specify a register to use directly.
+• 	PowerPC conventions require a period (.) to precede all cross TOC function names. CFM 68K does not use the period. So, a macro IMPORT_CFM_FUNCTION is set up in ConditionalMacros.a which evaluates to an IMPORT statement that prefixes a period when using PPCAsm.
+• 	In classic 68K, there is no import label defined for toolbox functions that do not have inline trap opcodes (e.g. FSOpen).
+• 	Older versions of the MPW Asm limited file include depth to 5 levels deep. Many of the toolbox interfaces go deeper than that. The MPW Asm 3.4 fixes the problem.
+• 	All RECORDs now have a comment on each field that shows the offset of the field in hex and decimal.
+• 	Traps that use 68K register based calling conventions now have a block comment that shows which registers are used on input and output.
+
+
+Conversion Process
+
+If you decide to convert to the new Universal AIncludes, here are some suggestions on how to proceed:
+
+1)	You can and should convert your assembly sources file by file. You may find some code that you wish to leave as is and always build it with the old AIncludes.
+
+2) 	Before beginning to convert a source file, save a copy of the assembled “.o” file. When conversion is complete, do a DumpObj of the new and old “.o” files and compare them. This will catch any problems. One possible problem is the incidental remapping of a name to another value. For instance, ioDirFlg was defined in SysEqu.a to be 4. In Files.a it is defined as 3. This is confusing, but historically ioDirFlg was defined in high-level languages to be the value passed to BitTst, which counts bits in a different way than the 68000 instruction btst does. This example is a worst case. Most are just inconsistencies regarding whether the constant name means the bit number or the mask value.
+
+3) 	Access to lowmem globals was previously via an equate that was the absolute address of the global in low-mem. Now access is through accessors functions.  For example:
+
+  ***** SysEqu.a ***** 
+  TheGDevice		EQU 		$0CC8 		
+
+
+  ***** LowMem.a ***** 
+  ;
+  ; pascal GDHandle LMGetTheGDevice(void)
+  ;
+  	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+    		Macro
+	     	_LMGetTheGDevice      &dest=(sp)
+  		   move.l                $0CC8,&dest
+    		EndM
+  	ELSE
+  		  IMPORT_CFM_FUNCTION	LMGetTheGDevice
+  	ENDIF
+
+
+  ***** Sample.a ***** 
+        Move.l       TheGDevice,A0     ; old way
+
+        _LMGetTheGDevice,A0            ; new way
+
+Additionally, a new file LowMemEqu.a is now available for classic 68K assembly code.  It consists of the low-mem equates that previously resided in SysEqu.a.  This file is useful during the conversion to Universal AIncludes if your code ever did any instruction to low-mem other than a MOVE.  If so, you cannot make an object identical source change to the Universal AIncludes without the use of LowMemEqu.a.
+
+4)	Previously, fields of records were stand-alone equates. Now there are real RECORD definitions. Because they were stand-alone equates, there was always the possibility of a name collision. For example a TERec and a GrafPort both have a field name txFont, but which have different offsets. Since we could not call them both txFont, the TERec one was renamed teFont. There are two strategies for updating records. One is to use WITH statements around large chucks of code that use one or two records. The other is to qualify each field access with is full qualified name (e.g., TERec.txFont)
+
+5) The attribute bits on trap words are no longer needed because they are built into the new trap macros. For instance:
+
+     _NewPtr, sys  ; old way
+     _NewPtrSys    ; new way
+
+6) Traps.a no longer contains all trap OPWORDS.  Instead each manager defines its traps in its on file (e.g. _GetResource is now in Resources.a). Therefore you will need to add more include statements to your assembly sources. Additionally, the MoveTrapWord macro has been added to Traps.a to enable the OPWORD constants to be used as values: 
+
+     MoveTrapWord	_GetResource,D0		      ; ->	Move.w	#$A9A0,D0
+     _GetToolboxTrapAddress
+
+

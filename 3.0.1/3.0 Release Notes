@@ -1,0 +1,106 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.0
+Date:    June 19, 1997
+Author:  Nick Kledzik
+
+
+========================================
+New Features in Universal Interfaces 3.0
+========================================
+
+-	ConditionalMacros.h has been completely redesigned.  It now has 
+	a separate block to set up conditionals for each recognized compiler. 
+	The following compilers are supported: MrC[pp], SC[pp], Metrowerks
+	(for PowerPC, 68K, and Intel),  Symantec C++, Think C, PPCC, MPW C,
+	GNU C for MPW, xlc on RS/6000, Visual C++, MIPSpro, SPARCompiler, 
+	MPW Pascal and Metrowerks Pascal, MPW Asm, and MPW PPCAsm. 
+	If your compiler is not recognized, you can create your own
+	block to set up conditionals.  If you do so, please send in your 
+	changes to devsupport@apple.com so that it can get integrated 
+	into the next release of ConditionalMacros.h.
+	
+-	Function prototypes and function pointer typedefs have been redesigned
+	to use the EXTERN_API() and CALLBACK_API() macros.  This factors
+	out platform specific declarations attributes (e.g. "pascal" or 
+	"__declspec(dllimport)").  
+
+-	UInt64 and SInt64 have been changed to be implemented as long long 
+	on compilers that support that data type. If you use the functions/macros 
+	in Math64.h, your source code will compile regardless of whether the 
+	compiler supports long long.  The types wide and UnsignedWide will remain
+	as structs.  If your source code assumes wide and SInt64 are the same 
+	thing, you should change to use the macros in Math64.h for conversion.  
+
+-	The conditional SystemSevenOrLater has been removed.  Previously, this 
+	was used to control whether Gestalt(), HOpenResFile(), and FindFolder() 
+	were called as an A-Trap or via glue code in Interface.o which first 
+	checked that the trap was implemented.  Since these functions were all 
+	implemented in System 7, using the glue code only mattered if the generated
+	code was run on a System 6 or earlier Macintosh.  In fact, it slowed down
+	code running on System 7 or later machines.  
+	
+	If you are creating classic 68K code to run on a pre-system 7 machines or 
+	which runs before INIT time in the boot process, you will need to add a
+	define to your build before #including the Universal Interfaces.  For 
+	example, with Gestalt() you need to #define USE_GESTALT_GLUE.  
+	See the interface files for more details.  
+
+-	The AppleGuideLib stub library now supports CFM 68K.
+
+-	The DragLib stub library now supports the routines for translucent dragging.
+
+
+
+=================================================
+Bug Fixes and Changes in Universal Interfaces 3.0
+=================================================
+
+-	The types double_t and float_t have been moved from Types.h to fp.h.  
+	If you use these types, you should #include fp.h to insure your source code 
+	compiles under both 2.x and 3.0 Interfaces.
+
+-	Windows and Memory (for .h, .p, .a, and .r) have been renamed to MacWindow 
+	and MacMemory. This was done to make the files interoperable with the headers
+	from other platforms.  We will continue to ship a Windows.h and Memory.h 
+	(which simply #include the new name) to support existing Mac OS source code, 
+	but cross-platform developers may wish to remove those files.
+
+-	The fixed font ID constants have been renamed to avoid conflicts with C++ STL.
+	(e.g. "times" is now "kFontIDTimes").  Relying on fixed font ID's has always 
+	been slightly risky.  It is better to use GetFNum() to look up a font ID by name.
+
+-	All sound related interfaces have moved to Sound.h.  The only change that is 
+	not backward compatible is that SysBeep() was previously in OSUtils.h, but 
+	OSUtils.h cannot auto-include Sound.h because that would cause a circular 
+	include.  You will need to add a #include <Sound.h> where ever SysBeep() is 
+	used in order for your sources to work with both 2.x and 3.0 Interfaces.
+
+-	In OSUtils.h, Delay() has been changed to use unsigned longs instead of longs.  
+	This change will be transparent to C, but C++ compilers will complain.  You 
+	should change your source code to use unsigned longs to Delay(). 
+
+-	GXPrinting is no longer supported as of Mac OS 8.  Therefore all GX printing 
+	routines have been removed from QuickDrawGXLib and moved into a new separate 
+	stub library GXPrintingLib.
+
+
+==========================
+Known Bugs and Limitations
+==========================
+
+-	Not all compilers are supported by ConditionalMacros.h, in particular
+	the variations on GNU C.
+
+-	Although the framework is in place, the 3.0 Universal Interfaces do
+	not yet work on other platforms (e.g. unix or Win32).  
+	
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+
+

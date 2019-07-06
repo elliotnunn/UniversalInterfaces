@@ -1,0 +1,96 @@
+;
+;    File:       ICACamera.a
+;
+;    Contains:   Digital still camera-specific selectors and structures
+;
+;    Version:    Technology: 1.0
+;                Release:    Universal Interfaces 3.4.1
+;
+;    Copyright:  © 2000-2001 by Apple Computer, Inc., all rights reserved.
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__ICACAMERA__') = 'UNDEFINED' THEN
+__ICACAMERA__ SET 1
+
+
+;   -------------------------------------------------------------------------
+;                                Selectors           
+;   -------------------------------------------------------------------------
+
+
+
+															; Camera properties
+															; Refer to section 13 of the PIMA 15740 (PTP) specification for
+															; descriptions and usage notes for these standard properties
+kICAPropertyCameraBatteryLevel	EQU		'5001'				; UInt8   enum/range
+kICAPropertyCameraFunctionalMode EQU	'5002'				; UInt16     enum
+kICAPropertyCameraImageSize		EQU		'5003'				; CFString     enum/range
+kICAPropertyCameraCompressionSetting EQU '5004'				; UInt8   enum/range
+kICAPropertyCameraWhiteBalance	EQU		'5005'				; UInt16     enum
+kICAPropertyCameraRGBGain		EQU		'5006'				; null terminated string enum/range
+kICAPropertyCameraFNumber		EQU		'5007'				; UInt16     enum
+kICAPropertyCameraFocalLength	EQU		'5008'				; UInt32     enum/range
+kICAPropertyCameraFocusDistance	EQU		'5009'				; UInt16     enum/range
+kICAPropertyCameraFocusMode		EQU		'500A'				; UInt16     enum
+kICAPropertyCameraExposureMeteringMode EQU '500B'			; UInt16     enum
+kICAPropertyCameraFlashMode		EQU		'500C'				; UInt16     enum
+kICAPropertyCameraExposureTime	EQU		'500D'				; UInt32     enum/range
+kICAPropertyCameraExposureProgramMode EQU '500E'			; UInt16     enum
+kICAPropertyCameraExposureIndex	EQU		'500F'				; UInt16     enum/range
+kICAPropertyCameraExposureBiasCompensation EQU '5010'		; UInt16     enum/range
+kICAPropertyCameraDateTime		EQU		'5011'				; null terminated string     none
+kICAPropertyCameraCaptureDelay	EQU		'5012'				; UInt32     enum/range
+kICAPropertyCameraStillCaptureMode EQU	'5013'				; UInt16     enum
+kICAPropertyCameraContrast		EQU		'5014'				; UInt8   enum/range
+kICAPropertyCameraSharpness		EQU		'5015'				; UInt8   enum/range
+kICAPropertyCameraDigitalZoom	EQU		'5016'				; UInt8   enum/range
+kICAPropertyCameraEffectMode	EQU		'5017'				; UInt16     enum
+kICAPropertyCameraBurstNumber	EQU		'5018'				; UInt16     enum/range
+kICAPropertyCameraBurstInterval	EQU		'5019'				; UInt16     enum/range
+kICAPropertyCameraTimelapseNumber EQU	'501A'				; UInt16     enum/range
+kICAPropertyCameraTimelapseInterval EQU	'501B'				; UInt32     enum/range
+kICAPropertyCameraFocusMeteringMode EQU	'501C'				; UInt16     enum
+
+															; Refer to section 5.5.3 of the PTP spec
+kICAPropertyCameraStorageType	EQU		'stor'				; UInt16
+kICAPropertyCameraFilesystemType EQU	'fsys'				; UInt16
+kICAPropertyCameraAccessCapability EQU	'acap'				; UInt16
+kICAPropertyCameraMaxCapacity	EQU		'maxc'				; UInt64
+kICAPropertyCameraFreeSpaceInBytes EQU	'fres'				; UInt64
+kICAPropertyCameraFreeSpaceInImages EQU	'frei'				; UInt32
+kICAPropertyCameraStorageDescription EQU 'stod'				; null terminated string
+kICAPropertyCameraVolumeLabel	EQU		'voll'				; null terminated string
+
+															; ICA specific
+kICAPropertyCameraIcon			EQU		'icon'				; ICAThumbnail
+kICAPropertyCameraSupportedMessages EQU	'msgs'				; array of OSTypes
+
+															; Values for kICAPropertyCameraStorageType
+kICAStorageFixedROM				EQU		$0001
+kICAStorageRemovableROM			EQU		$0002
+kICAStorageFixedRAM				EQU		$0003
+kICAStorageRemovableRAM			EQU		$0004
+
+															; Values for kICAPropertyCameraFilesystemType
+kICAFileystemGenericFlat		EQU		$0001
+kICAFileystemGenericHierarchical EQU	$0002
+kICAFileystemDCF				EQU		$0003
+
+															; Values for kICAPropertyCameraAccessCapability
+kICAAccessReadWrite				EQU		$0000
+kICAAccessReadOnly				EQU		$0001
+kICAAccessReadOnlyWithObjectDeletion EQU $0002
+
+															; Camera messages
+kICAMessageCameraCaptureNewImage EQU	'ccni'
+kICAMessageCameraDeleteOne		EQU		'del1'
+kICAMessageCameraDeleteAll		EQU		'dela'
+kICAMessageCameraSyncClock		EQU		'sclk'
+kICAMessageCameraUploadData		EQU		'load'
+	ENDIF ; __ICACAMERA__ 
+

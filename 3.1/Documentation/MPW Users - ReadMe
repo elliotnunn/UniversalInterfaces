@@ -1,0 +1,68 @@
+#
+# 	File:		MPW Users - ReadMe
+# 
+# 	Copyright:	© 1998 by Apple Computer, Inc. All rights reserved.
+# 
+# 	Version:	Universal Interfaces 3.1, February 11, 1998
+#
+# 	Usage: 		Run this file in MPW.  It will generate the commands needed
+#				to update the running MPW to the latest Universal Interfaces.
+#
+#
+#	Note:		The Universal Interfaces is not a complete MPW development release.
+#				It only contains the headers and libraries which are in "universal"
+#				format and are implemented in the Mac OS.  
+#
+#				The MPW development environment comes with a number of MPW specific
+#				headers and libraries (e.g. CursorCtl.h, Disassembler.h, etc.) that
+#				are _not_ part of this Universal Interfaces package.  You can either
+#				wait for the next release of MPW which will integrate the 3.1
+#				Universal Interfaces, or run the script below to merge the 3.1
+#				Universal Interfaces into the MPW set.
+#
+#				You cannot just drag the CIncludes and replace MPW's ! ! !
+#
+#
+
+
+set exit 0
+
+If "{CIncludes}"
+	If "{CIncludes}" =~ /(≈:)®1Interfaces:CIncludes:/
+		Set InterfacesAndLibrariesDir "{®1}"
+	End
+End
+
+If !`Exists "{InterfacesAndLibrariesDir}"`
+	If "{ShellDirectory}"
+		If `Exists "{ShellDirectory}Interfaces:CIncludes:"`
+			Set InterfacesAndLibrariesDir "{ShellDirectory}"
+		Else If `Exists "{ShellDirectory}:Interfaces&Libraries:CIncludes:"`
+			If "{ShellDirectory}" =~ /(≈:)®1IMPW:/
+				Set InterfacesAndLibrariesDir "{®1}Interfaces&Libraries:"
+			End
+		End
+	End
+End
+
+If (!"{InterfacesAndLibrariesDir}") || (!`Exists "{InterfacesAndLibrariesDir}"`)
+	Echo "### Error: Could not find Interfaces&Libraries. Try setting ∂{CIncludes∂}" >dev:stderr
+	Exit 1
+End
+
+
+Set ThisScript `files "{0}" -f`
+If "{ThisScript}" =~ /(≈:)®1Documentation:MPW Users - ReadMe/
+	Set UI "{®1}"
+End
+
+If (!`Exists "{UI}OpenTransport:"`) || (!`Exists "{UI}Universal:"`)
+	Echo "### Error: Script "{0}" not in Interfaces&Libraries folder" >dev:stderr
+	Exit 1
+End
+
+BackUp -from "{UI}Universal:Interfaces:" 					-to "{InterfacesAndLibrariesDir}Interfaces:" -r -a
+BackUp -from "{UI}Universal:Libraries:StubLibraries:" 		-to "{InterfacesAndLibrariesDir}Libraries:SharedLibraries:" -r -a
+BackUp -from "{UI}Universal:Libraries:Classic68kLibraries:" -to "{InterfacesAndLibrariesDir}Libraries:Libraries:" -r -a
+BackUp -from "{UI}Universal:Libraries:PPCLibraries:" 		-to "{InterfacesAndLibrariesDir}Libraries:PPCLibraries:" -r -a
+

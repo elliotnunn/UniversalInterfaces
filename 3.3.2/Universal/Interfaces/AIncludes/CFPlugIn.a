@@ -1,0 +1,180 @@
+;
+;    File:       CFPlugIn.a
+;
+;    Contains:   CoreFoundation plugins
+;
+;    Version:    Technology: Mac OS X
+;                Release:    Universal Interfaces 3.3.2
+;
+;    Copyright:  © 1999-2000 by Apple Computer, Inc., all rights reserved
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__CFPLUGIN__') = 'UNDEFINED' THEN
+__CFPLUGIN__ SET 1
+
+	IF &TYPE('__CFBASE__') = 'UNDEFINED' THEN
+	include 'CFBase.a'
+	ENDIF
+
+
+
+	IF &TYPE('__CFARRAY__') = 'UNDEFINED' THEN
+	include 'CFArray.a'
+	ENDIF
+	IF &TYPE('__CFSTRING__') = 'UNDEFINED' THEN
+	include 'CFString.a'
+	ENDIF
+	IF &TYPE('__CFURL__') = 'UNDEFINED' THEN
+	include 'CFURL.a'
+	ENDIF
+	IF &TYPE('__CFBUNDLE__') = 'UNDEFINED' THEN
+	include 'CFBundle.a'
+	ENDIF
+
+
+
+
+;  ================= Function prototypes for various callbacks ================= 
+;  ================= Creating PlugIns ================= 
+;
+; extern UInt32 CFPlugInGetTypeID(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInGetTypeID
+	ENDIF
+
+;
+; extern CFPlugInRef CFPlugInCreate(CFAllocatorRef allocator, CFURLRef plugInURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInCreate
+	ENDIF
+
+;  Might return an existing instance with the ref-count bumped. 
+;
+; extern CFBundleRef CFPlugInGetBundle(CFPlugInRef plugIn)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInGetBundle
+	ENDIF
+
+;  ================= Controlling load on demand ================= 
+;  For plugIns. 
+;  A dynamic registration function can call CFPlugInSetLoadOnDemand. 
+;
+; extern void CFPlugInSetLoadOnDemand(CFPlugInRef plugIn, Boolean flag)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInSetLoadOnDemand
+	ENDIF
+
+;
+; extern Boolean CFPlugInIsLoadOnDemand(CFPlugInRef plugIn)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInIsLoadOnDemand
+	ENDIF
+
+;  ================= Finding factories and creating instances ================= 
+;  For plugIn hosts. 
+;  Functions for finding factories to create specific types and actually creating instances of a type. 
+;
+; extern CFArrayRef CFPlugInFindFactoriesForPlugInType(CFStringRef typeName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInFindFactoriesForPlugInType
+	ENDIF
+
+;
+; extern CFPlugInInstanceRef CFPlugInInstanceCreate(CFAllocatorRef allocator, CFStringRef factoryName, CFStringRef typeName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInInstanceCreate
+	ENDIF
+
+;  ================= Using instances ================= 
+;  For plugIn hosts and/or plugIns. 
+;  Functions for dealing with instances. 
+;
+; extern Boolean CFPlugInInstanceGetInterfaceFunctionTable(CFPlugInInstanceRef instance, CFStringRef interfaceName, void **ftbl)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInInstanceGetInterfaceFunctionTable
+	ENDIF
+
+;
+; extern CFStringRef CFPlugInInstanceGetFactoryName(CFPlugInInstanceRef instance)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInInstanceGetFactoryName
+	ENDIF
+
+;
+; extern void *CFPlugInInstanceGetInstanceData(CFPlugInInstanceRef instance)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInInstanceGetInstanceData
+	ENDIF
+
+;  ================= Registering factories and types ================= 
+;  For plugIn writers who must dynamically register things. 
+;  Functions to register factory functions and to associate factories with types. 
+;
+; extern Boolean CFPlugInRegisterFactoryFunction(CFStringRef factoryName, CFPlugInFactoryFunction func)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInRegisterFactoryFunction
+	ENDIF
+
+;
+; extern Boolean CFPlugInRegisterFactoryFunctionByName(CFStringRef factoryName, CFPlugInRef plugIn, CFStringRef functionName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInRegisterFactoryFunctionByName
+	ENDIF
+
+;
+; extern Boolean CFPlugInUnregisterFactory(CFStringRef factoryName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInUnregisterFactory
+	ENDIF
+
+;
+; extern Boolean CFPlugInRegisterPlugInType(CFStringRef factoryName, CFStringRef typeName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInRegisterPlugInType
+	ENDIF
+
+;
+; extern Boolean CFPlugInUnregisterPlugInType(CFStringRef factoryName, CFStringRef typeName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInUnregisterPlugInType
+	ENDIF
+
+;  ================= Primitive instance creation ================= 
+;  For plugIns. 
+;  Factory function implementations should use this to actually create an instance. 
+;
+; extern UInt32 CFPlugInInstanceGetTypeID(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInInstanceGetTypeID
+	ENDIF
+
+;
+; extern CFPlugInInstanceRef CFPlugInInstanceCreateWithInstanceDataSize(CFAllocatorRef allocator, CFIndex instanceDataSize, CFPlugInInstanceDeallocateInstanceDataFunction deallocateInstanceFunction, CFStringRef factoryName, CFPlugInInstanceGetInterfaceFunction getInterfaceFunction)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFPlugInInstanceCreateWithInstanceDataSize
+	ENDIF
+
+	ENDIF ; __CFPLUGIN__ 
+

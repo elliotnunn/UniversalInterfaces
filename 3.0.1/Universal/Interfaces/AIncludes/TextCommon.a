@@ -1,0 +1,372 @@
+;
+;	File:		TextCommon.a
+;
+;	Contains:	Common text types and constants and prototypes for related functions 
+;
+;	Version:	Technology:	Mac OS 8 (Tempo)
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1995-1997 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__TEXTCOMMON__') = 'UNDEFINED' THEN
+__TEXTCOMMON__ SET 1
+
+	IF &TYPE('__TYPES__') = 'UNDEFINED' THEN
+	include 'Types.a'
+	ENDIF
+
+;  LocaleIdentifier is an obsolete Copland typedef, will be removed soon
+; typedef UInt32 						LocaleIdentifier
+
+;  TextEncodingBase type & values 
+;  (values 0-32 correspond to the Script Codes defined in Inside Macintosh: Text pages 6-52 and 6-53 
+; typedef UInt32 						TextEncodingBase
+
+
+															; Mac OS encodings
+kTextEncodingMacRoman			EQU		0
+kTextEncodingMacJapanese		EQU		1
+kTextEncodingMacChineseTrad		EQU		2
+kTextEncodingMacKorean			EQU		3
+kTextEncodingMacArabic			EQU		4
+kTextEncodingMacHebrew			EQU		5
+kTextEncodingMacGreek			EQU		6
+kTextEncodingMacCyrillic		EQU		7
+kTextEncodingMacDevanagari		EQU		9
+kTextEncodingMacGurmukhi		EQU		10
+kTextEncodingMacGujarati		EQU		11
+kTextEncodingMacOriya			EQU		12
+kTextEncodingMacBengali			EQU		13
+kTextEncodingMacTamil			EQU		14
+kTextEncodingMacTelugu			EQU		15
+kTextEncodingMacKannada			EQU		16
+kTextEncodingMacMalayalam		EQU		17
+kTextEncodingMacSinhalese		EQU		18
+kTextEncodingMacBurmese			EQU		19
+kTextEncodingMacKhmer			EQU		20
+kTextEncodingMacThai			EQU		21
+kTextEncodingMacLaotian			EQU		22
+kTextEncodingMacGeorgian		EQU		23
+kTextEncodingMacArmenian		EQU		24
+kTextEncodingMacChineseSimp		EQU		25
+kTextEncodingMacTibetan			EQU		26
+kTextEncodingMacMongolian		EQU		27
+kTextEncodingMacEthiopic		EQU		28
+kTextEncodingMacCentralEurRoman	EQU		29
+kTextEncodingMacVietnamese		EQU		30
+kTextEncodingMacExtArabic		EQU		31					; The following use script code 0, smRoman
+kTextEncodingMacSymbol			EQU		33
+kTextEncodingMacDingbats		EQU		34
+kTextEncodingMacTurkish			EQU		35
+kTextEncodingMacCroatian		EQU		36
+kTextEncodingMacIcelandic		EQU		37
+kTextEncodingMacRomanian		EQU		38					; The following use script code 4, smArabic
+kTextEncodingMacFarsi			EQU		$8C					; Like MacArabic but uses Farsi digits
+															; The following use script code 7, smCyrillic
+kTextEncodingMacUkrainian		EQU		$98					; The following use script code 32, smUnimplemented
+kTextEncodingMacVT100			EQU		$FC					; VT100/102 font from Comm Toolbox: Latin-1 repertoire + box drawing etc
+															; Special Mac OS encodings
+kTextEncodingMacHFS				EQU		$FF					; Meta-value, should never appear in a table.
+															; Unicode & ISO UCS encodings begin at 0x100
+kTextEncodingUnicodeDefault		EQU		$0100				; Meta-value, should never appear in a table.
+kTextEncodingUnicodeV1_1		EQU		$0101
+kTextEncodingISO10646_1993		EQU		$0101				; Code points identical to Unicode 1.1
+kTextEncodingUnicodeV2_0		EQU		$0103				; New location for Korean Hangul
+															; ISO 8-bit and 7-bit encodings begin at 0x200
+kTextEncodingISOLatin1			EQU		$0201				; ISO 8859-1
+kTextEncodingISOLatin2			EQU		$0202				; ISO 8859-2
+kTextEncodingISOLatinCyrillic	EQU		$0205				; ISO 8859-5
+kTextEncodingISOLatinArabic		EQU		$0206				; ISO 8859-6, = ASMO 708, =DOS CP 708
+kTextEncodingISOLatinGreek		EQU		$0207				; ISO 8859-7
+kTextEncodingISOLatinHebrew		EQU		$0208				; ISO 8859-8
+kTextEncodingISOLatin5			EQU		$0209				; ISO 8859-9
+															; MS-DOS & Windows encodings begin at 0x400
+kTextEncodingDOSLatinUS			EQU		$0400				; code page 437
+kTextEncodingDOSGreek			EQU		$0405				; code page 737 (formerly code page 437G)
+kTextEncodingDOSBalticRim		EQU		$0406				; code page 775
+kTextEncodingDOSLatin1			EQU		$0410				; code page 850, "Multilingual"
+kTextEncodingDOSGreek1			EQU		$0411				; code page 851
+kTextEncodingDOSLatin2			EQU		$0412				; code page 852, Slavic
+kTextEncodingDOSCyrillic		EQU		$0413				; code page 855, IBM Cyrillic
+kTextEncodingDOSTurkish			EQU		$0414				; code page 857, IBM Turkish
+kTextEncodingDOSPortuguese		EQU		$0415				; code page 860
+kTextEncodingDOSIcelandic		EQU		$0416				; code page 861
+kTextEncodingDOSHebrew			EQU		$0417				; code page 862
+kTextEncodingDOSCanadianFrench	EQU		$0418				; code page 863
+kTextEncodingDOSArabic			EQU		$0419				; code page 864
+kTextEncodingDOSNordic			EQU		$041A				; code page 865
+kTextEncodingDOSRussian			EQU		$041B				; code page 866
+kTextEncodingDOSGreek2			EQU		$041C				; code page 869, IBM Modern Greek
+kTextEncodingDOSThai			EQU		$041D				; code page 874, also for Windows
+kTextEncodingDOSJapanese		EQU		$0420				; code page 932, also for Windows
+kTextEncodingDOSChineseSimplif	EQU		$0421				; code page 936, also for Windows
+kTextEncodingDOSKorean			EQU		$0422				; code page 949, also for Windows; Unified Hangul Code
+kTextEncodingDOSChineseTrad		EQU		$0423				; code page 950, also for Windows
+kTextEncodingWindowsLatin1		EQU		$0500				; code page 1252
+kTextEncodingWindowsANSI		EQU		$0500				; code page 1252 (alternate name)
+kTextEncodingWindowsLatin2		EQU		$0501				; code page 1250, Central Europe
+kTextEncodingWindowsCyrillic	EQU		$0502				; code page 1251, Slavic Cyrillic
+kTextEncodingWindowsGreek		EQU		$0503				; code page 1253
+kTextEncodingWindowsLatin5		EQU		$0504				; code page 1254, Turkish
+kTextEncodingWindowsHebrew		EQU		$0505				; code page 1255
+kTextEncodingWindowsArabic		EQU		$0506				; code page 1256
+kTextEncodingWindowsBalticRim	EQU		$0507				; code page 1257
+kTextEncodingWindowsKoreanJohab	EQU		$0510				; code page 1361, for Windows NT
+															; Various national standards begin at 0x600
+kTextEncodingUS_ASCII			EQU		$0600
+kTextEncodingJIS_X0201_76		EQU		$0620
+kTextEncodingJIS_X0208_83		EQU		$0621
+kTextEncodingJIS_X0208_90		EQU		$0622
+kTextEncodingJIS_X0212_90		EQU		$0623
+kTextEncodingJIS_C6226_78		EQU		$0624
+kTextEncodingGB_2312_80			EQU		$0630
+kTextEncodingGBK_95				EQU		$0631				; annex to GB 13000-93; for Windows 95
+kTextEncodingKSC_5601_87		EQU		$0640				; same as KSC 5601-92 without Johab annex
+kTextEncodingKSC_5601_92_Johab	EQU		$0641				; KSC 5601-92 Johab annex
+kTextEncodingCNS_11643_92_P1	EQU		$0651				; CNS 11643-1992 plane 1
+kTextEncodingCNS_11643_92_P2	EQU		$0652				; CNS 11643-1992 plane 2
+kTextEncodingCNS_11643_92_P3	EQU		$0653				; CNS 11643-1992 plane 3 (was plane 14 in 1986 version)
+															; ISO 2022 collections begin at 0x800
+kTextEncodingISO_2022_JP		EQU		$0820
+kTextEncodingISO_2022_JP_2		EQU		$0821
+kTextEncodingISO_2022_CN		EQU		$0830
+kTextEncodingISO_2022_CN_EXT	EQU		$0831
+kTextEncodingISO_2022_KR		EQU		$0840				; EUC collections begin at 0x900
+kTextEncodingEUC_JP				EQU		$0920				; ISO 646, 1-byte katakana, JIS 208, JIS 212
+kTextEncodingEUC_CN				EQU		$0930				; ISO 646, GB 2312-80
+kTextEncodingEUC_TW				EQU		$0931				; ISO 646, CNS 11643-1992 Planes 1-16
+kTextEncodingEUC_KR				EQU		$0940				; ISO 646, KS C 5601-1987
+															; Misc standards begin at 0xA00
+kTextEncodingShiftJIS			EQU		$0A01				; plain Shift-JIS
+kTextEncodingKOI8_R				EQU		$0A02				; Russian internet standard
+kTextEncodingBig5				EQU		$0A03				; Big-5 (has variants)
+kTextEncodingMacRomanLatin1		EQU		$0A04				; Mac OS Roman permuted to align with ISO Latin-1
+kTextEncodingHZ_GB_2312			EQU		$0A05				; HZ (RFC 1842, for Chinese mail & news)
+															; Other platform encodings
+kTextEncodingNextStepLatin		EQU		$0B01				; NextStep encoding
+															; EBCDIC & IBM host encodings begin at 0xC00
+kTextEncodingEBCDIC_US			EQU		$0C01				; basic EBCDIC-US
+kTextEncodingEBCDIC_CP037		EQU		$0C02				; code page 037, extended EBCDIC (Latin-1 set) for US,Canada...
+															; Special value
+kTextEncodingMultiRun			EQU		$0FFF				; Multi-encoding text with external run info
+															; The following are older names for backward compatibility
+kTextEncodingMacTradChinese		EQU		2
+kTextEncodingMacRSymbol			EQU		8
+kTextEncodingMacSimpChinese		EQU		25
+kTextEncodingMacGeez			EQU		28
+kTextEncodingMacEastEurRoman	EQU		29
+kTextEncodingMacUninterp		EQU		32
+;  TextEncodingVariant type & values 
+; typedef UInt32 						TextEncodingVariant
+
+
+															; Default TextEncodingVariant, for any TextEncodingBase
+kTextEncodingDefaultVariant		EQU		0					; Variants of kTextEncodingMacIcelandic													
+kMacIcelandicStandardVariant	EQU		0					; 0xBB & 0xBC are fem./masc. ordinal indicators
+kMacIcelandicTrueTypeVariant	EQU		1					; 0xBB & 0xBC are fi/fl ligatures
+															; Variants of kTextEncodingMacJapanese
+kMacJapaneseStandardVariant		EQU		0
+kMacJapaneseStdNoVerticalsVariant EQU	1
+kMacJapaneseBasicVariant		EQU		2
+kMacJapanesePostScriptScrnVariant EQU	3
+kMacJapanesePostScriptPrintVariant EQU	4
+kMacJapaneseVertAtKuPlusTenVariant EQU	5					; Variant options for most Japanese encodings (MacJapanese, ShiftJIS, EUC-JP, ISO 2022-JP)	
+															; These can be OR-ed into the variant value in any combination
+kJapaneseNoOneByteKanaOption	EQU		$20
+kJapaneseUseAsciiBackslashOption EQU	$40					; Variants of kTextEncodingMacArabic
+kMacArabicStandardVariant		EQU		0					; 0xC0 is 8-spoke asterisk, 0x2A & 0xAA are asterisk (e.g. Cairo)
+kMacArabicTrueTypeVariant		EQU		1					; 0xC0 is asterisk, 0x2A & 0xAA are multiply signs (e.g. Baghdad)
+kMacArabicThuluthVariant		EQU		2					; 0xC0 is Arabic five-point star, 0x2A & 0xAA are multiply signs
+kMacArabicAlBayanVariant		EQU		3					; 8-spoke asterisk, multiply sign, Koranic ligatures & parens
+															; Variants of kTextEncodingMacFarsi
+kMacFarsiStandardVariant		EQU		0					; 0xC0 is 8-spoke asterisk, 0x2A & 0xAA are asterisk (e.g. Tehran)
+kMacFarsiTrueTypeVariant		EQU		1					; asterisk, multiply signs, Koranic ligatures, geometric shapes
+															; Variants of kTextEncodingMacHebrew
+kMacHebrewStandardVariant		EQU		0
+kMacHebrewFigureSpaceVariant	EQU		1					; Variants of Unicode & ISO 10646 encodings
+kUnicodeNoSubset				EQU		0
+kUnicodeNoCompatibilityVariant	EQU		1
+kUnicodeMaxDecomposedVariant	EQU		2
+kUnicodeNoComposedVariant		EQU		3
+kUnicodeNoCorporateVariant		EQU		4					; Variants of Big-5 encoding
+kBig5_BasicVariant				EQU		0
+kBig5_StandardVariant			EQU		1					; 0xC6A1-0xC7FC: kana, Cyrillic, enclosed numerics
+kBig5_ETenVariant				EQU		2					; adds kana, Cyrillic, radicals, etc with hi bytes C6-C8,F9
+															; The following are older names for backward compatibility
+kJapaneseStandardVariant		EQU		0
+kJapaneseStdNoVerticalsVariant	EQU		1
+kJapaneseBasicVariant			EQU		2
+kJapanesePostScriptScrnVariant	EQU		3
+kJapanesePostScriptPrintVariant	EQU		4
+kJapaneseVertAtKuPlusTenVariant	EQU		5					; kJapaneseStdNoOneByteKanaVariant = 6,	// replaced by kJapaneseNoOneByteKanaOption
+															; kJapaneseBasicNoOneByteKanaVariant = 7,	// replaced by kJapaneseNoOneByteKanaOption	
+kHebrewStandardVariant			EQU		0
+kHebrewFigureSpaceVariant		EQU		1
+;  TextEncodingFormat type & values 
+; typedef UInt32 						TextEncodingFormat
+
+
+															; Default TextEncodingFormat for any TextEncodingBase
+kTextEncodingDefaultFormat		EQU		0					; Formats for Unicode & ISO 10646
+kUnicode16BitFormat				EQU		0
+kUnicodeUTF7Format				EQU		1
+kUnicodeUTF8Format				EQU		2
+kUnicode32BitFormat				EQU		3
+;  TextEncoding type 
+; typedef UInt32 						TextEncoding
+
+;  name part selector for GetTextEncodingName
+; typedef UInt32 						TextEncodingNameSelector
+
+
+kTextEncodingFullName			EQU		0
+kTextEncodingBaseName			EQU		1
+kTextEncodingVariantName		EQU		2
+kTextEncodingFormatName			EQU		3
+;  Types used in conversion 
+TextEncodingRun			RECORD 0
+offset					 ds.l	1				; offset: $0 (0)
+textEncoding			 ds.l	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct TextEncodingRun *		TextEncodingRunPtr
+
+; typedef struct TextEncodingRun *		ConstTextEncodingRunPtr
+
+ScriptCodeRun			RECORD 0
+offset					 ds.l	1				; offset: $0 (0)
+script					 ds.w	1				; offset: $4 (4)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+; typedef struct ScriptCodeRun *		ScriptCodeRunPtr
+
+; typedef struct ScriptCodeRun *		ConstScriptCodeRunPtr
+
+; typedef UInt8 *						TextPtr
+
+; typedef UInt8 *						ConstTextPtr
+
+;  Basic types for Unicode characters and strings: 
+; typedef UniChar *						UniCharArrayPtr
+
+; typedef const UniChar *				ConstUniCharArrayPtr
+
+;  enums for TextEncoding Conversion routines
+
+kTextScriptDontCare				EQU		-128
+kTextLanguageDontCare			EQU		-128
+kTextRegionDontCare				EQU		-128
+;  struct for TECGetInfo
+
+TECInfo					RECORD 0
+format					 ds.w	1				; offset: $0 (0)		;  format code for this struct
+tecVersion				 ds.w	1				; offset: $2 (2)		;  TEC version in BCD, e.g. 0x0121 for 1.2.1
+tecTextConverterFeatures  ds.l	1				; offset: $4 (4)		;  bitmask indicating TEC features/fixes
+tecUnicodeConverterFeatures  ds.l 1				; offset: $8 (8)		;  bitmask indicating UnicodeConverter features/fixes
+tecTextCommonFeatures	 ds.l	1				; offset: $C (12)		;  bitmask indicating TextCommon features/fixes
+tecTextEncodingsFolderName  ds	Str31			; offset: $10 (16)		;  localized name of Text Encodings folder (pascal string)
+tecExtensionFileName	 ds		Str31			; offset: $30 (48)		;  localized name of TEC extension (pascal string)
+sizeof					 EQU *					; size:   $50 (80)
+						ENDR
+; typedef struct TECInfo *				TECInfoPtr
+
+; typedef TECInfoPtr *					TECInfoHandle
+
+;  Value for TECInfo format code
+
+kTECInfoCurrentFormat			EQU		1					; any future formats will just add fields at the end
+
+;   Defined feature/fix bits for tecUnicodeConverterFeatures field
+;   Bit:								Meaning if set:
+;   ----								---------------
+;   kTECKeepInfoFixBit				Unicode Converter no longer ignores other control flags if
+;  									kUnicodeKeepInfoBit is set. Bug fix.
+;   kTECFallbackTextLengthFixBit		Unicode Converter honors the *srcConvLen and *destConvLen
+;  									returned by caller-supplied fallback handler for any status
+;  									it returns except for kTECUnmappableElementErr (previously
+;  									it only honored these values if noErr was returned). Bug fix.
+
+
+
+
+kTECKeepInfoFixBit				EQU		0
+kTECFallbackTextLengthFixBit	EQU		1
+
+kTECKeepInfoFixMask				EQU		$00000001
+kTECFallbackTextLengthFixMask	EQU		$00000002
+;  Prototypes for TextEncoding functions
+
+;
+; pascal TextEncoding CreateTextEncoding(TextEncodingBase encodingBase, TextEncodingVariant encodingVariant, TextEncodingFormat encodingFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CreateTextEncoding
+	ENDIF
+
+;
+; pascal TextEncodingBase GetTextEncodingBase(TextEncoding encoding)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTextEncodingBase
+	ENDIF
+
+;
+; pascal TextEncodingVariant GetTextEncodingVariant(TextEncoding encoding)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTextEncodingVariant
+	ENDIF
+
+;
+; pascal TextEncodingFormat GetTextEncodingFormat(TextEncoding encoding)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTextEncodingFormat
+	ENDIF
+
+;
+; pascal TextEncoding ResolveDefaultTextEncoding(TextEncoding encoding)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ResolveDefaultTextEncoding
+	ENDIF
+
+;
+; extern OSStatus GetTextEncodingName(TextEncoding iEncoding, TextEncodingNameSelector iNamePartSelector, RegionCode iPreferredRegion, TextEncoding iPreferredEncoding, ByteCount iOutputBufLen, ByteCount *oNameLength, RegionCode *oActualRegion, TextEncoding *oActualEncoding, TextPtr oEncodingName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GetTextEncodingName
+	ENDIF
+
+;
+; pascal OSStatus TECGetInfo(TECInfoHandle *tecInfo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TECGetInfo
+	ENDIF
+
+
+;
+; pascal OSStatus UpgradeScriptInfoToTextEncoding(ScriptCode iTextScriptID, LangCode iTextLanguageID, RegionCode iRegionID, ConstStr255Param iTextFontname, TextEncoding *oEncoding)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION UpgradeScriptInfoToTextEncoding
+	ENDIF
+
+;
+; pascal OSStatus RevertTextEncodingToScriptInfo(TextEncoding iEncoding, ScriptCode *oTextScriptID, LangCode *oTextLanguageID, Str255 oTextFontname)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION RevertTextEncodingToScriptInfo
+	ENDIF
+
+
+	ENDIF ; __TEXTCOMMON__ 
+

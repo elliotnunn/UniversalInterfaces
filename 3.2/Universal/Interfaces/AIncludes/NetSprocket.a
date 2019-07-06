@@ -1,0 +1,617 @@
+;
+;	File:		NetSprocket.a
+;
+;	Contains:	Games Sprockets: NetSprocket interfaces
+;
+;	Version:	Technology:	NetSprocket 1.0.2
+;				Release:	Universal Interfaces 3.2
+;
+;	Copyright:	© 1996-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__NETSPROCKET__') = 'UNDEFINED' THEN
+__NETSPROCKET__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+
+	IF TARGET_OS_MAC THEN
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+	include 'Events.a'
+	ENDIF
+	ENDIF	; TARGET_OS_MAC
+	IF TARGET_OS_MAC THEN
+
+kNSpMaxPlayerNameLen			EQU		31
+kNSpMaxGroupNameLen				EQU		31
+kNSpMaxPasswordLen				EQU		31
+kNSpMaxGameNameLen				EQU		31
+kNSpMaxDefinitionStringLen		EQU		255
+
+;  NetSprocket basic types 
+
+
+
+
+
+
+
+
+; typedef SInt32 						NSpEventCode
+
+; typedef SInt32 						NSpGameID
+
+; typedef SInt32 						NSpPlayerID
+
+; typedef NSpPlayerID 					NSpGroupID
+
+; typedef UInt32 						NSpPlayerType
+
+; typedef SInt32 						NSpFlags
+
+NSpPlayerName			RECORD 0
+f						 ds		Str31
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+
+
+;  Individual player info 
+NSpPlayerInfo			RECORD 0
+id						 ds.l	1				; offset: $0 (0)
+playerType				 ds.l	1				; offset: $4 (4)		;  "type" in C
+name					 ds		Str31			; offset: $8 (8)
+groupCount				 ds.l	1				; offset: $28 (40)
+groups					 ds.l	1				; offset: $2C (44) <-- really an array of length one
+sizeof					 EQU *					; size:   $30 (48)
+						ENDR
+; typedef struct NSpPlayerInfo *		NSpPlayerInfoPtr
+
+;  list of all players 
+NSpPlayerEnumeration	RECORD 0
+count					 ds.l	1				; offset: $0 (0)
+playerInfo				 ds.l	1				; offset: $4 (4) <-- really an array of length one
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct NSpPlayerEnumeration *	NSpPlayerEnumerationPtr
+
+;  Individual group info 
+NSpGroupInfo			RECORD 0
+id						 ds.l	1				; offset: $0 (0)
+playerCount				 ds.l	1				; offset: $4 (4)
+players					 ds.l	1				; offset: $8 (8) <-- really an array of length one
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+; typedef struct NSpGroupInfo *			NSpGroupInfoPtr
+
+;  List of all groups 
+NSpGroupEnumeration		RECORD 0
+count					 ds.l	1				; offset: $0 (0)
+groups					 ds.l	1				; offset: $4 (4) <-- really an array of length one
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct NSpGroupEnumeration *	NSpGroupEnumerationPtr
+
+;  Topology types 
+; typedef UInt32 						NSpTopology
+
+
+kNSpClientServer				EQU		$00000001
+;  Game information 
+NSpGameInfo				RECORD 0
+maxPlayers				 ds.l	1				; offset: $0 (0)
+currentPlayers			 ds.l	1				; offset: $4 (4)
+currentGroups			 ds.l	1				; offset: $8 (8)
+topology				 ds.l	1				; offset: $C (12)
+reserved				 ds.l	1				; offset: $10 (16)
+name					 ds		Str31			; offset: $14 (20)
+password				 ds		Str31			; offset: $34 (52)
+sizeof					 EQU *					; size:   $54 (84)
+						ENDR
+;  Structure used for sending and receiving network messages 
+NSpMessageHeader		RECORD 0
+version					 ds.l	1				; offset: $0 (0)		;  Used by NetSprocket.  Don't touch this 
+what					 ds.l	1				; offset: $4 (4)		;  The kind of message (e.g. player joined) 
+from					 ds.l	1				; offset: $8 (8)		;  ID of the sender 
+toID					 ds.l	1				; offset: $C (12)		;  (player or group) id of the intended recipient (was "to) 
+id						 ds.l	1				; offset: $10 (16)		;  Unique ID for this message & (from) player 
+when					 ds.l	1				; offset: $14 (20)		;  Timestamp for the message 
+messageLen				 ds.l	1				; offset: $18 (24)		;  Bytes of data in the entire message (including the header) 
+sizeof					 EQU *					; size:   $1C (28)
+						ENDR
+;  NetSprocket-defined message structures 
+NSpErrorMessage			RECORD 0
+header					 ds		NSpMessageHeader ; offset: $0 (0)
+error					 ds.l	1				; offset: $1C (28)
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+NSpJoinRequestMessage	RECORD 0
+header					 ds		NSpMessageHeader ; offset: $0 (0)
+name					 ds		Str31			; offset: $1C (28)
+password				 ds		Str31			; offset: $3C (60)
+theType					 ds.l	1				; offset: $5C (92)
+customDataLen			 ds.l	1				; offset: $60 (96)
+customData				 ds.b	1				; offset: $64 (100) <-- really an array of length one
+						 ORG 102
+sizeof					 EQU *					; size:   $66 (102)
+						ENDR
+NSpJoinApprovedMessage	RECORD 0
+header					 ds		NSpMessageHeader ; offset: $0 (0)
+sizeof					 EQU *					; size:   $1C (28)
+						ENDR
+NSpJoinDeniedMessage	RECORD 0
+header					 ds		NSpMessageHeader ; offset: $0 (0)
+reason					 ds		Str255			; offset: $1C (28)
+sizeof					 EQU *					; size:   $11C (284)
+						ENDR
+NSpPlayerJoinedMessage	RECORD 0
+header					 ds		NSpMessageHeader ; offset: $0 (0)
+playerCount				 ds.l	1				; offset: $1C (28)
+playerInfo				 ds		NSpPlayerInfo	; offset: $20 (32)
+sizeof					 EQU *					; size:   $50 (80)
+						ENDR
+NSpPlayerLeftMessage	RECORD 0
+header					 ds		NSpMessageHeader ; offset: $0 (0)
+playerCount				 ds.l	1				; offset: $1C (28)
+playerID				 ds.l	1				; offset: $20 (32)
+playerName				 ds		NSpPlayerName	; offset: $24 (36)
+sizeof					 EQU *					; size:   $44 (68)
+						ENDR
+NSpHostChangedMessage	RECORD 0
+header					 ds		NSpMessageHeader ; offset: $0 (0)
+newHost					 ds.l	1				; offset: $1C (28)
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+NSpGameTerminatedMessage RECORD 0
+header					 ds		NSpMessageHeader ; offset: $0 (0)
+sizeof					 EQU *					; size:   $1C (28)
+						ENDR
+;  Different kinds of messages.  These can NOT be bitwise ORed together 
+
+kNSpSendFlag_Junk				EQU		$00100000			; will be sent (try once) when there is nothing else pending 
+kNSpSendFlag_Normal				EQU		$00200000			; will be sent immediately (try once) 
+kNSpSendFlag_Registered			EQU		$00400000			; will be sent immediately (guaranteed, in order) 
+
+;  Options for message delivery.  These can be bitwise ORed together with each other,
+;		as well as with ONE of the above 
+
+kNSpSendFlag_FailIfPipeFull		EQU		$00000001
+kNSpSendFlag_SelfSend			EQU		$00000002
+kNSpSendFlag_Blocking			EQU		$00000004
+
+;  Options for Hosting Joining, and Deleting games 
+
+kNSpGameFlag_DontAdvertise		EQU		$00000001
+kNSpGameFlag_ForceTerminateGame	EQU		$00000002
+;  Message "what" types 
+;  Apple reserves all negative "what" values (anything with bit 32 set) 
+
+kNSpSystemMessagePrefix			EQU		$80000000
+kNSpError						EQU		$FFFFFFFF
+kNSpJoinRequest					EQU		$80000001
+kNSpJoinApproved				EQU		$80000002
+kNSpJoinDenied					EQU		$80000003
+kNSpPlayerJoined				EQU		$80000004
+kNSpPlayerLeft					EQU		$80000005
+kNSpHostChanged					EQU		$80000006
+kNSpGameTerminated				EQU		$80000007
+
+;  Special TPlayerIDs  for sending messages 
+
+kNSpAllPlayers					EQU		$00000000
+kNSpHostOnly					EQU		$FFFFFFFF
+
+;  NetSprocket Error Codes 
+
+kNSpInitializationFailedErr		EQU		-30360
+kNSpAlreadyInitializedErr		EQU		-30361
+kNSpTopologyNotSupportedErr		EQU		-30362
+kNSpPipeFullErr					EQU		-30364
+kNSpHostFailedErr				EQU		-30365
+kNSpProtocolNotAvailableErr		EQU		-30366
+kNSpInvalidGameRefErr			EQU		-30367
+kNSpInvalidParameterErr			EQU		-30369
+kNSpOTNotPresentErr				EQU		-30370
+kNSpOTVersionTooOldErr			EQU		-30371
+kNSpMemAllocationErr			EQU		-30373
+kNSpAlreadyAdvertisingErr		EQU		-30374
+kNSpNotAdvertisingErr			EQU		-30376
+kNSpInvalidAddressErr			EQU		-30377
+kNSpFreeQExhaustedErr			EQU		-30378
+kNSpRemovePlayerFailedErr		EQU		-30379
+kNSpAddressInUseErr				EQU		-30380
+kNSpFeatureNotImplementedErr	EQU		-30381
+kNSpNameRequiredErr				EQU		-30382
+kNSpInvalidPlayerIDErr			EQU		-30383
+kNSpInvalidGroupIDErr			EQU		-30384
+kNSpNoPlayersErr				EQU		-30385
+kNSpNoGroupsErr					EQU		-30386
+kNSpNoHostVolunteersErr			EQU		-30387
+kNSpCreateGroupFailedErr		EQU		-30388
+kNSpAddPlayerFailedErr			EQU		-30389
+kNSpInvalidDefinitionErr		EQU		-30390
+kNSpInvalidProtocolRefErr		EQU		-30391
+kNSpInvalidProtocolListErr		EQU		-30392
+kNSpTimeoutErr					EQU		-30393
+kNSpGameTerminatedErr			EQU		-30394
+kNSpConnectFailedErr			EQU		-30395
+kNSpSendFailedErr				EQU		-30396
+kNSpJoinFailedErr				EQU		-30399
+
+
+
+; ************************  Initialization  ***********************
+;
+; extern OSStatus NSpInitialize(UInt32 inStandardMessageSize, UInt32 inBufferSize, UInt32 inQElements, NSpGameID inGameID, UInt32 inTimeout)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpInitialize
+	ENDIF
+
+
+
+
+; **************************  Protocols  *************************
+;  Programmatic protocol routines 
+;
+; extern OSStatus NSpProtocol_New(const char *inDefinitionString, NSpProtocolReference *outReference)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocol_New
+	ENDIF
+
+;
+; extern void NSpProtocol_Dispose(NSpProtocolReference inProtocolRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocol_Dispose
+	ENDIF
+
+;
+; extern OSStatus NSpProtocol_ExtractDefinitionString(NSpProtocolReference inProtocolRef, char *outDefinitionString)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocol_ExtractDefinitionString
+	ENDIF
+
+
+;  Protocol list routines 
+;
+; extern OSStatus NSpProtocolList_New(NSpProtocolReference inProtocolRef, NSpProtocolListReference *outList)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocolList_New
+	ENDIF
+
+;
+; extern void NSpProtocolList_Dispose(NSpProtocolListReference inProtocolList)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocolList_Dispose
+	ENDIF
+
+;
+; extern OSStatus NSpProtocolList_Append(NSpProtocolListReference inProtocolList, NSpProtocolReference inProtocolRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocolList_Append
+	ENDIF
+
+;
+; extern OSStatus NSpProtocolList_Remove(NSpProtocolListReference inProtocolList, NSpProtocolReference inProtocolRef)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocolList_Remove
+	ENDIF
+
+;
+; extern OSStatus NSpProtocolList_RemoveIndexed(NSpProtocolListReference inProtocolList, UInt32 inIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocolList_RemoveIndexed
+	ENDIF
+
+;
+; extern UInt32 NSpProtocolList_GetCount(NSpProtocolListReference inProtocolList)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocolList_GetCount
+	ENDIF
+
+;
+; extern NSpProtocolReference NSpProtocolList_GetIndexedRef(NSpProtocolListReference inProtocolList, UInt32 inIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocolList_GetIndexedRef
+	ENDIF
+
+
+;  Helpers 
+;
+; extern NSpProtocolReference NSpProtocol_CreateAppleTalk(ConstStr31Param inNBPName, ConstStr31Param inNBPType, UInt32 inMaxRTT, UInt32 inMinThruput)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocol_CreateAppleTalk
+	ENDIF
+
+;
+; extern NSpProtocolReference NSpProtocol_CreateIP(InetPort inPort, UInt32 inMaxRTT, UInt32 inMinThruput)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpProtocol_CreateIP
+	ENDIF
+
+
+; ***********************  Human Interface  ***********************
+;
+; extern NSpAddressReference NSpDoModalJoinDialog(ConstStr31Param inGameType, ConstStr255Param inEntityListLabel, Str31 ioName, Str31 ioPassword, NSpEventProcPtr inEventProcPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpDoModalJoinDialog
+	ENDIF
+
+;
+; extern Boolean NSpDoModalHostDialog(NSpProtocolListReference ioProtocolList, Str31 ioGameName, Str31 ioPlayerName, Str31 ioPassword, NSpEventProcPtr inEventProcPtr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpDoModalHostDialog
+	ENDIF
+
+
+; *********************  Hosting and Joining  *********************
+;
+; extern OSStatus NSpGame_Host(NSpGameReference *outGame, NSpProtocolListReference inProtocolList, UInt32 inMaxPlayers, ConstStr31Param inGameName, ConstStr31Param inPassword, ConstStr31Param inPlayerName, NSpPlayerType inPlayerType, NSpTopology inTopology, NSpFlags inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGame_Host
+	ENDIF
+
+;
+; extern OSStatus NSpGame_Join(NSpGameReference *outGame, NSpAddressReference inAddress, ConstStr31Param inName, ConstStr31Param inPassword, NSpPlayerType inType, void *inCustomData, UInt32 inCustomDataLen, NSpFlags inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGame_Join
+	ENDIF
+
+;
+; extern OSStatus NSpGame_EnableAdvertising(NSpGameReference inGame, NSpProtocolReference inProtocol, Boolean inEnable)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGame_EnableAdvertising
+	ENDIF
+
+;
+; extern OSStatus NSpGame_Dispose(NSpGameReference inGame, NSpFlags inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGame_Dispose
+	ENDIF
+
+;
+; extern OSStatus NSpGame_GetInfo(NSpGameReference inGame, NSpGameInfo *ioInfo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGame_GetInfo
+	ENDIF
+
+; **************************  Messaging  *************************
+;
+; extern OSStatus NSpMessage_Send(NSpGameReference inGame, NSpMessageHeader *inMessage, NSpFlags inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpMessage_Send
+	ENDIF
+
+;
+; extern NSpMessageHeader *NSpMessage_Get(NSpGameReference inGame)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpMessage_Get
+	ENDIF
+
+;
+; extern void NSpMessage_Release(NSpGameReference inGame, NSpMessageHeader *inMessage)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpMessage_Release
+	ENDIF
+
+;  Helpers 
+;
+; extern OSStatus NSpMessage_SendTo(NSpGameReference inGame, NSpPlayerID inTo, SInt32 inWhat, void *inData, UInt32 inDataLen, NSpFlags inFlags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpMessage_SendTo
+	ENDIF
+
+
+; *********************  Player Information  *********************
+;
+; extern NSpPlayerID NSpPlayer_GetMyID(NSpGameReference inGame)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpPlayer_GetMyID
+	ENDIF
+
+;
+; extern OSStatus NSpPlayer_GetInfo(NSpGameReference inGame, NSpPlayerID inPlayerID, NSpPlayerInfoPtr *outInfo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpPlayer_GetInfo
+	ENDIF
+
+;
+; extern void NSpPlayer_ReleaseInfo(NSpGameReference inGame, NSpPlayerInfoPtr inInfo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpPlayer_ReleaseInfo
+	ENDIF
+
+;
+; extern OSStatus NSpPlayer_GetEnumeration(NSpGameReference inGame, NSpPlayerEnumerationPtr *outPlayers)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpPlayer_GetEnumeration
+	ENDIF
+
+;
+; extern void NSpPlayer_ReleaseEnumeration(NSpGameReference inGame, NSpPlayerEnumerationPtr inPlayers)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpPlayer_ReleaseEnumeration
+	ENDIF
+
+;
+; extern UInt32 NSpPlayer_GetRoundTripTime(NSpGameReference inGame, NSpPlayerID inPlayer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpPlayer_GetRoundTripTime
+	ENDIF
+
+;
+; extern UInt32 NSpPlayer_GetThruput(NSpGameReference inGame, NSpPlayerID inPlayer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpPlayer_GetThruput
+	ENDIF
+
+
+; *********************  Group Management  *********************
+;
+; extern OSStatus NSpGroup_New(NSpGameReference inGame, NSpGroupID *outGroupID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGroup_New
+	ENDIF
+
+;
+; extern OSStatus NSpGroup_Dispose(NSpGameReference inGame, NSpGroupID inGroupID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGroup_Dispose
+	ENDIF
+
+;
+; extern OSStatus NSpGroup_AddPlayer(NSpGameReference inGame, NSpGroupID inGroupID, NSpPlayerID inPlayerID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGroup_AddPlayer
+	ENDIF
+
+;
+; extern OSStatus NSpGroup_RemovePlayer(NSpGameReference inGame, NSpGroupID inGroupID, NSpPlayerID inPlayerID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGroup_RemovePlayer
+	ENDIF
+
+;
+; extern OSStatus NSpGroup_GetInfo(NSpGameReference inGame, NSpGroupID inGroupID, NSpGroupInfoPtr *outInfo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGroup_GetInfo
+	ENDIF
+
+;
+; extern void NSpGroup_ReleaseInfo(NSpGameReference inGame, NSpGroupInfoPtr inInfo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGroup_ReleaseInfo
+	ENDIF
+
+;
+; extern OSStatus NSpGroup_GetEnumeration(NSpGameReference inGame, NSpGroupEnumerationPtr *outGroups)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGroup_GetEnumeration
+	ENDIF
+
+;
+; extern void NSpGroup_ReleaseEnumeration(NSpGameReference inGame, NSpGroupEnumerationPtr inGroups)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGroup_ReleaseEnumeration
+	ENDIF
+
+
+; **************************  Utilities  **************************
+;
+; extern NumVersion NSpGetVersion(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGetVersion
+	ENDIF
+
+;
+; extern void NSpClearMessageHeader(NSpMessageHeader *inMessage)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpClearMessageHeader
+	ENDIF
+
+;
+; extern UInt32 NSpGetCurrentTimeStamp(NSpGameReference inGame)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpGetCurrentTimeStamp
+	ENDIF
+
+;
+; extern NSpAddressReference NSpConvertOTAddrToAddressReference(OTAddress *inAddress)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpConvertOTAddrToAddressReference
+	ENDIF
+
+;
+; extern OTAddress *NSpConvertAddressReferenceToOTAddr(NSpAddressReference inAddress)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpConvertAddressReferenceToOTAddr
+	ENDIF
+
+;
+; extern void NSpReleaseAddressReference(NSpAddressReference inAddress)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpReleaseAddressReference
+	ENDIF
+
+
+; ************************ Advanced/Async routines ***************
+;
+; extern OSStatus NSpInstallCallbackHandler(NSpCallbackProcPtr inHandler, void *inContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpInstallCallbackHandler
+	ENDIF
+
+
+;
+; extern OSStatus NSpInstallJoinRequestHandler(NSpJoinRequestHandlerProcPtr inHandler, void *inContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpInstallJoinRequestHandler
+	ENDIF
+
+
+;
+; extern OSStatus NSpInstallAsyncMessageHandler(NSpMessageHandlerProcPtr inHandler, void *inContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NSpInstallAsyncMessageHandler
+	ENDIF
+
+
+
+	ENDIF	; TARGET_OS_MAC
+	ENDIF ; __NETSPROCKET__ 
+

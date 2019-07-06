@@ -1,0 +1,78 @@
+=================================================
+Installing Universal Interfaces into CodeWarrior
+=================================================
+
+Version: Universal Interfaces 3.3a1
+Date:    September 30, 1999
+Author:  Nick Kledzik
+
+
+=================================================
+IMPORTANT NOTE
+=================================================
+If you use recursive access paths to find CIncludes, the MW
+C/C++ compiler will not properly process '/' in #includes.
+To work around this you must a non-recursive access path to
+the CIncludes folder.  For instance your access paths might
+look like:
+
+		 {Compiler}MacOS Support:Universal:Interfaces:CIncludes:
+	 <f> {Compiler}MacOS Support:
+		 
+The first access path is to work around the bug.  The second is
+to access everthing else in MacOS Support.
+	
+
+For Pro 5:
+
+	Replace the 'MacOS Support:Universal:' folder 
+	with the 'Universal Interfaces 3.3x:Universal:' folder
+
+
+For Pro 4:
+
+	In the Finder, do the following:
+		
+		Universal C headers:
+			Drag contents of:
+				'Universal Interfaces 3.3x:Universal:Interfaces:CIncludes:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Headers:Universal Headers:'
+
+
+		Universal Rez headers:
+			Drag contents of:
+				'Universal Interfaces 3.3x:Universal:Interfaces:RIncludes:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Headers:Rez Headers:'
+			
+			
+		Universal Pascal Interfaces:
+			Drag contents of:
+				'Universal Interfaces 3.3x:Universal:Interfaces:PInterfaces:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Interfaces:Universal Interfaces:'
+			
+			
+		Stub Libraries:
+			Drag contents of:
+				'Universal Interfaces 3.3x:Universal:Libraries:StubLibraries:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Libraries:MacOS Common:'
+
+
+		PowerPC Libraries:
+			Drag contents of:
+				'Universal Interfaces 3.3x:Universal:Libraries:PPCLibraries:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Libraries:MacOS PPC:'
+
+
+		68k Libraries:
+			Drag contents of:
+				'Universal Interfaces 3.3x:Universal:Libraries:Classic68kLibraries:'
+			into
+				':Metrowerks CodeWarrior:MacOS Support:Libraries:MacOS 68K:MacOS Files:'
+
+
+

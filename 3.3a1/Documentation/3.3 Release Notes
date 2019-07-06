@@ -1,0 +1,243 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.3a1
+Date:    September 28, 1999
+Author:  Nick Kledzik
+
+
+=================
+Important Notice
+=================
+
+This is a pre-release set of headers and libraries that
+integrates Sonata (Mac OS 9) and Carbon development.
+
+See ReadMe files for how to install into MPW or CodeWarrior.
+
+
+==========================================
+Notes on Carbon development
+==========================================
+
+-	In order to build a Carbon application, you must set 
+	TARGET_API_MAC_CARBON to true, either on the command 
+	line (e.g. -d TARGET_API_MAC_CARBON=1) or in a 
+	prefix file (e.g. #define TARGET_API_MAC_CARBON 1).
+
+-	You must link against CarbonLib and no other
+	Mac OS shared libraries.
+
+-	In Carbon a UPP is opaque and may not be a pointer to
+	a MixedMode RoutineDescriptor.  You cannot call
+	DisposeRoutineDescriptor on them.  Instead, the headers
+	contain new Dispose≈UPP routines for each UPP type.
+	For pre-Carbon development, the Dispose≈UPP routines
+	macro to a call to DisposeRoutineDescriptor. For Pascal
+	users you need to link with PascalPreCarbonUPPGlue.o
+	
+-	In Carbon, many toolbox structures are opaque, including
+	GrafPtrs and WindowPtrs.  You cannot access fields with 
+	them.  Instead you must use new accessor routines.  For
+	instance, use GetPortTextFont(thePort) instead of
+	thePort->txFont.  For pre-Carbon development, the accessor
+	routines are available by linking with PreCarbon.o.
+	
+-	Beginning in 3.3a1, all functions that are not in CarbonLib
+	are conditionalized with #if CALL_NOT_IN_CARBON, so you
+	will get a compile time error instead of a link time error
+	if you try to use a toolbox API that is not in Carbon.
+
+
+==========================================
+Notes on CoreFoundation Framework
+==========================================
+
+-	There is now a subfolder in CIncludes called CoreFoundation.
+	We are experimenting with changing the CIncludes folder from
+	a flat directory to a two level directory with CIncludes
+	containing grouping (or framework) directories in which
+	are the individual header files.
+
+-	If you want to directly use some of the CoreFoundation API's
+	your source code should:
+	
+		#include <CoreFoundation/CoreFoundation.h>
+	
+	Assuming, your compiler interprets '/' as a path separator,
+	which the latest Metrowerks, MrC, and gcc/egcs compilers do.
+	
+-	IMPORTANT NOTE FOR METROWERKS IDE USERS
+	If you use recursive access paths to find CIncludes, the MW
+	C/C++ compiler will not properly process '/' in #includes.
+	To work around this you must a non-recursive access path to
+	the CIncludes folder.  For instance your access paths might
+	look like:
+	
+	         {Compiler}MacOS Support:Universal:Interfaces:CIncludes:
+	     <f> {Compiler}MacOS Support:
+			 
+	The first access path is to work around the bug.  The second is
+	to access everthing else in MacOS Support.
+	
+	
+
+==================================================
+Notes on OpenTransport
+==================================================
+
+-	The OpenTransport headers have been reorganized as follows:
+	
+		OpenTptAppleTalk.h	--> OpenTransportProviders.h
+		OpenTptClient.h		--> OpenTransportProtocol.h
+		OpenTptCommon.h		--> OpenTransportProtocol.h
+		OpenTptConfig.h		--> OpenTransportProtocol.h
+		OpenTptDevLinks.h	--> OpenTransportProviders.h
+		OpenTptInternet.h	--> OpenTransportProviders.h
+		OpenTptISDN.h		--> OpenTransportProviders.h
+		OpenTptLinks.h		--> OpenTransportProviders.h
+		OpenTptModule.h		--> OpenTransportKernel.h
+		OpenTptPCISupport.h	--> OpenTransportKernel.h
+		OpenTptSerial.h		--> OpenTransportProviders.h
+		OpenTptXTI.h		--> OpenTransportUNIX.r
+		OpenTransport.h		--> OpenTransport.h
+		OpenTransport.r		--> OpenTransport.r
+		cred.h				--> OpenTransportProtocol.h
+		dlpi.h				--> OpenTransportProtocol.h
+		miioccom.h			--> OpenTransportProtocol.h
+		mistream.h			--> OpenTransportProtocol.h/OpenTransportKernel.h
+		modnames.h			--> OpenTransportProtocol.h
+		strlog.h			--> OpenTransportProtocol.h/OpenTransportKernel.h
+		stropts.h			--> OpenTransportProtocol.h/OpenTransportUNIX.h
+		strstat.h			--> OpenTransportProtocol.h
+		tihdr.h				--> OpenTransportProtocol.h
+
+	You can continue to #include to old names in your source code.
+
+-	When developing a Carbon application that uses OpenTransport, be 
+	sure to #define OTCARBONAPPLICATION, otherwise you will need
+	to use the ≈InContext variant of functions. 
+
+	
+==================================================
+Other Notes
+==================================================
+
+-	The file Controls.h has been split into two files:
+	Controls.h and ControlDefinitions.h.  If you have source
+	code that previously compiled with an #include of
+	Controls.h you may have to add a #include of ControlDefinitions.h
+	
+
+==================================================
+New files since Universal Interfaces 3.2
+==================================================
+
+-	New .h/.a/.p files:
+
+		ControlDefinitions.h
+		CoreFoundation/CFArray.h
+		CoreFoundation/CFBag.h
+		CoreFoundation/CFBase.h
+		CoreFoundation/CFCharacterSet.h
+		CoreFoundation/CFData.h
+		CoreFoundation/CFDate.h
+		CoreFoundation/CFDictionary.h
+		CoreFoundation/CFNumber.h
+		CoreFoundation/CFPreferences.h
+		CoreFoundation/CFPropertyList.h
+		CoreFoundation/CFSet.h
+		CoreFoundation/CFString.h
+		CoreFoundation/CFStringEncodingExt.h
+		CoreFoundation/CFTimeZone.h
+		CoreFoundation/CoreFoundation.h
+		Debugging.h
+		DesktopPrinting.h
+		FileSigning.h
+		FontSync.h
+		HID.h
+		HTMLRendering.h
+		Keychain.h
+		LanguageAnalysis.h
+		MacHelp.h
+		MacLocales.h
+		MacTextEditor.h
+		NetworkSetup.h
+		NSL.h
+		PMApplication.h
+		QTSMovie.ih
+		QTStreamingComponents.h
+		QuickTimeStreaming.h
+		URLAccess.h
+		USB.h
+		UTCUtils.h
+
+
+-	New .r files
+
+		AVComponents.r
+		ControlDefinitions.r
+		DesktopPrinting.r
+		NetworkSetup.r
+
+
+- New 68k .o files:
+
+		Navigation.far.o
+		Navigation.o
+
+
+- New PowerPC .o files:
+
+		PreCarbon.o
+		PascalPreCarbonUPPGlue.o
+
+
+- New stub libraries
+
+		CarbonLib
+		CSScriptingLib
+		DebugLib
+		DictionaryMgrLib
+		FileSigningLib
+		FontSyncLib
+		HIDLib
+		HTMLRenderingLib
+		ISpDeferLib
+		KeychainLib
+		LocalesLib
+		MPLibrary
+		NetworkSetup
+		NSLPPCLib
+		QuickDrawText
+		QTStreaming
+		Textension
+		UnicodeUtilitiesCoreLib
+		UTCUtils
+
+
+==========================
+Known Bugs and Limitations
+==========================
+
+-	The stub libraries in this release are PowerPC only.
+	They will not work for CFM68K developement.
+
+-	Some of the newer stub libraries have the usage field
+	in the cfrg resource set to 3 instead of 0.  This 
+	specifies the fragment is a stub and does not contain
+	code.  All CodeWarrior linkers handle this, but older
+	PPCLink tools will ignore the fragment and issue a 
+	warning.  You should update to a newer PPCLink because
+	this will become the standard way stub libraries are 
+	built.
+
+
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+
+

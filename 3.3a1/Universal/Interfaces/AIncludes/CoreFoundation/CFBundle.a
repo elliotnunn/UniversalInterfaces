@@ -1,0 +1,234 @@
+;
+;	File:		CFBundle.a
+;
+;	Contains:	CoreFoundation bundle
+;
+;	Version:	Technology:	Mac OS X
+;				Release:	Universal Interfaces 3.3a1
+;
+;	Copyright:	© 1999 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__COREFOUNDATION_CFBUNDLE__') = 'UNDEFINED' THEN
+__COREFOUNDATION_CFBUNDLE__ SET 1
+
+	IF &TYPE('___COREFOUNDATION_CFBASE__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFBase.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFARRAY__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFArray.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFSTRING__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFString.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFURL__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFURL.a'
+	ENDIF
+	IF &TYPE('___COREFOUNDATION_CFDICTIONARY__') = 'UNDEFINED' THEN
+	include ':CoreFoundation:CFDictionary.a'
+	ENDIF
+
+
+
+
+
+
+;  ===================== Finding Bundles ===================== 
+;
+; extern CFBundleRef CFBundleGetMainBundle(void)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleGetMainBundle
+	ENDIF
+
+;
+; extern CFBundleRef CFBundleGetBundleWithIdentifier(CFStringRef bundleID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleGetBundleWithIdentifier
+	ENDIF
+
+;  A bundle can name itself by providing a key in the info dictionary. 
+;  This facility is meant to allow bundle-writers to get hold of their 
+;  bundle from their code without having to know where it was on the disk. 
+;  This is meant to be a replacement mechanism for +bundleForClass: users. 
+;  ===================== Creating Bundles ===================== 
+;
+; extern UInt32 CFBundleGetTypeID(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleGetTypeID
+	ENDIF
+
+;
+; extern CFBundleRef CFBundleCreate(CFAllocatorRef allocator, CFURLRef bundleURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCreate
+	ENDIF
+
+;  Might return an existing instance with the ref-count bumped. 
+;
+; extern CFArrayRef CFBundleCreateBundlesFromDirectory(CFAllocatorRef allocator, CFURLRef directoryURL, CFStringRef bundleType)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCreateBundlesFromDirectory
+	ENDIF
+
+;  Create instances for all bundles in the given directory matching the given 
+;  type (or all of them if bundleType is NULL) 
+;  ==================== Basic Bundle Info ==================== 
+;
+; extern CFURLRef CFBundleCopyBundleURL(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopyBundleURL
+	ENDIF
+
+;
+; extern CFDictionaryRef CFBundleGetInfoDictionary(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleGetInfoDictionary
+	ENDIF
+
+;
+; extern CFStringRef CFBundleGetIdentifier(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleGetIdentifier
+	ENDIF
+
+;
+; extern CFStringRef CFBundleGetDevelopmentRegion(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleGetDevelopmentRegion
+	ENDIF
+
+;
+; extern CFURLRef CFBundleCopySupportFilesDirectoryURL(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopySupportFilesDirectoryURL
+	ENDIF
+
+;
+; extern CFURLRef CFBundleCopyResourcesDirectoryURL(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopyResourcesDirectoryURL
+	ENDIF
+
+;  ------------- Basic Bundle Info without a CFBundle instance ------------- 
+;  This API is provided to enable developers to use access a bundle Info 
+;  dictionary without having to create an instance of CFBundle. 
+;
+; extern CFDictionaryRef CFBundleCopyInfoDictionaryInDirectory(CFURLRef bundleURL)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopyInfoDictionaryInDirectory
+	ENDIF
+
+;  ==================== Resource Handling API ==================== 
+;
+; extern CFURLRef CFBundleCopyResourceURL(CFBundleRef bundle, CFStringRef resourceName, CFStringRef resourceType, CFStringRef subDirName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopyResourceURL
+	ENDIF
+
+;
+; extern CFArrayRef CFBundleCopyResourceURLsOfType(CFBundleRef bundle, CFStringRef resourceType, CFStringRef subDirName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopyResourceURLsOfType
+	ENDIF
+
+;
+; extern CFStringRef CFBundleCopyLocalizedString(CFBundleRef bundle, CFStringRef key, CFStringRef value, CFStringRef tableName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopyLocalizedString
+	ENDIF
+
+;  ------------- Resource Handling without a CFBundle instance ------------- 
+;  This API is provided to enable developers to use the CFBundle resource 
+;  searching policy without having to create an instance of CFBundle. 
+;  Because of caching behavior when a CFBundle instance exists, it will be faster 
+;  to actually create a CFBundle if you need to access several resources. 
+;
+; extern CFURLRef CFBundleCopyResourceURLInDirectory(CFURLRef bundleURL, CFStringRef resourceName, CFStringRef resourceType, CFStringRef subDirName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopyResourceURLInDirectory
+	ENDIF
+
+;
+; extern CFArrayRef CFBundleCopyResourceURLsOfTypeInDirectory(CFURLRef bundleURL, CFStringRef resourceType, CFStringRef subDirName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopyResourceURLsOfTypeInDirectory
+	ENDIF
+
+;  ==================== Primitive Code Loading API ==================== 
+;  This API abstracts the variosu different executable formats supported on various platforms. 
+;  It can load DYLD, CFM, or DLL shared libraries (on their appropriate platforms) and gives a 
+;  uniform API for looking up functions. 
+;
+; extern CFURLRef CFBundleCopyExecutableURL(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleCopyExecutableURL
+	ENDIF
+
+;
+; extern Boolean CFBundleIsExecutableLoaded(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleIsExecutableLoaded
+	ENDIF
+
+;
+; extern Boolean CFBundleLoadExecutable(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleLoadExecutable
+	ENDIF
+
+;
+; extern void CFBundleUnloadExecutable(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleUnloadExecutable
+	ENDIF
+
+;
+; extern void *CFBundleGetFunctionPointerForName(CFBundleRef bundle, CFStringRef functionName)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleGetFunctionPointerForName
+	ENDIF
+
+;
+; extern void CFBundleGetFunctionPointersForNames(CFBundleRef bundle, CFArrayRef functionNames, void *ftbl[])
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleGetFunctionPointersForNames
+	ENDIF
+
+;  ==================== Getting a bundles plugIn ==================== 
+;
+; extern CFPlugInRef CFBundleGetPlugIn(CFBundleRef bundle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CFBundleGetPlugIn
+	ENDIF
+
+	ENDIF ; __COREFOUNDATION_CFBUNDLE__ 
+

@@ -1,0 +1,344 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.2
+Date:    August 18, 1998
+Author:  Nick Kledzik
+
+
+=================
+Important Notice
+=================
+
+The 3.2 Universal Interfaces contain Beta headers for 
+Allegro (Mac OS 8.5).  There is a slight chance that some
+of the new Allegro API's may change before Allegro ships.
+If you use any of the new Allegro API's, be sure to test 
+your code on Mac OS 8.5 final before shipping your product.
+
+
+==========================================
+New Features in Universal Interfaces 3.2
+==========================================
+
+-	Latest interfaces and stub libraries for:
+		Mac OS 8.5 (late beta)
+		QuickTime 3.0 
+		NavServices
+		TEC 1.4
+	
+-	New files:
+		ATSLayoutTypes.h
+		ATSUnicode.h
+		Navigation.h
+		QD3DCustomElements.h
+		RAVE.h
+		RAVESystem.h
+		UnicodeUtilities.h
+
+
+==================================================
+Bug Fixes and Changes in Universal Interfaces 3.2
+==================================================
+
+	AERegistry.h
+		Added support for unit coercions, Connectivity, and Internet suites
+	
+	Aliases.h
+		Add IsAliasFile() and ResolveAliasWithMountFlags() for Mac OS 8.5
+	
+	Appearance.h
+		Updated to include Appearance 1.1 API's
+		
+	ASRegistry.h
+		Update for AppleScript 1.3
+		
+	ATA.h
+		Add support for Ultra DMA mode.
+		
+	ATSLayoutTypes.h
+	ATSUnicode.h
+		New file for Mac OS 8.5
+		
+	AVComponents.h
+		Change itemOffset from a short to the long.
+		
+	Balloons.p
+		Change VAR Rect to RectPtr for pascal
+		
+	CodeFragments.r
+		Change cfrg template to derez version fields in hex instead of decimal
+		
+	Controls.h
+		Update for new API's in Mac OS 8.5
+		
+	Dialogs.h
+		Fix macros to not use implicit casts (for Pro4).
+		
+	DigitalSignature.h
+		Change uses of SIGStatusProcPtr to SIGStatusUPP
+		
+	DiskInit.h
+		Change DIBadMount to take UInt32 instead of long
+		
+	Displays.h
+		Add DMMakeAndModelRec struct.
+		
+	Drag.h
+		Remove spurious DragImageTranslucency typedef.
+		
+	DriverGestalt.h
+		Add drive icon suite functionality for Mac OS 8.5
+		
+	DriveServices.h
+		Add kPageInformationVersion comment.  Add kPageIsHeldResident
+		
+	Errors.h
+		Update with latest error codes.
+		
+	Events.h
+		Change KeyMap back to UInt32 array from long array.
+		
+	Files.h
+		Add fsRdDenyPerm and fsWrDenyPerm.  Add PBHTrashVolumeCachesSync().
+
+	FindByContent.h
+		New file for Mac OS 8.5
+	
+	Finder.h
+		Add ExtendedFileInfo and ExtendedFolderInfo structs for new Finder info.
+		
+	Folders.h
+		Add new folder constants for Mac OS 8.5
+		
+	Fonts.h
+		Add routines for enabling anti-aliased fonts.
+		
+	fp.h
+		Fix comments. Make compatible with latest MSL.
+		
+	FSM.h
+		Moved some declarations to Files.h
+		
+	Gestalt.h
+		Add latest Gestalt selectors.
+		
+	HFSVolumes.h
+		Minor tweaks
+		
+	Icons.h
+		Add new IconRef based API's for Mac OS 8.5
+		
+	ImageCodec.h
+	ImageCompression.h
+		Updated to QuickTime 3.0 final headers.
+		
+	InputSprockets.r
+		New file for InputSprockets 1.3
+		
+	IntlResources.h
+		Add itlcDisableKeyScriptSync constant.
+		
+	JManager.h
+		Fix JMGetCurrentJRIEnv to be in JRI_H not JNI_H. Rename some parameters.
+		
+	LowMem.h
+		Add KeyTime and MBTicks.  Add LMGetFinderName for pascal.
+		
+	MachineExceptions.h
+		Add AltiVec support.
+		
+	MacTypes.h
+		Fix comments.  Add ConstStringPtr.
+	
+	MacWindows.h
+		Update for new API's in Mac OS 8.5
+	
+	Menus.h
+		Update for new API's in Mac OS 8.5
+		
+	MixedMode.h
+		Updated comment about how to put PEF in a resource.
+	
+	Movies.h
+		Updated to QuickTime 3.0 final headers.
+	
+	Navigation.h
+		Fold NavFileOrFolderInfo into one struct.
+		
+	OSUtils.h
+		FlushCodeCacheRange now callable from PowerPC. 
+		
+	Palettes.h
+		Add back pmDithered.
+		
+	PCCard.h
+		Add USB and Firewire contorller types.
+		
+	PEFBinaryFormat.h
+		Update for PEF2.
+		
+	Printing.h
+		Fix TPPRPortRef and TPPrStatusRef for pascal.
+	
+	QD3D.h
+	QD3DCustomElements.h
+	QD3DMath.h
+	QD3DRenderer.h
+	QD3DSet.h
+	QD3DTransform.h
+	QD3DView.h
+	QD3DViewer.h
+	RAVE.h
+	RAVESystem.h
+		Update to QD3D 1.5.4 headers.
+		
+	QDOffscreen.h
+		Add GetPixRowBytes()
+	
+	QTML.h
+		Update for QuickTime 3.0 final headers.
+	
+	Quickdraw.h
+		GDevice.gdNextGD is now a GDHandle. 
+		
+	QuickTimeComponents.h
+		Update for QuickTime 3.0 final headers.
+
+	Script.h
+		Add constants for Greenland.
+		
+	SFNTLayoutTypes.h
+		Change property table version to 2.0.
+		
+	SFNTTypes.h
+		Add FontNameCode.
+		
+	Sound.h
+		Add kSoundInSource.  Add support for getting siRecordingQuality.
+		
+	TextCommon.h
+		Updates for MacOS 8.5
+		
+	TextEdit.h
+		Fix TEGetScrapLength to only be defined for classic 68k.
+		
+	TextServices.h
+		Add TextServiceProperty routines.
+		
+	UnicodeConverter.r
+		New Rez file.
+		
+	UnicodeUtilities.h
+		New interface for Mac OS 8.5
+		
+	Video.h
+		Add bits for determing in sleep is OK on powerbooks.
+	
+	VideoServices.h
+		Add VSLSetDisplayConfiguration().
+		
+			
+
+========================================
+Bug Fixes and Changes in Stub Libraries
+========================================
+
+-	New Stub Libraries for Allegro:
+		ATSUnicodeLib
+		ControlsLib
+		DialogsLib
+		FindByContent
+		FontManager
+		IconServicesLib
+		MenusLib
+		UnicodeUtilitiesLib
+		WindowsLib
+
+-	Updated Stub Libraries for Allegro:
+		InterfaceLib
+		AppearanceLib
+		
+-	Stub Libraries previously on separate SDK's:
+		ContextualMenu
+		InputSprockets
+		NavigationLib
+		TextCommon
+		TextEncodingConverter
+		UnicodeConverter
+		ColorPickerLib
+		QuickTimeLib
+		SoundLib
+
+-	NOTE: the new InterfaceLib stub library contains a number of additional
+	routines available only in Mac OS 8.5.  If you use any of the new routines,
+	and want to run on pre 8.5 systems, you must weak link against InterfaceLib
+	and then not call any of the new routines when running on pre 8.5 systems.
+
+- 	The following routines were added to InterfaceLib in System 7.5
+		FTCompletionAsync, FTReceiveAsync, FTSendAsync
+		DeleteGestaltValue, NewGestaltValue, SetGestaltValue, ReplaceGestaltValue
+
+- 	The following routines were added to InterfaceLib in Mac OS 8.5
+		PBXGetVolInfoSync, PBXGetVolInfoAsync, PBGetXCatInfoSync, PBGetXCatInfoAsync,
+		LMGetCursorNew, LMSetCursorNew, LMGetMouseButtonState, LMSetMouseButtonState,
+		LMGetMouseTemp, LMSetMouseTemp, LMGetRawMouseLocation, LMSetRawMouseLocation,
+		LMGetMouseLocation, LMSetMouseLocation, LMGetTheCursor, LMSetTheCursor,
+		LMGetHighHeapMark, LMSetHighHeapMark, LMGetStackLowPoint, LMSetStackLowPoint,
+		LMGetROMMapHandle, LMSetROMMapHandle, LMGetUnitTableEntryCount, LMSetUnitTableEntryCount,
+		LMGetDiskFormatingHFSDefaults, LMSetDiskFormatingHFSDefaults,
+		LMGetPortAInfo, LMSetPortAInfo, LMGetABusGlobals, LMSetABusGlobals, 
+		LMGetABusDCE, LMSetABusDCE, LMGetKeyTime, LMSetKeyTime, LMGetMBTicks, LMSetMBTicks,
+		IsAliasFile, ResolveAliasWithMountFlags, ResolveAliasFileWithMountFlags, 
+		DriverInstall, DriverInstallReserveMem, DIXFormat, DIXZero, DIReformat,
+		PBUnmountVolImmed, ReallocateHandleSys, LockMemoryForOutput, MakeMemoryResident,
+		ReleaseMemoryData, MakeMemoryNonResident, FlushMemory,
+		InstallExtensionNotificationProc, RemoveExtensionNotificationProc,
+		InstallExtensionTableHandlerProc, RemoveExtensionTableHandlerProc,
+		FlushCodeCacheRange, NewCServiceWindow, UCTextServiceEvent, ataManager,
+		PurgeSpaceTotal, PurgeSpaceContiguous, PurgeSpaceSysTotal, PurgeSpaceSysContiguous,,
+		UTAllocateFCB, UTReleaseFCB, UTLocateFCB, UTLocateNextFCB, UTIndexFCB, UTResolveFCB,
+		UTAllocateVCB, UTAddNewVCB, UTDisposeVCB, UTLocateVCBByRefNum, UTLocateVCBByName, 
+		UTLocateNextVCB, UTAllocateWDCB, UTReleaseWDCB, UTResolveWDCB, UTFindDrive, UTAdjustEOF,
+		UTSetDefaultVol, UTGetDefaultVol, UTEjectVol, UTCheckWDRefNum, UTCheckFileRefNum, 
+		UTCheckVolRefNum, UTCheckPermission, UTCheckVolOffline, UTCheckVolModifiable, 
+		UTCheckFileModifiable, UTCheckDirBusy, UTParsePathname, UTGetPathComponentName, 
+		UTDetermineVol, UTGetBlock, UTReleaseBlock, UTFlushCache, UTMarkDirty, UTTrashVolBlocks,
+		UTTrashFileBlocks, UTTrashBlocks, UTCacheReadIP, UTCacheWriteIP, UTBlockInFQHashP, 
+		UTVolCacheReadIP, UTVolCacheWriteIP, InstallFS, RemoveFS, 
+		SetFSInfo, GetFSInfo, InformFSM, InformFFS, 
+		IncrementAtomic, DecrementAtomic, AddAtomic, BitAndAtomic, BitOrAtomic, BitXorAtomic
+		CompareAndSwap, IncrementAtomic8, DecrementAtomic8, AddAtomic8, BitAndAtomic8, BitOrAtomic8,
+		BitXorAtomic8, IncrementAtomic16, DecrementAtomic16, AddAtomic16, BitAndAtomic16, 
+		BitOrAtomic16, BitXorAtomic16, TestAndSet, TestAndClear,
+		BlockMoveDataUncached, BlockMoveUncached, BlockZero, BlockZeroUncached
+
+
+==========================
+Known Bugs and Limitations
+==========================
+
+-	Some of the newer stub libraries have the usage field
+	in the cfrg resource set to 3 instead of 0.  This 
+	specifies the fragment is a stub and does not contain
+	code.  All CodeWarrior linkers handle this, but older
+	PPCLink tools will ignore the fragment and issue a 
+	warning.  You should update to a newer PPCLink because
+	this will become the standard way stub libraries are 
+	built.
+
+-	CodeWarrior Pro4 has made changes to MSL to conform with
+	the evolving C9X standard.  The changes conflict with
+	fp.h.  If you are using the 3.2 headers, Pro4, MSL, fp.h, 
+	and are getting compiler errors, update your fp.h to be 
+	the one from Pro4.  It has been modified by Metrowerks
+	to be compatible with their latest MSL.
+	
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+
+

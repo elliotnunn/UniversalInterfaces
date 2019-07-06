@@ -1,0 +1,388 @@
+;
+;	File:		CMMComponent.a
+;
+;	Contains:	ColorSync CMM Component API
+;
+;	Version:	Technology:	ColorSync 2.5
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1994-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__CMMCOMPONENT__') = 'UNDEFINED' THEN
+__CMMCOMPONENT__ SET 1
+
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__COMPONENTS__') = 'UNDEFINED' THEN
+	include 'Components.a'
+	ENDIF
+	IF &TYPE('__CMAPPLICATION__') = 'UNDEFINED' THEN
+	include 'CMApplication.a'
+	ENDIF
+
+
+CMMInterfaceVersion				EQU		1
+;  Component function selectors 
+;  Required 
+
+kCMMInit						EQU		0
+kNCMMInit						EQU		6
+kCMMMatchColors					EQU		1
+kCMMCheckColors					EQU		2
+;  Optional 
+
+kCMMValidateProfile				EQU		8
+kCMMFlattenProfile				EQU		14
+kCMMUnflattenProfile			EQU		15
+kCMMMatchBitmap					EQU		9
+kCMMCheckBitmap					EQU		10
+kCMMMatchPixMap					EQU		3
+kCMMCheckPixMap					EQU		4
+kCMMConcatenateProfiles			EQU		5
+kCMMConcatInit					EQU		7
+kCMMNewLinkProfile				EQU		16
+kCMMGetPS2ColorSpace			EQU		11
+kCMMGetPS2ColorRenderingIntent	EQU		12
+kCMMGetPS2ColorRendering		EQU		13
+kCMMGetPS2ColorRenderingVMSize	EQU		17
+kCMMGetNamedColorInfo			EQU		70
+kCMMGetNamedColorValue			EQU		71
+kCMMGetIndNamedColorValue		EQU		72
+kCMMGetNamedColorIndex			EQU		73
+kCMMGetNamedColorName			EQU		74
+
+;
+; pascal CMError NCMInit(ComponentInstance CMSession, CMProfileRef srcProfile, CMProfileRef dstProfile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_NCMInit
+			move.l              #$00080006,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NCMInit
+	ENDIF
+
+;
+; pascal CMError CMInit(ComponentInstance CMSession, CMProfileHandle srcProfile, CMProfileHandle dstProfile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMInit
+			move.l              #$00080000,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMInit
+	ENDIF
+
+;
+; pascal CMError CMMatchColors(ComponentInstance CMSession, CMColor *myColors, unsigned long count)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMatchColors
+			move.l              #$00080001,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMatchColors
+	ENDIF
+
+;
+; pascal CMError CMCheckColors(ComponentInstance CMSession, CMColor *myColors, unsigned long count, long *result)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMCheckColors
+			move.l              #$000C0002,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMCheckColors
+	ENDIF
+
+
+;  Optional functions 
+;
+; pascal CMError CMMValidateProfile(ComponentInstance CMSession, CMProfileRef prof, Boolean *valid)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMValidateProfile
+			move.l              #$00080008,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMValidateProfile
+	ENDIF
+
+;
+; pascal CMError CMMFlattenProfile(ComponentInstance CMSession, CMProfileRef prof, unsigned long flags, CMFlattenUPP proc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMFlattenProfile
+			move.l              #$0010000E,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMFlattenProfile
+	ENDIF
+
+;
+; pascal CMError CMMUnflattenProfile(ComponentInstance CMSession, FSSpec *resultFileSpec, CMFlattenUPP proc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMUnflattenProfile
+			move.l              #$000C000F,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMUnflattenProfile
+	ENDIF
+
+;
+; pascal CMError CMMatchBitmap(ComponentInstance CMSession, const CMBitmap *bitmap, CMBitmapCallBackUPP progressProc, void *refCon, CMBitmap *matchedBitmap)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMatchBitmap
+			move.l              #$00100009,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMatchBitmap
+	ENDIF
+
+;
+; pascal CMError CMCheckBitmap(ComponentInstance CMSession, const CMBitmap *bitmap, CMBitmapCallBackUPP progressProc, void *refCon, CMBitmap *resultBitmap)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMCheckBitmap
+			move.l              #$0010000A,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMCheckBitmap
+	ENDIF
+
+;
+; pascal CMError CMMatchPixMap(ComponentInstance CMSession, PixMap *myPixMap, CMBitmapCallBackUPP progressProc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMatchPixMap
+			move.l              #$000C0003,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMatchPixMap
+	ENDIF
+
+;
+; pascal CMError CMCheckPixMap(ComponentInstance CMSession, const PixMap *myPixMap, CMBitmapCallBackUPP progressProc, BitMap *myBitMap, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMCheckPixMap
+			move.l              #$00100004,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMCheckPixMap
+	ENDIF
+
+;
+; pascal CMError CMConcatInit(ComponentInstance CMSession, CMConcatProfileSet *profileSet)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMConcatInit
+			move.l              #$00040007,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMConcatInit
+	ENDIF
+
+;
+; pascal CMError CMNewLinkProfile(ComponentInstance CMSession, CMProfileRef *prof, const CMProfileLocation *targetLocation, CMConcatProfileSet *profileSet)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMNewLinkProfile
+			move.l              #$000C0010,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMNewLinkProfile
+	ENDIF
+
+;
+; pascal CMError CMMGetPS2ColorSpace(ComponentInstance CMSession, CMProfileRef srcProf, unsigned long flags, CMFlattenUPP proc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMGetPS2ColorSpace
+			move.l              #$0010000B,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMGetPS2ColorSpace
+	ENDIF
+
+;
+; pascal CMError CMMGetPS2ColorRenderingIntent(ComponentInstance CMSession, CMProfileRef srcProf, unsigned long flags, CMFlattenUPP proc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMGetPS2ColorRenderingIntent
+			move.l              #$0010000C,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMGetPS2ColorRenderingIntent
+	ENDIF
+
+;
+; pascal CMError CMMGetPS2ColorRendering(ComponentInstance CMSession, CMProfileRef srcProf, CMProfileRef dstProf, unsigned long flags, CMFlattenUPP proc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMGetPS2ColorRendering
+			move.l              #$0014000D,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMGetPS2ColorRendering
+	ENDIF
+
+;
+; pascal CMError CMMGetPS2ColorRenderingVMSize(ComponentInstance CMSession, CMProfileRef srcProf, CMProfileRef dstProf, unsigned long *vmSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMGetPS2ColorRenderingVMSize
+			move.l              #$000C0011,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMGetPS2ColorRenderingVMSize
+	ENDIF
+
+;
+; pascal CMError CMConcatenateProfiles(ComponentInstance CMSession, CMProfileHandle thru, CMProfileHandle dst, CMProfileHandle *newDst)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMConcatenateProfiles
+			move.l              #$000C0005,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMConcatenateProfiles
+	ENDIF
+
+;  Named Color functions 
+;
+; pascal CMError CMMGetNamedColorInfo(ComponentInstance CMSession, CMProfileRef srcProf, unsigned long *deviceChannels, OSType *deviceColorSpace, OSType *PCSColorSpace, unsigned long *count, StringPtr prefix, StringPtr suffix)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMGetNamedColorInfo
+			move.l              #$001C0046,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMGetNamedColorInfo
+	ENDIF
+
+;
+; pascal CMError CMMGetNamedColorValue(ComponentInstance CMSession, CMProfileRef prof, StringPtr name, CMColor *deviceColor, CMColor *PCSColor)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMGetNamedColorValue
+			move.l              #$00100047,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMGetNamedColorValue
+	ENDIF
+
+;
+; pascal CMError CMMGetIndNamedColorValue(ComponentInstance CMSession, CMProfileRef prof, unsigned long index, CMColor *deviceColor, CMColor *PCSColor)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMGetIndNamedColorValue
+			move.l              #$00100048,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMGetIndNamedColorValue
+	ENDIF
+
+;
+; pascal CMError CMMGetNamedColorIndex(ComponentInstance CMSession, CMProfileRef prof, StringPtr name, unsigned long *index)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMGetNamedColorIndex
+			move.l              #$000C0049,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMGetNamedColorIndex
+	ENDIF
+
+;
+; pascal CMError CMMGetNamedColorName(ComponentInstance CMSession, CMProfileRef prof, unsigned long index, StringPtr name)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_CMMGetNamedColorName
+			move.l              #$000C004A,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CMMGetNamedColorName
+	ENDIF
+
+	ENDIF ; __CMMCOMPONENT__ 
+

@@ -1,0 +1,2837 @@
+;
+;    File:       GXPrinting.a
+;
+;    Contains:   This file contains all printing APIs except for driver/extension specific ones.
+;
+;    Version:    Technology: Quickdraw GX 1.1
+;                Release:    Universal Interfaces 3.3.2
+;
+;    Copyright:  © 1994-2000 by Apple Computer, Inc., all rights reserved.
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__GXPRINTING__') = 'UNDEFINED' THEN
+__GXPRINTING__ SET 1
+
+	IF &TYPE('__CONDITIONALMACROS__') = 'UNDEFINED' THEN
+	include 'ConditionalMacros.a'
+	ENDIF
+	IF &TYPE('__COLLECTIONS__') = 'UNDEFINED' THEN
+	include 'Collections.a'
+	ENDIF
+	IF &TYPE('__DIALOGS__') = 'UNDEFINED' THEN
+	include 'Dialogs.a'
+	ENDIF
+	IF &TYPE('__MACERRORS__') = 'UNDEFINED' THEN
+	include 'MacErrors.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+	IF &TYPE('__GXFONTS__') = 'UNDEFINED' THEN
+	include 'GXFonts.a'
+	ENDIF
+	IF &TYPE('__GXMATH__') = 'UNDEFINED' THEN
+	include 'GXMath.a'
+	ENDIF
+	IF &TYPE('__GXTYPES__') = 'UNDEFINED' THEN
+	include 'GXTypes.a'
+	ENDIF
+	IF &TYPE('__LISTS__') = 'UNDEFINED' THEN
+	include 'Lists.a'
+	ENDIF
+	IF &TYPE('__MENUS__') = 'UNDEFINED' THEN
+	include 'Menus.a'
+	ENDIF
+	IF &TYPE('__GXMESSAGES__') = 'UNDEFINED' THEN
+	include 'GXMessages.a'
+	ENDIF
+	IF &TYPE('__PRINTING__') = 'UNDEFINED' THEN
+	include 'Printing.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+
+; ********************************************************************
+;                    Start of old "GXPrintingManager.h/a/p" interface file.
+;            ********************************************************************
+
+;  ------------------------------------------------------------------------------
+;
+;                            Printing Manager API Contants and Types
+;
+;-------------------------------------------------------------------------------- 
+
+
+; typedef unsigned long 				gxOwnerSignature
+
+	IF OLDROUTINENAMES THEN
+; typedef unsigned long 				Signature
+
+	ENDIF	; OLDROUTINENAMES
+; 
+;
+;    ABSTRACT DATA TYPES
+;
+;
+
+
+;   typedef struct gxPrivatePrinterRecord *gxPrinter;
+;   typedef struct gxPrivateJobRecord *gxJob;
+;   typedef struct gxPrivateFormatRecord *gxFormat;
+;   typedef struct gxPrivatePaperTypeRecord *gxPaperType;
+;   typedef struct gxPrivatePrintFileRecord *gxPrintFile;
+
+
+
+
+
+
+
+
+
+
+
+
+
+;  Possible values for LoopStatus 
+; typedef Boolean 						gxLoopStatus
+
+
+gxStopLooping					EQU		0
+gxKeepLooping					EQU		1
+	IF CALL_NOT_IN_CARBON THEN
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF CALL_NOT_IN_CARBON THEN
+	ENDIF	; CALL_NOT_IN_CARBON
+	IF OLDROUTINENAMES THEN
+; typedef GXViewDeviceProcPtr 			gxViewDeviceProc
+
+; typedef GXFormatProcPtr 				gxFormatProc
+
+; typedef GXPaperTypeProcPtr 			gxPaperTypeProc
+
+; typedef GXPrintingFlattenProcPtr 		gxPrintingFlattenProc
+
+	ENDIF	; OLDROUTINENAMES
+; 
+;    The following constants are used to set collection item flags in printing
+;    collections. The Printing Manager purges certain items whenever a driver
+;    switch occurs. If the formatting driver changes, all items marked as
+;    gxVolatileFormattingDriverCategory will be purged.  If the output driver
+;    changes, all items marked as gxVolatileOutputDriverCategory will be purged.
+;    Note that to prevent items from being flattened when GXFlattenJob is called,
+;    you should unset the collectionPersistenceBit (defined in Collections.h),
+;    which is on by default.
+;
+
+;  Structure stored in collection items' user attribute bits 
+; typedef short 						gxCollectionCategory
+
+
+gxNoCollectionCategory			EQU		$0000
+gxOutputDriverCategory			EQU		$0001
+gxFormattingDriverCategory		EQU		$0002
+gxDriverVolatileCategory		EQU		$0004
+gxVolatileOutputDriverCategory	EQU		$0005
+gxVolatileFormattingDriverCategory EQU	$0006
+
+; 
+;
+;    >>>>>> JOB COLLECTION ITEMS <<<<<<
+;
+;
+
+
+;  gxJobInfo COLLECTION ITEM 
+
+gxJobTag						EQU		'job '
+gxJobInfo				RECORD 0
+numPages				 ds.l	1				; offset: $0 (0)		;  Number of pages in the document 
+priority				 ds.l	1				; offset: $4 (4)		;  Priority of this job plus "is it on hold?" 
+timeToPrint				 ds.l	1				; offset: $8 (8)		;  When to print job, if scheduled 
+jobTimeout				 ds.l	1				; offset: $C (12)		;  Timeout value, in ticks 
+firstPageToPrint		 ds.l	1				; offset: $10 (16)		;  Start printing from this page 
+jobAlert				 ds.w	1				; offset: $14 (20)		;  How to alert user when printing 
+appName					 ds		Str31			; offset: $16 (22)		;  Which application printed the document 
+documentName			 ds		Str31			; offset: $36 (54)		;  The name of the document being printed 
+userName				 ds		Str31			; offset: $56 (86)		;  The owner name of the machine that printed the document 
+sizeof					 EQU *					; size:   $76 (118)
+						ENDR
+;  gxPDDDefaultSettingTag COLLECTION ITEM 
+
+gxPDDDefaultSettingTag			EQU		'pdds'
+gxPDDDefaultSettingInfo	RECORD 0
+useDefaultSetting		 ds.b	1				; offset: $0 (0)		;  true if PDD default setting should be used 
+pad						 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+;  priority field constants 
+
+gxPrintJobHoldingBit			EQU		$00001000			; This bit is set if the job is on hold. 
+
+gxPrintJobUrgent				EQU		$00000001
+gxPrintJobAtTime				EQU		$00000002
+gxPrintJobASAP					EQU		$00000003
+gxPrintJobHolding				EQU		$00001003
+gxPrintJobHoldingAtTime			EQU		$00001002
+gxPrintJobHoldingUrgent			EQU		$00001001
+;  jobAlert field constants 
+
+gxNoPrintTimeAlert				EQU		0					; Don't alert user when we print 
+gxAlertBefore					EQU		1					; Alert user before we print 
+gxAlertAfter					EQU		2					; Alert user after we print 
+gxAlertBothTimes				EQU		3					; Alert before and after we print 
+;  jobTimeout field constants 
+
+gxThirtySeconds					EQU		1800				; 30 seconds in ticks 
+gxTwoMinutes					EQU		7200				; 2 minutes in ticks 
+
+;  gxCollationTag COLLECTION ITEM 
+
+gxCollationTag					EQU		'sort'
+gxCollationInfo			RECORD 0
+collation				 ds.b	1				; offset: $0 (0)		;  True if copies are to be collated 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+;  gxCopiesTag COLLECTION ITEM 
+
+gxCopiesTag						EQU		'copy'
+gxCopiesInfo			RECORD 0
+copies					 ds.l	1				; offset: $0 (0)		;  Number of copies of the document to print 
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+
+;  gxPageRangeTag COLLECTION ITEM 
+
+gxPageRangeTag					EQU		'rang'
+gxSimplePageRangeInfo	RECORD 0
+optionChosen			 ds.b	1				; offset: $0 (0)		;  From options listed below 
+printAll				 ds.b	1				; offset: $1 (1)		;  True if user wants to print all pages 
+fromPage				 ds.l	1				; offset: $2 (2)		;  For gxDefaultPageRange, current value 
+toPage					 ds.l	1				; offset: $6 (6)		;  For gxDefaultPageRange, current value 
+sizeof					 EQU *					; size:   $A (10)
+						ENDR
+gxPageRangeInfo			RECORD 0
+simpleRange				 ds		gxSimplePageRangeInfo ; offset: $0 (0) ;  Info which will be returned for GetJobPageRange 
+fromString				 ds		Str31			; offset: $A (10)		;  For gxCustomizePageRange, current value 
+toString				 ds		Str31			; offset: $2A (42)		;  For gxCustomizePageRange, current value 
+minFromPage				 ds.l	1				; offset: $4A (74)		;  For gxDefaultPageRange, we parse with this, ignored if nil 
+maxToPage				 ds.l	1				; offset: $4E (78)		;  For gxDefaultPageRange, we parse with this, ignored if nil 
+replaceString			 ds.b	1				; offset: $52 (82) <-- really an array of length one ;  For gxReplacePageRange, string to display 
+						 ORG 84
+sizeof					 EQU *					; size:   $54 (84)
+						ENDR
+
+;  optionChosen field constants for SimplePageRangeInfo 
+
+gxDefaultPageRange				EQU		0
+gxReplacePageRange				EQU		1
+gxCustomizePageRange			EQU		2
+
+;  gxQualityTag COLLECTION ITEM 
+
+gxQualityTag					EQU		'qual'
+gxQualityInfo			RECORD 0
+disableQuality			 ds.b	1				; offset: $0 (0)		;  True to disable standard quality controls 
+padByte					 ds.b	1				; offset: $1 (1)
+defaultQuality			 ds.w	1				; offset: $2 (2)		;  The default quality value 
+currentQuality			 ds.w	1				; offset: $4 (4)		;  The current quality value 
+qualityCount			 ds.w	1				; offset: $6 (6)		;  The number of quality menu items in popup menu 
+qualityNames			 ds.b	1				; offset: $8 (8) <-- really an array of length one ;  An array of packed pascal strings for popup menu titles 
+						 ORG 10
+sizeof					 EQU *					; size:   $A (10)
+						ENDR
+
+;  gxFileDestinationTag COLLECTION ITEM 
+
+gxFileDestinationTag			EQU		'dest'
+gxFileDestinationInfo	RECORD 0
+toFile					 ds.b	1				; offset: $0 (0)		;  True if destination is a file 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+;  gxFileLocationTag COLLECTION ITEM 
+
+gxFileLocationTag				EQU		'floc'
+gxFileLocationInfo		RECORD 0
+fileSpec				 ds		FSSpec			; offset: $0 (0)		;  Location to put file, if destination is file 
+sizeof					 EQU *					; size:   $46 (70)
+						ENDR
+
+;  gxFileFormatTag COLLECTION ITEM 
+
+gxFileFormatTag					EQU		'ffmt'
+gxFileFormatInfo		RECORD 0
+fileFormatName			 ds		Str31			; offset: $0 (0)		;  Name of file format (e.g. "PostScript") if destination is file 
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+
+;  gxFileFontsTag COLLECTION ITEM 
+
+gxFileFontsTag					EQU		'incf'
+gxFileFontsInfo			RECORD 0
+includeFonts			 ds.b	1				; offset: $0 (0)		;  Which fonts to include, if destination is file 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+;  includeFonts field constants 
+
+gxIncludeNoFonts				EQU		1					; Include no fonts 
+gxIncludeAllFonts				EQU		2					; Include all fonts 
+gxIncludeNonStandardFonts		EQU		3					; Include only fonts that aren't in the standard LW set 
+
+;  gxPaperFeedTag COLLECTION ITEM 
+
+gxPaperFeedTag					EQU		'feed'
+gxPaperFeedInfo			RECORD 0
+autoFeed				 ds.b	1				; offset: $0 (0)		;  True if automatic feed, false if manual 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+;  gxTrayFeedTag COLLECTION ITEM 
+
+gxTrayFeedTag					EQU		'tray'
+; typedef long 							gxTrayIndex
+
+gxTrayFeedInfo			RECORD 0
+feedTrayIndex			 ds.l	1				; offset: $0 (0)		;  Tray to feed paper from 
+manualFeedThisPage		 ds.b	1				; offset: $4 (4)		;  Signals manual feeding for the page 
+padByte					 ds.b	1				; offset: $5 (5)
+sizeof					 EQU *					; size:   $6 (6)
+						ENDR
+
+;  gxManualFeedTag COLLECTION ITEM 
+
+gxManualFeedTag					EQU		'manf'
+gxManualFeedInfo		RECORD 0
+numPaperTypeNames		 ds.l	1				; offset: $0 (0)		;  Number of paperTypes to manually feed 
+paperTypeNames			 ds		Str31			; offset: $4 (4) <-- really an array of length one ;  Array of names of paperTypes to manually feed 
+sizeof					 EQU *					; size:   $24 (36)
+						ENDR
+
+;  gxNormalMappingTag COLLECTION ITEM 
+
+gxNormalMappingTag				EQU		'nmap'
+gxNormalMappingInfo		RECORD 0
+normalPaperMapping		 ds.b	1				; offset: $0 (0)		;  True if not overriding normal paper mapping 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+;  gxSpecialMappingTag COLLECTION ITEM 
+
+gxSpecialMappingTag				EQU		'smap'
+gxSpecialMappingInfo	RECORD 0
+specialMapping			 ds.b	1				; offset: $0 (0)		;  Enumerated redirect, scale or tile setting 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+;  specialMapping field constants 
+
+gxRedirectPages					EQU		1					; Redirect pages to a papertype and clip if necessary 
+gxScalePages					EQU		2					; Scale pages if necessary 
+gxTilePages						EQU		3					; Tile pages if necessary 
+
+;  gxTrayMappingTag COLLECTION ITEM 
+
+gxTrayMappingTag				EQU		'tmap'
+gxTrayMappingInfo		RECORD 0
+mapPaperToTray			 ds.l	1				; offset: $0 (0)		;  Tray to map all paper to 
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+
+;  gxPaperMappingTag COLLECTION ITEM 
+;  This collection item contains a flattened paper type resource 
+
+gxPaperMappingTag				EQU		'pmap'
+
+;  gxPrintPanelTag COLLECTION ITEM 
+
+gxPrintPanelTag					EQU		'ppan'
+gxPrintPanelInfo		RECORD 0
+startPanelName			 ds		Str31			; offset: $0 (0)		;  Name of starting panel in Print dialog 
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+
+;  gxFormatPanelTag COLLECTION ITEM 
+
+gxFormatPanelTag				EQU		'fpan'
+gxFormatPanelInfo		RECORD 0
+startPanelName			 ds		Str31			; offset: $0 (0)		;  Name of starting panel in Format dialog 
+sizeof					 EQU *					; size:   $20 (32)
+						ENDR
+
+;  gxTranslatedDocumentTag COLLECTION ITEM 
+
+gxTranslatedDocumentTag			EQU		'trns'
+gxTranslatedDocumentInfo RECORD 0
+translatorInfo			 ds.l	1				; offset: $0 (0)		;  Information from the translation process 
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+
+;  gxCoverPageTag COLLECTION ITEM 
+
+gxCoverPageTag					EQU		'cvpg'
+
+gxCoverPageInfo			RECORD 0
+coverPage				 ds.l	1				; offset: $0 (0)		;  Use same enum values as for PrintRecord field in GXPrinterDrivers.h 
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; 
+;
+;    >>>>>> FORMAT COLLECTION ITEMS <<<<<<
+;
+;
+
+;  gxPaperTypeLockTag COLLECTION ITEM 
+
+gxPaperTypeLockTag				EQU		'ptlk'
+gxPaperTypeLockInfo		RECORD 0
+paperTypeLocked			 ds.b	1				; offset: $0 (0)		;  True if format's paperType is locked 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+;  gxOrientationTag COLLECTION ITEM 
+
+gxOrientationTag				EQU		'layo'
+gxOrientationInfo		RECORD 0
+orientation				 ds.b	1				; offset: $0 (0)		;  An enumerated orientation value 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+;  orientation field constants 
+
+gxPortraitLayout				EQU		0					; Portrait 
+gxLandscapeLayout				EQU		1					; Landscape 
+gxRotatedPortraitLayout			EQU		2					; Portrait, rotated 180° 
+gxRotatedLandscapeLayout		EQU		3					; Landscape, rotated 180°  
+
+;  gxScalingTag COLLECTION ITEM 
+
+gxScalingTag					EQU		'scal'
+gxScalingInfo			RECORD 0
+horizontalScaleFactor	 ds.l	1				; offset: $0 (0)		;  Current horizontal scaling factor 
+verticalScaleFactor		 ds.l	1				; offset: $4 (4)		;  Current vertical scaling factor 
+minScaling				 ds.w	1				; offset: $8 (8)		;  Minimum scaling allowed 
+maxScaling				 ds.w	1				; offset: $A (10)		;  Maximum scaling allowed 
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+
+;  gxDirectModeTag COLLECTION ITEM 
+
+gxDirectModeTag					EQU		'dirm'
+gxDirectModeInfo		RECORD 0
+directModeOn			 ds.b	1				; offset: $0 (0)		;  True if a direct mode is enabled 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+;  gxFormatHalftoneTag COLLECTION ITEM 
+
+gxFormatHalftoneTag				EQU		'half'
+gxFormatHalftoneInfo	RECORD 0
+numHalftones			 ds.l	1				; offset: $0 (0)		;  Number of halftone records 
+halftones				 ds		gxHalftone		; offset: $4 (4) <-- really an array of length one ;  The halftone records 
+sizeof					 EQU *					; size:   $38 (56)
+						ENDR
+
+;  gxInvertPageTag COLLECTION ITEM 
+
+gxInvertPageTag					EQU		'invp'
+gxInvertPageInfo		RECORD 0
+padByte					 ds.b	1				; offset: $0 (0)
+invert					 ds.b	1				; offset: $1 (1)		;  If true, invert page 
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+;  gxFlipPageHorizontalTag COLLECTION ITEM 
+
+gxFlipPageHorizontalTag			EQU		'flph'
+gxFlipPageHorizontalInfo RECORD 0
+padByte					 ds.b	1				; offset: $0 (0)
+flipHorizontal			 ds.b	1				; offset: $1 (1)		;  If true, flip x coordinates on page 
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+;  gxFlipPageVerticalTag COLLECTION ITEM 
+
+gxFlipPageVerticalTag			EQU		'flpv'
+gxFlipPageVerticalInfo	RECORD 0
+padByte					 ds.b	1				; offset: $0 (0)
+flipVertical			 ds.b	1				; offset: $1 (1)		;  If true, flip y coordinates on page 
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+;  gxPreciseBitmapsTag COLLECTION ITEM 
+
+gxPreciseBitmapsTag				EQU		'pbmp'
+gxPreciseBitmapInfo		RECORD 0
+preciseBitmaps			 ds.b	1				; offset: $0 (0)		;  If true, scale page by 96% 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+
+; 
+;
+;    >>>>>> PAPERTYPE COLLECTION ITEMS <<<<<<
+;
+;
+
+;  gxBaseTag COLLECTION ITEM 
+
+gxBaseTag						EQU		'base'
+gxBaseInfo				RECORD 0
+baseType				 ds.l	1				; offset: $0 (0)		;  PaperType's base type 
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+;  baseType field constants 
+
+gxUnknownBase					EQU		0					; Base paper type from which this paper type is 
+gxUSLetterBase					EQU		1					; derived.  This is not a complete set. 
+gxUSLegalBase					EQU		2
+gxA4LetterBase					EQU		3
+gxB5LetterBase					EQU		4
+gxTabloidBase					EQU		5
+
+;  gxCreatorTag COLLECTION ITEM 
+
+gxCreatorTag					EQU		'crea'
+gxCreatorInfo			RECORD 0
+creator					 ds.l	1				; offset: $0 (0)		;  PaperType's creator 
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+;  gxUnitsTag COLLECTION ITEM 
+
+gxUnitsTag						EQU		'unit'
+gxUnitsInfo				RECORD 0
+units					 ds.b	1				; offset: $0 (0)		;  PaperType's units (used by PaperType Editor). 
+padByte					 ds.b	1				; offset: $1 (1)
+sizeof					 EQU *					; size:   $2 (2)
+						ENDR
+;  units field constants 
+
+gxPicas							EQU		0					; Pica measurement 
+gxMMs							EQU		1					; Millimeter measurement 
+gxInches						EQU		2					; Inches measurement 
+
+;  gxFlagsTag COLLECTION ITEM 
+
+gxFlagsTag						EQU		'flag'
+gxFlagsInfo				RECORD 0
+flags					 ds.l	1				; offset: $0 (0)		;  PaperType's flags 
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+;  flags field constants 
+
+gxOldPaperTypeFlag				EQU		$00800000			; Indicates a paper type for compatibility printing 
+gxNewPaperTypeFlag				EQU		$00400000			; Indicates a paper type for QuickDraw GX-aware printing 
+gxOldAndNewFlag					EQU		$00C00000			; Indicates a paper type that's both old and new 
+gxDefaultPaperTypeFlag			EQU		$00100000			; Indicates the default paper type in the group 
+
+;  gxCommentTag COLLECTION ITEM 
+
+gxCommentTag					EQU		'cmnt'
+gxCommentInfo			RECORD 0
+comment					 ds		Str255			; offset: $0 (0)		;  PaperType's comment 
+sizeof					 EQU *					; size:   $100 (256)
+						ENDR
+
+; 
+;
+;    >>>>>> PRINTER VIEWDEVICE TAGS <<<<<<
+;
+;
+
+;  gxPenTableTag COLLECTION ITEM 
+
+gxPenTableTag					EQU		'pent'
+gxPenTableEntry			RECORD 0
+penName					 ds		Str31			; offset: $0 (0)		;  Name of the pen 
+penColor				 ds		gxColor			; offset: $20 (32)		;  Color to use from the color set 
+penThickness			 ds.l	1				; offset: $30 (48)		;  Size of the pen 
+penUnits				 ds.w	1				; offset: $34 (52)		;  Specifies units in which pen thickness is defined 
+penPosition				 ds.w	1				; offset: $36 (54)		;  Pen position in the carousel, -1 (kPenNotLoaded) if not loaded 
+sizeof					 EQU *					; size:   $38 (56)
+						ENDR
+gxPenTable				RECORD 0
+numPens					 ds.l	1				; offset: $0 (0)		;  Number of pen entries in the following array 
+pens					 ds		gxPenTableEntry ; offset: $4 (4) <-- really an array of length one ;  Array of pen entries 
+sizeof					 EQU *					; size:   $3C (60)
+						ENDR
+; typedef struct gxPenTable *			gxPenTablePtr
+
+; typedef gxPenTablePtr *				gxPenTableHdl
+
+;  penUnits field constants 
+
+gxDeviceUnits					EQU		0
+gxMMUnits						EQU		1
+gxInchesUnits					EQU		2
+;  penPosition field constants 
+
+gxPenNotLoaded					EQU		-1
+
+; 
+;
+;    >>>>>> DIALOG-RELATED CONSTANTS AND TYPES <<<<<<
+;
+;
+
+; typedef long 							gxDialogResult
+
+
+gxCancelSelected				EQU		0
+gxOKSelected					EQU		1
+gxRevertSelected				EQU		2
+
+gxEditMenuRecord		RECORD 0
+editMenuID				 ds.w	1				; offset: $0 (0)
+cutItem					 ds.w	1				; offset: $2 (2)
+copyItem				 ds.w	1				; offset: $4 (4)
+pasteItem				 ds.w	1				; offset: $6 (6)
+clearItem				 ds.w	1				; offset: $8 (8)
+undoItem				 ds.w	1				; offset: $A (10)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+
+; 
+;
+;    >>>>>> JOB FORMAT MODE CONSTANTS AND TYPES <<<<<<
+;
+;
+
+; typedef OSType 						gxJobFormatMode
+
+gxJobFormatModeTable	RECORD 0
+numModes				 ds.l	1				; offset: $0 (0)		;  Number of job format modes to choose from 
+modes					 ds.l	1				; offset: $4 (4) <-- really an array of length one ;  The job format modes 
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct gxJobFormatModeTable *	gxJobFormatModeTablePtr
+
+; typedef gxJobFormatModeTablePtr *		gxJobFormatModeTableHdl
+
+
+gxGraphicsJobFormatMode			EQU		'grph'
+gxTextJobFormatMode				EQU		'text'
+gxPostScriptJobFormatMode		EQU		'post'
+; typedef long 							gxQueryType
+
+
+gxGetJobFormatLineConstraintQuery EQU	0
+gxGetJobFormatFontsQuery		EQU		1
+gxGetJobFormatFontCommonStylesQuery EQU	2
+gxGetJobFormatFontConstraintQuery EQU	3
+gxSetStyleJobFormatCommonStyleQuery EQU	4
+
+;  Structures used for Text mode field constants 
+gxPositionConstraintTable RECORD 0
+phase					 ds		gxPoint			; offset: $0 (0)		;  Position phase 
+offset					 ds		gxPoint			; offset: $8 (8)		;  Position offset 
+numSizes				 ds.l	1				; offset: $10 (16)		;  Number of available font sizes 
+sizes					 ds.l	1				; offset: $14 (20) <-- really an array of length one ;  The available font sizes 
+sizeof					 EQU *					; size:   $18 (24)
+						ENDR
+; typedef struct gxPositionConstraintTable * gxPositionConstraintTablePtr
+
+; typedef gxPositionConstraintTablePtr * gxPositionConstraintTableHdl
+
+;  numSizes field constants 
+
+gxConstraintRange				EQU		-1
+gxStyleNameTable		RECORD 0
+numStyleNames			 ds.l	1				; offset: $0 (0)		;  Number of style names 
+styleNames				 ds		Str255			; offset: $4 (4) <-- really an array of length one ;  The style names 
+sizeof					 EQU *					; size:   $104 (260)
+						ENDR
+; typedef struct gxStyleNameTable *		gxStyleNameTablePtr
+
+; typedef gxStyleNameTablePtr *			gxStyleNameTableHdl
+
+gxFontTable				RECORD 0
+numFonts				 ds.l	1				; offset: $0 (0)		;  Number of font references 
+fonts					 ds.l	1				; offset: $4 (4) <-- really an array of length one ;  The font references 
+sizeof					 EQU *					; size:   $8 (8)
+						ENDR
+; typedef struct gxFontTable *			gxFontTablePtr
+
+; typedef gxFontTablePtr *				gxFontTableHdl
+
+;  ------------------------------------------------------------------------------
+;
+;                                Printing Manager API Functions
+;
+;-------------------------------------------------------------------------------- 
+
+; 
+;    Global Routines
+;
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; pascal OSErr GXInitPrinting(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXInitPrinting
+			move.l              #$00000000,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXInitPrinting
+	ENDIF
+
+;
+; pascal OSErr GXExitPrinting(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXExitPrinting
+			move.l              #$00000001,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXExitPrinting
+	ENDIF
+
+
+; 
+;    Error-Handling Routines
+;
+
+;
+; pascal OSErr GXGetJobError(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobError
+			move.l              #$0000000E,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobError
+	ENDIF
+
+;
+; pascal void GXSetJobError(gxJob aJob, OSErr anErr)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetJobError
+			move.l              #$0000000F,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetJobError
+	ENDIF
+
+
+; 
+;    Job Routines
+;
+
+;
+; pascal OSErr GXNewJob(gxJob *aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewJob
+			move.l              #$00000002,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewJob
+	ENDIF
+
+;
+; pascal OSErr GXDisposeJob(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeJob
+			move.l              #$00000003,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeJob
+	ENDIF
+
+;
+; pascal void GXFlattenJob(gxJob aJob, GXPrintingFlattenUPP flattenProc, void *aVoid)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXFlattenJob
+			move.l              #$00000004,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXFlattenJob
+	ENDIF
+
+;
+; pascal gxJob GXUnflattenJob(gxJob aJob, GXPrintingFlattenUPP flattenProc, void *aVoid)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnflattenJob
+			move.l              #$00000005,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnflattenJob
+	ENDIF
+
+;
+; pascal Handle GXFlattenJobToHdl(gxJob aJob, Handle aHdl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXFlattenJobToHdl
+			move.l              #$00000006,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXFlattenJobToHdl
+	ENDIF
+
+;
+; pascal gxJob GXUnflattenJobFromHdl(gxJob aJob, Handle aHdl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUnflattenJobFromHdl
+			move.l              #$00000007,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUnflattenJobFromHdl
+	ENDIF
+
+;
+; pascal void GXInstallApplicationOverride(gxJob aJob, short messageID, void *override)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXInstallApplicationOverride
+			move.l              #$00000008,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXInstallApplicationOverride
+	ENDIF
+
+;
+; pascal Collection GXGetJobCollection(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobCollection
+			move.l              #$0000001D,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobCollection
+	ENDIF
+
+;
+; pascal void *GXGetJobRefCon(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobRefCon
+			move.l              #$0000001E,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobRefCon
+	ENDIF
+
+;
+; pascal void GXSetJobRefCon(gxJob aJob, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetJobRefCon
+			move.l              #$0000001F,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetJobRefCon
+	ENDIF
+
+;
+; pascal gxJob GXCopyJob(gxJob srcJob, gxJob dstJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyJob
+			move.l              #$00000020,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyJob
+	ENDIF
+
+;
+; pascal void GXSelectJobFormattingPrinter(gxJob aJob, Str31 printerName)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSelectJobFormattingPrinter
+			move.l              #$00000021,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSelectJobFormattingPrinter
+	ENDIF
+
+;
+; pascal void GXSelectJobOutputPrinter(gxJob aJob, Str31 printerName)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSelectJobOutputPrinter
+			move.l              #$00000022,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSelectJobOutputPrinter
+	ENDIF
+
+;
+; pascal void GXForEachJobFormatDo(gxJob aJob, GXFormatUPP formatProc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXForEachJobFormatDo
+			move.l              #$00000023,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXForEachJobFormatDo
+	ENDIF
+
+;
+; pascal long GXCountJobFormats(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCountJobFormats
+			move.l              #$00000024,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCountJobFormats
+	ENDIF
+
+;
+; pascal Boolean GXUpdateJob(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXUpdateJob
+			move.l              #$00000025,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXUpdateJob
+	ENDIF
+
+;
+; pascal void GXConvertPrintRecord(gxJob aJob, THPrint hPrint)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXConvertPrintRecord
+			move.l              #$00000026,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXConvertPrintRecord
+	ENDIF
+
+;
+; pascal void GXIdleJob(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXIdleJob
+			move.l              #$00000057,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXIdleJob
+	ENDIF
+
+
+; 
+;    Job Format Modes Routines
+;
+
+;
+; pascal void GXSetAvailableJobFormatModes(gxJob aJob, gxJobFormatModeTableHdl formatModeTable)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetAvailableJobFormatModes
+			move.l              #$0000003B,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetAvailableJobFormatModes
+	ENDIF
+
+;
+; pascal gxJobFormatMode GXGetPreferredJobFormatMode(gxJob aJob, Boolean *directOnly)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPreferredJobFormatMode
+			move.l              #$0000003C,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPreferredJobFormatMode
+	ENDIF
+
+;
+; pascal gxJobFormatMode GXGetJobFormatMode(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobFormatMode
+			move.l              #$0000003D,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobFormatMode
+	ENDIF
+
+;
+; pascal void GXSetJobFormatMode(gxJob aJob, gxJobFormatMode formatMode)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetJobFormatMode
+			move.l              #$0000003E,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetJobFormatMode
+	ENDIF
+
+;
+; pascal void GXJobFormatModeQuery(gxJob aJob, gxQueryType aQueryType, void *srcData, void *dstData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXJobFormatModeQuery
+			move.l              #$0000003F,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXJobFormatModeQuery
+	ENDIF
+
+
+; 
+;    Format Routines
+;
+
+;
+; pascal gxFormat GXNewFormat(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewFormat
+			move.l              #$00000009,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewFormat
+	ENDIF
+
+;
+; pascal void GXDisposeFormat(gxFormat aFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposeFormat
+			move.l              #$0000000A,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposeFormat
+	ENDIF
+
+;
+; pascal gxFormat GXGetJobFormat(gxJob aJob, long whichFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobFormat
+			move.l              #$00000013,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobFormat
+	ENDIF
+
+;
+; pascal gxJob GXGetFormatJob(gxFormat aFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetFormatJob
+			move.l              #$00000014,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetFormatJob
+	ENDIF
+
+;
+; pascal gxPaperType GXGetFormatPaperType(gxFormat aFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetFormatPaperType
+			move.l              #$00000015,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetFormatPaperType
+	ENDIF
+
+;
+; pascal void GXGetFormatDimensions(gxFormat aFormat, gxRectangle *pageSize, gxRectangle *paperSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetFormatDimensions
+			move.l              #$00000016,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetFormatDimensions
+	ENDIF
+
+;
+; pascal Collection GXGetFormatCollection(gxFormat aFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetFormatCollection
+			move.l              #$00000033,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetFormatCollection
+	ENDIF
+
+;
+; pascal void GXChangedFormat(gxFormat aFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXChangedFormat
+			move.l              #$00000034,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXChangedFormat
+	ENDIF
+
+;
+; pascal gxFormat GXCopyFormat(gxFormat srcFormat, gxFormat dstFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyFormat
+			move.l              #$00000035,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyFormat
+	ENDIF
+
+;
+; pascal gxFormat GXCloneFormat(gxFormat aFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCloneFormat
+			move.l              #$00000036,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCloneFormat
+	ENDIF
+
+;
+; pascal long GXCountFormatOwners(gxFormat aFormat)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCountFormatOwners
+			move.l              #$00000037,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCountFormatOwners
+	ENDIF
+
+;
+; pascal void GXGetFormatMapping(gxFormat aFormat, gxMapping *fmtMapping)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetFormatMapping
+			move.l              #$00000038,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetFormatMapping
+	ENDIF
+
+;
+; pascal gxShape GXGetFormatForm(gxFormat aFormat, gxShape *mask)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetFormatForm
+			move.l              #$00000039,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetFormatForm
+	ENDIF
+
+;
+; pascal void GXSetFormatForm(gxFormat aFormat, gxShape form, gxShape mask)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetFormatForm
+			move.l              #$0000003A,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetFormatForm
+	ENDIF
+
+
+; 
+;    PaperType Routines
+;
+
+;
+; pascal gxPaperType GXNewPaperType(gxJob aJob, Str31 name, gxRectangle *pageSize, gxRectangle *paperSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXNewPaperType
+			move.l              #$0000000B,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXNewPaperType
+	ENDIF
+
+;
+; pascal void GXDisposePaperType(gxPaperType aPaperType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDisposePaperType
+			move.l              #$0000000C,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDisposePaperType
+	ENDIF
+
+;
+; pascal gxPaperType GXGetNewPaperType(gxJob aJob, short resID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetNewPaperType
+			move.l              #$0000000D,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetNewPaperType
+	ENDIF
+
+;
+; pascal long GXCountJobPaperTypes(gxJob aJob, Boolean forFormatDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCountJobPaperTypes
+			move.l              #$00000042,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCountJobPaperTypes
+	ENDIF
+
+;
+; pascal gxPaperType GXGetJobPaperType(gxJob aJob, long whichPaperType, Boolean forFormatDevice, gxPaperType aPaperType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobPaperType
+			move.l              #$00000043,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobPaperType
+	ENDIF
+
+;
+; pascal void GXForEachJobPaperTypeDo(gxJob aJob, GXPaperTypeUPP aProc, void *refCon, Boolean forFormattingPrinter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXForEachJobPaperTypeDo
+			move.l              #$00000044,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXForEachJobPaperTypeDo
+	ENDIF
+
+;
+; pascal gxPaperType GXCopyPaperType(gxPaperType srcPaperType, gxPaperType dstPaperType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCopyPaperType
+			move.l              #$00000045,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCopyPaperType
+	ENDIF
+
+;
+; pascal void GXGetPaperTypeName(gxPaperType aPaperType, Str31 papertypeName)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPaperTypeName
+			move.l              #$00000046,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPaperTypeName
+	ENDIF
+
+;
+; pascal void GXGetPaperTypeDimensions(gxPaperType aPaperType, gxRectangle *pageSize, gxRectangle *paperSize)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPaperTypeDimensions
+			move.l              #$00000047,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPaperTypeDimensions
+	ENDIF
+
+;
+; pascal gxJob GXGetPaperTypeJob(gxPaperType aPaperType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPaperTypeJob
+			move.l              #$00000048,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPaperTypeJob
+	ENDIF
+
+;
+; pascal Collection GXGetPaperTypeCollection(gxPaperType aPaperType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPaperTypeCollection
+			move.l              #$00000049,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPaperTypeCollection
+	ENDIF
+
+
+; 
+;    Printer Routines
+;
+
+;
+; pascal gxPrinter GXGetJobFormattingPrinter(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobFormattingPrinter
+			move.l              #$00000027,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobFormattingPrinter
+	ENDIF
+
+;
+; pascal gxPrinter GXGetJobOutputPrinter(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobOutputPrinter
+			move.l              #$00000028,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobOutputPrinter
+	ENDIF
+
+;
+; pascal gxPrinter GXGetJobPrinter(gxJob aJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobPrinter
+			move.l              #$00000029,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobPrinter
+	ENDIF
+
+;
+; pascal gxJob GXGetPrinterJob(gxPrinter aPrinter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPrinterJob
+			move.l              #$0000002A,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPrinterJob
+	ENDIF
+
+;
+; pascal void GXForEachPrinterViewDeviceDo(gxPrinter aPrinter, GXViewDeviceUPP aProc, void *refCon)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXForEachPrinterViewDeviceDo
+			move.l              #$0000002B,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXForEachPrinterViewDeviceDo
+	ENDIF
+
+;
+; pascal long GXCountPrinterViewDevices(gxPrinter aPrinter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCountPrinterViewDevices
+			move.l              #$0000002C,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCountPrinterViewDevices
+	ENDIF
+
+;
+; pascal gxViewDevice GXGetPrinterViewDevice(gxPrinter aPrinter, long whichViewDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPrinterViewDevice
+			move.l              #$0000002D,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPrinterViewDevice
+	ENDIF
+
+;
+; pascal void GXSelectPrinterViewDevice(gxPrinter aPrinter, long whichViewDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSelectPrinterViewDevice
+			move.l              #$0000002E,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSelectPrinterViewDevice
+	ENDIF
+
+;
+; pascal void GXGetPrinterName(gxPrinter aPrinter, Str31 printerName)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPrinterName
+			move.l              #$0000002F,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPrinterName
+	ENDIF
+
+;
+; pascal OSType GXGetPrinterType(gxPrinter aPrinter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPrinterType
+			move.l              #$00000030,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPrinterType
+	ENDIF
+
+;
+; pascal void GXGetPrinterDriverName(gxPrinter aPrinter, Str31 driverName)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPrinterDriverName
+			move.l              #$00000031,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPrinterDriverName
+	ENDIF
+
+;
+; pascal OSType GXGetPrinterDriverType(gxPrinter aPrinter)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPrinterDriverType
+			move.l              #$00000032,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPrinterDriverType
+	ENDIF
+
+
+; 
+;    Dialog Routines
+;
+
+;
+; pascal gxDialogResult GXJobDefaultFormatDialog(gxJob aJob, gxEditMenuRecord *anEditMenuRec)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXJobDefaultFormatDialog
+			move.l              #$00000010,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXJobDefaultFormatDialog
+	ENDIF
+
+;
+; pascal gxDialogResult GXJobPrintDialog(gxJob aJob, gxEditMenuRecord *anEditMenuRec)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXJobPrintDialog
+			move.l              #$00000011,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXJobPrintDialog
+	ENDIF
+
+;
+; pascal gxDialogResult GXFormatDialog(gxFormat aFormat, gxEditMenuRecord *anEditMenuRec, StringPtr title)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXFormatDialog
+			move.l              #$00000012,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXFormatDialog
+	ENDIF
+
+;
+; pascal void GXEnableJobScalingPanel(gxJob aJob, Boolean enabled)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXEnableJobScalingPanel
+			move.l              #$00000040,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXEnableJobScalingPanel
+	ENDIF
+
+;
+; pascal void GXGetJobPanelDimensions(gxJob aJob, Rect *panelArea)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobPanelDimensions
+			move.l              #$00000041,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobPanelDimensions
+	ENDIF
+
+
+; 
+;    Spooling Routines
+;
+
+;
+; pascal void GXGetJobPageRange(gxJob theJob, long *firstPage, long *lastPage)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJobPageRange
+			move.l              #$00000017,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJobPageRange
+	ENDIF
+
+;
+; pascal void GXStartJob(gxJob theJob, StringPtr docName, long pageCount)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXStartJob
+			move.l              #$00000018,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXStartJob
+	ENDIF
+
+;
+; pascal void GXPrintPage(gxJob theJob, long pageNumber, gxFormat theFormat, gxShape thePage)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXPrintPage
+			move.l              #$00000019,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXPrintPage
+	ENDIF
+
+;
+; pascal Boolean GXStartPage(gxJob theJob, long pageNumber, gxFormat theFormat, long numViewPorts, gxViewPort *viewPortList)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXStartPage
+			move.l              #$0000001A,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXStartPage
+	ENDIF
+
+;
+; pascal void GXFinishPage(gxJob theJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXFinishPage
+			move.l              #$0000001B,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXFinishPage
+	ENDIF
+
+;
+; pascal void GXFinishJob(gxJob theJob)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXFinishJob
+			move.l              #$0000001C,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXFinishJob
+	ENDIF
+
+
+; 
+;    PrintFile Routines
+;
+
+;
+; pascal gxPrintFile GXOpenPrintFile(gxJob theJob, FSSpecPtr anFSSpec, char permission)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXOpenPrintFile
+			move.l              #$0000004A,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXOpenPrintFile
+	ENDIF
+
+;
+; pascal void GXClosePrintFile(gxPrintFile aPrintFile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXClosePrintFile
+			move.l              #$0000004B,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXClosePrintFile
+	ENDIF
+
+;
+; pascal gxJob GXGetPrintFileJob(gxPrintFile aPrintFile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetPrintFileJob
+			move.l              #$0000004C,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetPrintFileJob
+	ENDIF
+
+;
+; pascal long GXCountPrintFilePages(gxPrintFile aPrintFile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCountPrintFilePages
+			move.l              #$0000004D,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCountPrintFilePages
+	ENDIF
+
+;
+; pascal void GXReadPrintFilePage(gxPrintFile aPrintFile, long pageNumber, long numViewPorts, gxViewPort *viewPortList, gxFormat *pgFormat, gxShape *pgShape)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXReadPrintFilePage
+			move.l              #$0000004E,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXReadPrintFilePage
+	ENDIF
+
+;
+; pascal void GXReplacePrintFilePage(gxPrintFile aPrintFile, long pageNumber, gxFormat aFormat, gxShape aShape)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXReplacePrintFilePage
+			move.l              #$0000004F,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXReplacePrintFilePage
+	ENDIF
+
+;
+; pascal void GXInsertPrintFilePage(gxPrintFile aPrintFile, long atPageNumber, gxFormat pgFormat, gxShape pgShape)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXInsertPrintFilePage
+			move.l              #$00000050,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXInsertPrintFilePage
+	ENDIF
+
+;
+; pascal void GXDeletePrintFilePageRange(gxPrintFile aPrintFile, long fromPageNumber, long toPageNumber)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXDeletePrintFilePageRange
+			move.l              #$00000051,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXDeletePrintFilePageRange
+	ENDIF
+
+;
+; pascal void GXSavePrintFile(gxPrintFile aPrintFile, FSSpec *anFSSpec)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSavePrintFile
+			move.l              #$00000052,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSavePrintFile
+	ENDIF
+
+
+; 
+;    ColorSync Routines
+;
+
+;
+; pascal long GXFindPrinterProfile(gxPrinter aPrinter, void *searchData, long index, gxColorProfile *returnedProfile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXFindPrinterProfile
+			move.l              #$00000053,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXFindPrinterProfile
+	ENDIF
+
+;
+; pascal long GXFindFormatProfile(gxFormat aFormat, void *searchData, long index, gxColorProfile *returnedProfile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXFindFormatProfile
+			move.l              #$00000054,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXFindFormatProfile
+	ENDIF
+
+;
+; pascal void GXSetPrinterProfile(gxPrinter aPrinter, gxColorProfile oldProfile, gxColorProfile newProfile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetPrinterProfile
+			move.l              #$00000055,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetPrinterProfile
+	ENDIF
+
+;
+; pascal void GXSetFormatProfile(gxFormat aFormat, gxColorProfile oldProfile, gxColorProfile newProfile)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetFormatProfile
+			move.l              #$00000056,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetFormatProfile
+	ENDIF
+
+
+; ************************************************************************
+;                        Start of old "GXPrintingResEquates.h/a/p" interface file.
+;                ************************************************************************
+
+;     ------------------------------------
+;                Basic client types
+;    ------------------------------------ 
+
+	ENDIF	; CALL_NOT_IN_CARBON
+
+gxPrintingManagerType			EQU		'pmgr'
+gxImagingSystemType				EQU		'gxis'
+gxPrinterDriverType				EQU		'pdvr'
+gxPrintingExtensionType			EQU		'pext'
+gxUnknownPrinterType			EQU		'none'
+gxAnyPrinterType				EQU		'univ'
+gxQuickdrawPrinterType			EQU		'qdrw'
+gxPortableDocPrinterType		EQU		'gxpd'
+gxRasterPrinterType				EQU		'rast'
+gxPostscriptPrinterType			EQU		'post'
+gxVectorPrinterType				EQU		'vect'
+;  All pre-defined printing collection items have this ID 
+
+gxPrintingTagID					EQU		-28672
+
+;     ----------------------------------------------------------------------
+;
+;        Resource types and IDs used by both extension and driver writers
+;
+;    ---------------------------------------------------------------------- 
+
+;  Resources in a printer driver or extension must be based off of these IDs 
+
+gxPrintingDriverBaseID			EQU		-27648
+gxPrintingExtensionBaseID		EQU		-27136
+;     Override resources tell the system what messages a driver or extension
+;        is overriding.  A driver may have a series of these resources. 
+;  Override resource type for 68k resource-based code:
+
+
+gxOverrideType					EQU		'over'
+
+;  Override resource type for PowerPC datafork-based code:
+
+
+gxNativeOverrideType			EQU		'povr'
+
+;     --------------------------------------------------------------
+;
+;        Message ID definitions by both extension and driver writers
+;
+;    --------------------------------------------------------------- 
+
+;  Identifiers for universal message overrides. 
+
+gxInitializeMsg					EQU		0
+gxShutDownMsg					EQU		1
+gxJobIdleMsg					EQU		2
+gxJobStatusMsg					EQU		3
+gxPrintingEventMsg				EQU		4
+gxJobDefaultFormatDialogMsg		EQU		5
+gxFormatDialogMsg				EQU		6
+gxJobPrintDialogMsg				EQU		7
+gxFilterPanelEventMsg			EQU		8
+gxHandlePanelEventMsg			EQU		9
+gxParsePageRangeMsg				EQU		10
+gxDefaultJobMsg					EQU		11
+gxDefaultFormatMsg				EQU		12
+gxDefaultPaperTypeMsg			EQU		13
+gxDefaultPrinterMsg				EQU		14
+gxCreateSpoolFileMsg			EQU		15
+gxSpoolPageMsg					EQU		16
+gxSpoolDataMsg					EQU		17
+gxSpoolResourceMsg				EQU		18
+gxCompleteSpoolFileMsg			EQU		19
+gxCountPagesMsg					EQU		20
+gxDespoolPageMsg				EQU		21
+gxDespoolDataMsg				EQU		22
+gxDespoolResourceMsg			EQU		23
+gxCloseSpoolFileMsg				EQU		24
+gxStartJobMsg					EQU		25
+gxFinishJobMsg					EQU		26
+gxStartPageMsg					EQU		27
+gxFinishPageMsg					EQU		28
+gxPrintPageMsg					EQU		29
+gxSetupImageDataMsg				EQU		30
+gxImageJobMsg					EQU		31
+gxImageDocumentMsg				EQU		32
+gxImagePageMsg					EQU		33
+gxRenderPageMsg					EQU		34
+gxCreateImageFileMsg			EQU		35
+gxOpenConnectionMsg				EQU		36
+gxCloseConnectionMsg			EQU		37
+gxStartSendPageMsg				EQU		38
+gxFinishSendPageMsg				EQU		39
+gxWriteDataMsg					EQU		40
+gxBufferDataMsg					EQU		41
+gxDumpBufferMsg					EQU		42
+gxFreeBufferMsg					EQU		43
+gxCheckStatusMsg				EQU		44
+gxGetDeviceStatusMsg			EQU		45
+gxFetchTaggedDataMsg			EQU		46
+gxGetDTPMenuListMsg				EQU		47
+gxDTPMenuSelectMsg				EQU		48
+gxHandleAlertFilterMsg			EQU		49
+gxJobFormatModeQueryMsg			EQU		50
+gxWriteStatusToDTPWindowMsg		EQU		51
+gxInitializeStatusAlertMsg		EQU		52
+gxHandleAlertStatusMsg			EQU		53
+gxHandleAlertEventMsg			EQU		54
+gxCleanupStartJobMsg			EQU		55
+gxCleanupStartPageMsg			EQU		56
+gxCleanupOpenConnectionMsg		EQU		57
+gxCleanupStartSendPageMsg		EQU		58
+gxDefaultDesktopPrinterMsg		EQU		59
+gxCaptureOutputDeviceMsg		EQU		60
+gxOpenConnectionRetryMsg		EQU		61
+gxExamineSpoolFileMsg			EQU		62
+gxFinishSendPlaneMsg			EQU		63
+gxDoesPaperFitMsg				EQU		64
+gxChooserMessageMsg				EQU		65
+gxFindPrinterProfileMsg			EQU		66
+gxFindFormatProfileMsg			EQU		67
+gxSetPrinterProfileMsg			EQU		68
+gxSetFormatProfileMsg			EQU		69
+gxHandleAltDestinationMsg		EQU		70
+gxSetupPageImageDataMsg			EQU		71
+
+;  Identifiers for Quickdraw message overrides. 
+
+gxPrOpenDocMsg					EQU		0
+gxPrCloseDocMsg					EQU		1
+gxPrOpenPageMsg					EQU		2
+gxPrClosePageMsg				EQU		3
+gxPrintDefaultMsg				EQU		4
+gxPrStlDialogMsg				EQU		5
+gxPrJobDialogMsg				EQU		6
+gxPrStlInitMsg					EQU		7
+gxPrJobInitMsg					EQU		8
+gxPrDlgMainMsg					EQU		9
+gxPrValidateMsg					EQU		10
+gxPrJobMergeMsg					EQU		11
+gxPrGeneralMsg					EQU		12
+gxConvertPrintRecordToMsg		EQU		13
+gxConvertPrintRecordFromMsg		EQU		14
+gxPrintRecordToJobMsg			EQU		15
+
+;  Identifiers for raster imaging message overrides. 
+
+gxRasterDataInMsg				EQU		0
+gxRasterLineFeedMsg				EQU		1
+gxRasterPackageBitmapMsg		EQU		2
+
+;  Identifiers for PostScript imaging message overrides. 
+
+gxPostscriptQueryPrinterMsg		EQU		0
+gxPostscriptInitializePrinterMsg EQU	1
+gxPostscriptResetPrinterMsg		EQU		2
+gxPostscriptExitServerMsg		EQU		3
+gxPostscriptGetStatusTextMsg	EQU		4
+gxPostscriptGetPrinterTextMsg	EQU		5
+gxPostscriptScanStatusTextMsg	EQU		6
+gxPostscriptScanPrinterTextMsg	EQU		7
+gxPostscriptGetDocumentProcSetListMsg EQU 8
+gxPostscriptDownloadProcSetListMsg EQU	9
+gxPostscriptGetPrinterGlyphsInformationMsg EQU 10
+gxPostscriptStreamFontMsg		EQU		11
+gxPostscriptDoDocumentHeaderMsg	EQU		12
+gxPostscriptDoDocumentSetUpMsg	EQU		13
+gxPostscriptDoDocumentTrailerMsg EQU	14
+gxPostscriptDoPageSetUpMsg		EQU		15
+gxPostscriptSelectPaperTypeMsg	EQU		16
+gxPostscriptDoPageTrailerMsg	EQU		17
+gxPostscriptEjectPageMsg		EQU		18
+gxPostscriptProcessShapeMsg		EQU		19
+gxPostScriptEjectPendingPageMsg	EQU		20
+
+;  Identifiers for Vector imaging message overrides. 
+
+gxVectorPackageDataMsg			EQU		0
+gxVectorLoadPensMsg				EQU		1
+gxVectorVectorizeShapeMsg		EQU		2
+
+;  Dialog related resource types 
+
+gxPrintingAlertType				EQU		'plrt'
+gxStatusType					EQU		'stat'
+gxExtendedDITLType				EQU		'xdtl'
+gxPrintPanelType				EQU		'ppnl'
+gxCollectionType				EQU		'cltn'
+
+;  Communication resource types 
+; 
+;    The looker resource is used by the Chooser PACK to determine what kind
+;    of communications this driver supports. (In order to generate/handle the 
+;    pop-up menu for "Connect via:".
+;    
+;    The looker resource is also used by PrinterShare to determine the AppleTalk NBP Type
+;    for servers created for this driver.
+;
+
+
+gxLookerType					EQU		'look'
+gxLookerID						EQU		-4096
+
+;  The communications method and private data used to connect to the printer 
+
+gxDeviceCommunicationsType		EQU		'comm'
+;     -------------------------------------------------
+;
+;    Resource types and IDs used by extension writers
+;
+;    ------------------------------------------------- 
+
+
+gxExtensionUniversalOverrideID	EQU		-27136
+
+gxExtensionImagingOverrideSelectorID EQU -27136
+
+gxExtensionScopeType			EQU		'scop'
+gxDriverScopeID					EQU		-27136
+gxPrinterScopeID				EQU		-27135
+gxPrinterExceptionScopeID		EQU		-27134
+
+gxExtensionLoadType				EQU		'load'
+gxExtensionLoadID				EQU		-27136
+
+gxExtensionLoadFirst			EQU		$00000100
+gxExtensionLoadAnywhere			EQU		$7FFFFFFF
+gxExtensionLoadLast				EQU		$FFFFFF00
+
+gxExtensionOptimizationType		EQU		'eopt'
+gxExtensionOptimizationID		EQU		-27136
+
+;     -----------------------------------------------
+;
+;    Resource types and IDs used by driver writers
+;
+;    ----------------------------------------------- 
+
+
+gxDriverUniversalOverrideID		EQU		-27648
+gxDriverImagingOverrideID		EQU		-27647
+gxDriverCompatibilityOverrideID	EQU		-27646
+
+gxDriverFileFormatType			EQU		'pfil'
+gxDriverFileFormatID			EQU		-27648
+
+
+gxDestinationAdditionType		EQU		'dsta'
+gxDestinationAdditionID			EQU		-27648
+
+;  IMAGING RESOURCES 
+;     The imaging system resource specifies which imaging system a printer
+;        driver wishes to use. 
+
+
+gxImagingSystemSelectorType		EQU		'isys'
+gxImagingSystemSelectorID		EQU		-27648
+
+;  'exft' resource ID -- exclude font list 
+
+kExcludeFontListType			EQU		'exft'
+kExcludeFontListID				EQU		-27648
+;  Resource for type for color matching 
+
+gxColorMatchingDataType			EQU		'prof'
+gxColorMatchingDataID			EQU		-27648
+
+;  Resource type and id for the tray count 
+
+gxTrayCountDataType				EQU		'tray'
+gxTrayCountDataID				EQU		-27648
+
+;  Resource type for the tray names 
+
+gxTrayNameDataType				EQU		'tryn'
+
+;  Resource type for manual feed preferences, stored in DTP. 
+
+gxManualFeedAlertPrefsType		EQU		'mfpr'
+gxManualFeedAlertPrefsID		EQU		-27648
+;  Resource type for desktop printer output characteristics, stored in DTP. 
+
+gxDriverOutputType				EQU		'outp'
+gxDriverOutputTypeID			EQU		1
+
+;  IO Resources 
+;  Resource type and ID for default IO and buffering resources 
+
+gxUniversalIOPrefsType			EQU		'iobm'
+gxUniversalIOPrefsID			EQU		-27648
+
+;     Resource types and IDs for default implementation of CaptureOutputDevice.
+;        The default implementation of CaptureOutputDevice only handles PAP devices 
+
+gxCaptureType					EQU		'cpts'
+gxCaptureStringID				EQU		-27648
+gxReleaseStringID				EQU		-27647
+gxUncapturedAppleTalkType		EQU		-27646
+gxCapturedAppleTalkType			EQU		-27645
+
+;  Resource type and ID for custom halftone matrix 
+
+gxCustomMatrixType				EQU		'dmat'
+gxCustomMatrixID				EQU		-27648
+;  Resource type and ID for raster driver rendering preferences 
+
+gxRasterPrefsType				EQU		'rdip'
+gxRasterPrefsID					EQU		-27648
+
+;  Resource type for specifiying a colorset 
+
+gxColorSetResType				EQU		'crst'
+
+;  Resource type and ID for raster driver packaging preferences 
+
+gxRasterPackType				EQU		'rpck'
+gxRasterPackID					EQU		-27648
+
+;  Resource type and ID for raster driver packaging options 
+
+
+gxRasterNumNone					EQU		0					; Number isn't output at all 
+gxRasterNumDirect				EQU		1					; Lowest minWidth bytes as data 
+gxRasterNumToASCII				EQU		2					; minWidth ASCII characters 
+
+
+gxRasterPackOptionsType			EQU		'ropt'
+gxRasterPackOptionsID			EQU		-27648
+
+;  Resource type for the PostScript imaging system procedure set control resource 
+
+gxPostscriptProcSetControlType	EQU		'prec'
+
+;  Resource type for the PostScript imaging system printer font resource 
+
+gxPostscriptPrinterFontType		EQU		'pfnt'
+
+;  Resource type and ID for the PostScript imaging system imaging preferences 
+
+gxPostscriptPrefsType			EQU		'pdip'
+gxPostscriptPrefsID				EQU		-27648
+;  Resource type and ID for the PostScript imaging system default scanning code 
+
+gxPostscriptScanningType		EQU		'scan'
+gxPostscriptScanningID			EQU		-27648
+
+;  Old Application Support Resources 
+
+gxCustType						EQU		'cust'
+gxCustID						EQU		-8192
+
+
+gxReslType						EQU		'resl'
+gxReslID						EQU		-8192
+
+
+gxDiscreteResolution			EQU		0
+
+
+gxStlDialogResID				EQU		-8192
+
+
+gxJobDialogResID				EQU		-8191
+
+
+gxScaleTableType				EQU		'stab'
+gxDITLControlType				EQU		'dctl'
+;     The default implementation of gxPrintDefault loads and
+;    PrValidates a print record stored in the following driver resource. 
+
+gxPrintRecordType				EQU		'PREC'
+gxDefaultPrintRecordID			EQU		0
+
+; 
+;    -----------------------------------------------
+;
+;    Resource types and IDs used in papertype files
+;
+;    -----------------------------------------------
+;
+
+;  Resource type and ID for driver papertypes placed in individual files 
+
+gxSignatureType					EQU		'sig '
+gxPapertypeSignatureID			EQU		0
+
+;  Papertype creator types 
+
+gxDrvrPaperType					EQU		'drpt'
+gxSysPaperType					EQU		'sypt'				; System paper type creator 
+gxUserPaperType					EQU		'uspt'				; User paper type creator 
+															; Driver creator types == driver file's creator value 
+gxPaperTypeType					EQU		'ptyp'
+
+; *********************************************************************
+;                    Start of old "GXPrintingMessages.h/a/p" interface file.
+;            *********************************************************************
+
+;  ------------------------------------------------------------------------------
+;
+;                                    Constants and Types
+;
+;-------------------------------------------------------------------------------- 
+
+; 
+;
+;    ABSTRACT DATA TYPES
+;
+;
+
+
+
+; 
+;
+;    DIALOG PANEL CONSTANTS AND TYPES
+;
+;
+
+; typedef long 							gxPanelEvent
+
+;  Dialog panel event equates 
+
+gxPanelNoEvt					EQU		0
+gxPanelOpenEvt					EQU		1					; Initialize and draw 
+gxPanelCloseEvt					EQU		2					; Your panel is going away (panel switchL, confirm or cancel) 
+gxPanelHitEvt					EQU		3					; There's a hit in your panel 
+gxPanelActivateEvt				EQU		4					; The dialog window has just been activated 
+gxPanelDeactivateEvt			EQU		5					; The dialog window is about to be deactivated 
+gxPanelIconFocusEvt				EQU		6					; The focus changes from the panel to the icon list 
+gxPanelPanelFocusEvt			EQU		7					; The focus changes from the icon list to the panel 
+gxPanelFilterEvt				EQU		8					; Every event is filtered 
+gxPanelCancelEvt				EQU		9					; The user has cancelled the dialog 
+gxPanelConfirmEvt				EQU		10					; The user has confirmed the dialog 
+gxPanelDialogEvt				EQU		11					; Event to be handle by dialoghandler 
+gxPanelOtherEvt					EQU		12					; osEvts, etc. 
+gxPanelUserWillConfirmEvt		EQU		13					; User has selected confirm, time to parse panel interdependencies 
+
+;  Constants for panel responses to dialog handler calls 
+; typedef long 							gxPanelResult
+
+
+gxPanelNoResult					EQU		0
+gxPanelCancelConfirmation		EQU		1					; Only valid from panelUserWillConfirmEvt - used to keep the dialog from going away 
+
+;  Panel event info record for FilterPanelEvent and HandlePanelEvent messages 
+gxPanelInfoRecord		RECORD 0
+panelEvt				 ds.l	1				; offset: $0 (0)		;  Why we were called 
+panelResId				 ds.w	1				; offset: $4 (4)		;  'ppnl' resource ID of current panel 
+pDlg					 ds.l	1				; offset: $6 (6)		;  Pointer to dialog 
+theEvent				 ds.l	1				; offset: $A (10)		;  Pointer to event 
+itemHit					 ds.w	1				; offset: $E (14)		;  Actual item number as Dialog Mgr thinks 
+itemCount				 ds.w	1				; offset: $10 (16)		;  Number of items before your items 
+evtAction				 ds.w	1				; offset: $12 (18)		;  Once this event is processed, the action that will result 
+;  (evtAction is only meaningful during filtering) 
+errorStringId			 ds.w	1				; offset: $14 (20)		;  STR ID of string to put in error alert (0 means no string) 
+theFormat				 ds.l	1				; offset: $16 (22)		;  The current format (only meaningful in a format dialog) 
+refCon					 ds.l	1				; offset: $1A (26)		;  refCon passed in PanelSetupRecord 
+sizeof					 EQU *					; size:   $1E (30)
+						ENDR
+;  Constants for the evtAction field in PanelInfoRecord 
+
+gxOtherAction					EQU		0					; Current item will not change 
+gxClosePanelAction				EQU		1					; Panel will be closed 
+gxCancelDialogAction			EQU		2					; Dialog will be cancelled 
+gxConfirmDialogAction			EQU		3					; Dialog will be confirmed 
+
+;  Constants for the panelKind field in gxPanelSetupRecord 
+; typedef long 							gxPrintingPanelKind
+
+;  The gxPanelSetupInfo structure is passed to GXSetupDialogPanel 
+gxPanelSetupRecord		RECORD 0
+panelKind				 ds.l	1				; offset: $0 (0)
+panelResId				 ds.w	1				; offset: $4 (4)
+resourceRefNum			 ds.w	1				; offset: $6 (6)
+refCon					 ds.l	1				; offset: $8 (8)
+sizeof					 EQU *					; size:   $C (12)
+						ENDR
+
+gxApplicationPanel				EQU		0
+gxExtensionPanel				EQU		1
+gxDriverPanel					EQU		2
+
+;  Constants returned by gxParsePageRange message 
+; typedef long 							gxParsePageRangeResult
+
+
+gxRangeNotParsed				EQU		0					; Default initial value 
+gxRangeParsed					EQU		1					; Range has been parsed 
+gxRangeBadFromValue				EQU		2					; From value is bad 
+gxRangeBadToValue				EQU		3					; To value is bad 
+; 
+;
+;    STATUS-RELATED CONSTANTS AND TYPES
+;
+;
+
+
+;  Structure for status messages 
+gxStatusRecord			RECORD 0
+statusType				 ds.w	1				; offset: $0 (0)		;  One of the ids listed above (nonFatalError, etc. ) 
+statusId				 ds.w	1				; offset: $2 (2)		;  Specific status (out of paper, etc.) 
+statusAlertId			 ds.w	1				; offset: $4 (4)		;     Printing alert ID (if any) for status 
+statusOwner				 ds.l	1				; offset: $6 (6)		;  Creator type of status owner 
+statResId				 ds.w	1				; offset: $A (10)		;  ID for 'stat' resource 
+statResIndex			 ds.w	1				; offset: $C (12)		;  Index into 'stat' resource for this status 
+dialogResult			 ds.w	1				; offset: $E (14)		;  ID of button string selected on dismissal of printing alert 
+bufferLen				 ds.w	1				; offset: $10 (16)		;  Number of bytes in status buffer - total record size must be <= 512 
+statusBuffer			 ds.b	1				; offset: $12 (18) <-- really an array of length one ;  User response from alert 
+						 ORG 20
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+
+;  Constants for statusType field of gxStatusRecord 
+
+gxNonFatalError					EQU		1					; An error occurred, but the job can continue 
+gxFatalError					EQU		2					; A fatal error occurred-- halt job 
+gxPrinterReady					EQU		3					; Tells QDGX to leave alert mode 
+gxUserAttention					EQU		4					; Signals initiation of a modal alert 
+gxUserAlert						EQU		5					; Signals initiation of a moveable modal alert 
+gxPageTransmission				EQU		6					; Signals page sent to printer, increments page count in strings to user 
+gxOpenConnectionStatus			EQU		7					; Signals QDGX to begin animation on printer icon 
+gxInformationalStatus			EQU		8					; Default status type, no side effects 
+gxSpoolingPageStatus			EQU		9					; Signals page spooled, increments page count in spooling dialog 
+gxEndStatus						EQU		10					; Signals end of spooling 
+gxPercentageStatus				EQU		11					; Signals QDGX as to the amount of the job which is currently complete 
+
+;  Structure for gxWriteStatusToDTPWindow message 
+gxDisplayRecord			RECORD 0
+useText					 ds.b	1				; offset: $0 (0)		;  Use text as opposed to a picture 
+padByte					 ds.b	1				; offset: $1 (1)
+hPicture				 ds.l	1				; offset: $2 (2)		;  if !useText, the picture handle 
+theText					 ds		Str255			; offset: $6 (6)		;  if useText, the text 
+sizeof					 EQU *					; size:   $106 (262)
+						ENDR
+
+; -----------------------------------------------
+;  paper mapping-related constants and types...  
+; -----------------------------------------------
+
+; typedef long 							gxTrayMapping
+
+
+gxDefaultTrayMapping			EQU		0
+gxConfiguredTrayMapping			EQU		1
+
+
+;  ------------------------------------------------------------------------------
+;
+;                API Functions callable only from within message overrides
+;
+;-------------------------------------------------------------------------------- 
+
+
+; 
+;    Message Sending API Routines
+;
+
+	IF TARGET_CPU_68K THEN
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern OSErr GXPrintingDispatch(long selector, ...)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXPrintingDispatch
+			move.l              (sp)+,D1
+			move.l              #$00010000,D0
+			dc.w            	$ABFE
+			dc.w            	$598F
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXPrintingDispatch
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF	; TARGET_CPU_68K
+; 
+;
+;    How to use the GXPRINTINGDISPATCH macro...
+;    
+;    If your driver or extension is large, you may want to segment it
+;    across smaller boundaries than is permitted by the messaging system.
+;    Without using the Printing Manager's segmentation manager directly,
+;    the smallest segment you can create consists of the code to override
+;    a single message.  If you are overriding workhorse messages such as
+;    RenderPage, you may want to divide up the work among many functions
+;    distributed across several segments.  Here's how...
+;    
+;    The Printing Manager segment scheme involves the construction of a
+;    single 32-bit dispatch selector, which contains all the information
+;    necessary for the dispatcher to find a single routine.  It contains the
+;    segment's resource ID, and the offset within the segment which contains
+;    the start of the routine.  The GXPRINTINGDISPATCH macro will construct the
+;    dispatch selector for you, as well as the code to do the dispatch.
+;    
+;    Usually, it is convenient to start your segment with a long aligned jump table,
+;    beginning after the 4 byte header required by the Printing Manager.  The
+;    macro assumes this is the case and takes a 1-based routine selector from
+;    which it conmstructs the offset.
+;    
+;    For example, if your code is in resource 'pdvr' (print driver), ID=2
+;    at offset=12 (third routine in segment), you would declare your
+;    routine as follows:
+;    
+;    OSErr MyRenderingRoutine (long param1, Ptr param2)
+;        = GXPRINTINGDISPATCH(2, 3);
+;        
+;    Remember, ALL segment dispatches must return OSErr.  If your routine
+;    does not generate errors, you must still declare it to return OSErr
+;    and have the routine itself return noErr.
+;    
+;    An alternative way to call across segments is to call the GXPrintingDispatch
+;    function directly.  You must construct the 32-bit selector yourself and pass
+;    it as the first parameter.  This is usually not preferable since you don't get
+;    type-checking unless you declare a prototype as shown above, and your code
+;    isn't as easy to read.
+;    
+;    So given the above prototype, there are two ways to call the function:
+;    
+;        anErr = MyRenderingRoutine(p1, p2);         // Free type checking!
+;        
+;    or:
+;    
+;        #define kMyRenderRoutineSelector 0x0002000C
+;        anErr = GXPrintingDispatch(kMyRenderRoutineSelector, p1, p2);       // No type-checking!
+;    
+;    
+;    Both have the same effect.
+;
+;
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern gxJob GXGetJob(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetJob
+			move.l              #$00010001,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetJob
+	ENDIF
+
+;
+; extern short GXGetMessageHandlerResFile(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetMessageHandlerResFile
+			move.l              #$00010002,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetMessageHandlerResFile
+	ENDIF
+
+;
+; extern Boolean GXSpoolingAborted(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSpoolingAborted
+			move.l              #$00010003,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSpoolingAborted
+	ENDIF
+
+;
+; extern OSErr GXJobIdle(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXJobIdle
+			move.l              #$00010004,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXJobIdle
+	ENDIF
+
+;
+; extern OSErr GXReportStatus(long statusID, unsigned long statusIndex)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXReportStatus
+			move.l              #$00010005,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXReportStatus
+	ENDIF
+
+;
+; extern OSErr GXAlertTheUser(gxStatusRecord *statusRec)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXAlertTheUser
+			move.l              #$00010006,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXAlertTheUser
+	ENDIF
+
+;
+; extern OSErr GXSetupDialogPanel(gxPanelSetupRecord *panelRec)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetupDialogPanel
+			move.l              #$00010007,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetupDialogPanel
+	ENDIF
+
+;
+; extern OSErr GXCountTrays(gxTrayIndex *numTrays)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCountTrays
+			move.l              #$00010008,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCountTrays
+	ENDIF
+
+;
+; extern OSErr GXGetTrayName(gxTrayIndex trayNumber, Str31 trayName)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTrayName
+			move.l              #$00010009,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTrayName
+	ENDIF
+
+;
+; extern OSErr GXSetTrayPaperType(gxTrayIndex whichTray, gxPaperType aPapertype)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXSetTrayPaperType
+			move.l              #$0001000A,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXSetTrayPaperType
+	ENDIF
+
+;
+; extern OSErr GXGetTrayPaperType(gxTrayIndex whichTray, gxPaperType aPapertype)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTrayPaperType
+			move.l              #$0001000B,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTrayPaperType
+	ENDIF
+
+;
+; extern OSErr GXGetTrayMapping(gxTrayMapping *trayMapping)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXGetTrayMapping
+			move.l              #$0001000C,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXGetTrayMapping
+	ENDIF
+
+;
+; extern void GXCleanupStartJob(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCleanupStartJob
+			move.l              #$0001000D,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCleanupStartJob
+	ENDIF
+
+;
+; extern void GXCleanupStartPage(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCleanupStartPage
+			move.l              #$0001000E,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCleanupStartPage
+	ENDIF
+
+;
+; extern void GXCleanupOpenConnection(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCleanupOpenConnection
+			move.l              #$0001000F,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCleanupOpenConnection
+	ENDIF
+
+;
+; extern void GXCleanupStartSendPage(void )
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_GXCleanupStartSendPage
+			move.l              #$00010010,D0
+			dc.w            	$ABFE
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION GXCleanupStartSendPage
+	ENDIF
+
+
+;  ------------------------------------------------------------------------------
+;
+;                    Constants and types for Universal Printing Messages
+;
+;-------------------------------------------------------------------------------- 
+
+
+;  Options for gxCreateSpoolFile message 
+	ENDIF	; CALL_NOT_IN_CARBON
+
+gxNoCreateOptions				EQU		$00000000			; Just create the file 
+gxInhibitAlias					EQU		$00000001			; Do not create an alias in the PMD folder 
+gxInhibitUniqueName				EQU		$00000002			; Do not append to the filename to make it unique 
+gxResolveBitmapAlias			EQU		$00000004			; Resolve bitmap aliases and duplicate data in file 
+
+;  Options for gxCloseSpoolFile message 
+
+gxNoCloseOptions				EQU		$00000000			; Just close the file 
+gxDeleteOnClose					EQU		$00000001			; Delete the file rather than closing it 
+gxUpdateJobData					EQU		$00000002			; Write current job information into file prior to closing 
+gxMakeRemoteFile				EQU		$00000004			; Mark job as a remote file 
+
+;  Options for gxCreateImageFile message 
+
+gxNoImageFile					EQU		$00000000			; Don't create image file 
+gxMakeImageFile					EQU		$00000001			; Create an image file 
+gxEachPlane						EQU		$00000002			; Only save up planes before rewinding 
+gxEachPage						EQU		$00000004			; Save up entire pages before rewinding 
+gxEntireFile					EQU		$00000006			; Save up the entire file before rewinding 
+
+;  Options for gxBufferData message 
+
+gxNoBufferOptions				EQU		$00000000
+gxMakeBufferHex					EQU		$00000001
+gxDontSplitBuffer				EQU		$00000002
+
+;  Structure for gxDumpBuffer and gxFreeBuffer messages 
+gxPrintingBuffer		RECORD 0
+size					 ds.l	1				; offset: $0 (0)		;  Size of buffer in bytes 
+userData				 ds.l	1				; offset: $4 (4)		;  Client assigned id for the buffer 
+data					 ds.b	1				; offset: $8 (8) <-- really an array of length one ;  Array of size bytes 
+						 ORG 10
+sizeof					 EQU *					; size:   $A (10)
+						ENDR
+
+;  Structure for gxRenderPage message 
+gxPageInfoRecord		RECORD 0
+docPageNum				 ds.l	1				; offset: $0 (0)		;  Number of page being printed 
+copyNum					 ds.l	1				; offset: $4 (4)		;  Copy number being printed 
+formatChanged			 ds.b	1				; offset: $8 (8)		;  True if format changed from last page 
+pageChanged				 ds.b	1				; offset: $9 (9)		;  True if page contents changed from last page 
+internalUse				 ds.l	1				; offset: $A (10)		;  Private 
+sizeof					 EQU *					; size:   $E (14)
+						ENDR
+; *******************************************************************
+;                Start of old "GXPrintingErrors.h/a/p" interface file.
+;        *******************************************************************
+
+
+gxPrintingResultBase			EQU		-510				;First QuickDraw GX printing error code.
+; RESULT CODES FOR QUICKDRAW GX PRINTING OPERATIONS
+
+gxAioTimeout					EQU		-510				;-510 : Timeout condition occurred during operation
+gxAioBadRqstState				EQU		-511				;-511 : Async I/O request in invalid state for operation
+gxAioBadConn					EQU		-512				;-512 : Invalid Async I/O connection refnum
+gxAioInvalidXfer				EQU		-513				;-513 : Read data transfer structure contained bad values
+gxAioNoRqstBlks					EQU		-514				;-514 : No available request blocks to process request
+gxAioNoDataXfer					EQU		-515				;-515 : Data transfer structure pointer not specified
+gxAioTooManyAutos				EQU		-516				;-516 : Auto status request already active
+gxAioNoAutoStat					EQU		-517				;-517 : Connection not configured for auto status
+gxAioBadRqstID					EQU		-518				;-518 : Invalid I/O request identifier
+gxAioCantKill					EQU		-519				;-519 : Comm. protocol doesn't support I/O term
+gxAioAlreadyExists				EQU		-520				;-520 : Protocol spec. data already specified
+gxAioCantFind					EQU		-521				;-521 : Protocol spec. data does not exist
+gxAioDeviceDisconn				EQU		-522				;-522 : Machine disconnected from printer
+gxAioNotImplemented				EQU		-523				;-523 : Function not implemented
+gxAioOpenPending				EQU		-524				;-524 : Opening a connection for protocol, but another open pending
+gxAioNoProtocolData				EQU		-525				;-525 : No protocol specific data specified in request
+gxAioRqstKilled					EQU		-526				;-526 : I/O request was terminated
+gxBadBaudRate					EQU		-527				;-527 : Invalid baud rate specified
+gxBadParity						EQU		-528				;-528 : Invalid parity specified
+gxBadStopBits					EQU		-529				;-529 : Invalid stop bits specified
+gxBadDataBits					EQU		-530				;-530 : Invalid data bits specified
+gxBadPrinterName				EQU		-531				;-531 : Bad printer name specified
+gxAioBadMsgType					EQU		-532				;-532 : Bad masType field in transfer info structure
+gxAioCantFindDevice				EQU		-533				;-533 : Cannot locate target device
+gxAioOutOfSeq					EQU		-534				;-534 : Non-atomic SCSI requests submitted out of sequence
+gxPrIOAbortErr					EQU		-535				;-535 : I/O operation aborted
+gxPrUserAbortErr				EQU		-536				;-536 : User aborted
+gxCantAddPanelsNowErr			EQU		-537				;-537 : Can only add panels during driver switch or dialog setup
+gxBadxdtlKeyErr					EQU		-538				;-538 : Unknown key for xdtl - must be radiobutton, etc
+gxXdtlItemOutOfRangeErr			EQU		-539				;-539 : Referenced item does not belong to panel
+gxNoActionButtonErr				EQU		-540				;-540 : Action button is nil
+gxTitlesTooLongErr				EQU		-541				;-541 : Length of buttons exceeds alert maximum width
+gxUnknownAlertVersionErr		EQU		-542				;-542 : Bad version for printing alerts
+gxGBBufferTooSmallErr			EQU		-543				;-543 : Buffer too small.
+gxInvalidPenTable				EQU		-544				;-544 : Invalid vector driver pen table.
+gxIncompletePrintFileErr		EQU		-545				;-545 : Print file was not completely spooled
+gxCrashedPrintFileErr			EQU		-546				;-546 : Print file is corrupted
+gxInvalidPrintFileVersion		EQU		-547				;-547 : Print file is incompatible with current QuickDraw GX version
+gxSegmentLoadFailedErr			EQU		-548				;-548 : Segment loader error
+gxExtensionNotFoundErr			EQU		-549				;-549 : Requested printing extension could not be found
+gxDriverVersionErr				EQU		-550				;-550 : Driver too new for current version of QuickDraw GX
+gxImagingSystemVersionErr		EQU		-551				;-551 : Imaging system too new for current version of QuickDraw GX
+gxFlattenVersionTooNew			EQU		-552				;-552 : Flattened object format too new for current version of QDGX
+gxPaperTypeNotFound				EQU		-553				;-553 : Requested papertype could not be found
+gxNoSuchPTGroup					EQU		-554				;-554 : Requested papertype group could not be found
+gxNotEnoughPrinterMemory		EQU		-555				;-555 : Printer does not have enough memory for fonts in document
+gxDuplicatePanelNameErr			EQU		-556				;-556 : Attempt to add more than 10 panels with the same name
+gxExtensionVersionErr			EQU		-557				;-557 : Extension too new for current version of QuickDraw GX
+
+
+	ENDIF ; __GXPRINTING__ 
+

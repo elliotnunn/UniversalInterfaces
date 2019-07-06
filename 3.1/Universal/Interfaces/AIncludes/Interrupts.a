@@ -1,0 +1,30 @@
+;
+;	File:		Interrupts.a
+;
+;	Contains:	Public Interface to the Interrupt Manager.
+;
+;	Version:	Technology:	PowerSurge 1.0.2
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1985-1998 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__INTERRUPTS__') = 'UNDEFINED' THEN
+__INTERRUPTS__ SET 1
+
+	IF &TYPE('__DRIVERSERVICES__') = 'UNDEFINED' THEN
+	include 'DriverServices.a'
+	ENDIF
+
+; 
+;	The contents of Interrupts.h has been merged into DriverServices.h
+;
+
+	ENDIF ; __INTERRUPTS__ 
+

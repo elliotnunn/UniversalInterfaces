@@ -1,0 +1,240 @@
+Open Transport SDK Roadmap (OT 1.3)
+
+Contents
+
+Introduction
+     Client vs Kernel
+     The Three SDKs
+     Another SDK of Interest
+Developing Client Software
+     Development Opportunities
+     Client SDK Interface Files
+     Protocol SDK Interface Files
+     Libraries
+     Calling OT From Emulated Code
+Developing Kernel Software
+     Development Opportunities
+     Interface Files
+     Libraries
+Conclusion
+
+Introduction
+
+Confused about where to start with Open Transport?  This document gives broad details about the contents of the SDK to get you started quickly.
+
+If you are developing for Open Transport, you should know about the Open Transport web page. This web page is a one-stop site for OT information and updates.
+
+  <http://devworld.apple.com/dev/opentransport/>
+
+Client vs Kernel
+
+Open Transport draws a strict distinction between client code and kernel code. Client code is the code that can call the Open Transport Client application programming interface (API). An example of client code is an application that uses Open Transport to download URLs.
+
+Kernel code is code that is loaded by Open Transport to do some function inside the Open Transport kernel environment.  Kernel code has special restrictions and is not allowed to call the Open Transport Client API. An example of kernel code is an Ethernet driver.
+
+It’s important that you understand which type of code you are writing because it affects the OT routines which you can call and the libraries you should link with.
+
+The Three SDKs
+
+OT ships with three SDKs, namely:
+
+Open Tpt Client Developer — Stuff for writing standard client code.  If you’re writing an application or extension that does networking, this is the SDK for you. This include support for CFM68K. You'll reference the same header file, however, you'll link with the supplied stub libraries. OT CFM68K requires Open Transport version 1.3 or greater.
+
+Open Tpt Module Developer — Stuff for writing modules and drivers.  If you’re writing a hardware driver, a filter or encryption module, or a protocol stack, you will need this SDK.
+
+Open Tpt Protocol Developer — Stuff for writing configurators, a necessary part of any OT protocol stack and also used by some device drivers.  Note that you can’t use this SDK in isolation; you will also need the Client and Module SDKs to bring up an OT protocol stack.
+
+Another SDK of Interest
+
+If you’re doing any non-client Open Transport work, you will most probably need the ASLM SDK.  At the time of writing, this SDK was available on the developer CDs as:
+
+  Dev.CD July 97 SDK1
+    Development Kits (Disc 1)
+      Apple Shared Library Manager
+
+and from the net as:
+
+  <ftp://ftpdev.info.apple.com//Developer_Services/Development_Kits/
+    Apple_Shared_Library_Manager/>
+
+Developing Client Software
+
+Development Opportunities
+
+OT allows you to developer the following types of client software:
+
+application — An application is the most obvious way to use Open Transport.  It is client code that simply calls the Open Transport Client API.
+
+OT supports application code built in the following environments:
+
+o classic 68K code on both 68K and PPC machines
+o native CFM code on both 68k and PPC machines - OT 1.3 or later is required for 68k CFM code
+
+extension — You can call the Open Transport Client API from an extension, such as a shared library or code resource, as long as you follow some simple rules.  These rules are discussed later in this document.  If you’re developing a code resource that calls OT, you should check out the sample for doing this on the OT web page.
+
+OT supports extensions built in the following environments:
+
+o classic 68K code resources on both 68K and PPC machines
+o 68K and PPC ASLM shared library on both 68K and PPC machines
+o native CFM code on both 68k and PPC machines - OT 1.3 or later is required for 68k CFM code
+
+configuration helper library — A configuration helper library is a client side shared library that OT calls to get extra information about configured ports. Currently OT uses this library to get a user-visible name and icon for the port. Most people who develop port scanners (described in the kernel Developer Opportunities section) will need to develop one of these libraries.
+
+Configuration helper libraries must be built for one of the following environments:
+
+o 68K ASLM shared library on 68K
+o PPC ASLM shared library on PPC
+o CFM shared library on PPC where Open Transport version 1.3 or greater is present
+
+configurator — A configurator is a client side library that OT invokes when it creates a stream.  Configurators can be either part of a protocol stack (for example, configuring an SPX stream and linking it to the IPX driver) or as part of driver (for example, linking up OT/PPP with the serial module). Very few developers need to create configurators.
+
+Configurators must be built in one of the following environments:
+
+o 68K ASLM shared library on 68K
+o PPC ASLM shared library on PPC
+o CFM shared library on PPC where Open Transport version 1.3 or greater is present
+
+Client SDK Interface Files
+
+The following interfaces files define things that can be used by client software. They are part of the Client SDK.
+
+OpenTransport.h — This is the main client interface to Open Transport.
+
+OpenTptClient.h — This interface contains extra, less commonly used, OT Client API routines. On a PPC machine, the routines in this header file can only be called from PPC code.
+
+OpenTptAppleTalk.h
+OpenTptInternet.h
+OpenTptISDN.h
+OpenTptLinks.h
+OpenTptSerial.h — These files contain definitions related to specific transport mechanism, respectively AppleTalk, TCP/IP, ISDN, Ethernet (and other 802-type hardware) and serial.
+
+OpenTptGlobalNew.h — This interface contains a definition of the C++ “new” operator that uses Open Transport’s standard memory allocator functions, ie OTAllocMem.
+
+OpenTptCommon.h (also in Module SDK) — This interface contains definitions that are accesible by both client and kernel code.
+
+OpenTptXTI.h — This interface contains the types and routines for accessing OT using unix-style XTI calls. This interface is designed for porting unix code, and native Mac software should avoid it.
+
+stropts.h — This interface contains the definition of a number of constants and structures shared between the client code and kernel STREAMS modules. It also contains the unix raw STREAMS APIs; the Mac versions of these routines are available in "OpenTptClient.h".
+
+mistream.h (also in Module SDK) — This interface contains types and routines related to OT’s STREAMS environment. Client developers rarely need to use this file.
+
+Protocol SDK Interface Files
+
+The following are additional client side interfaces that are part of the Protocol SDK:
+
+OpenTransport.r — This interface defines symbols for building shared libraries that are recognised by OT.
+
+OTSharedLibs.h — This interface provides access to OT’s shared library loading and unloading code. This is useful if you’re writing a shared library that loads another shared library, for example a resident part of a configurator that loads a non-resident part to do complicated tasks.
+
+OpenTptConfig.h — This interface gives definitions need to implement a configuration helper library. It also gives a few useful API routines for getting the user-visible name and icon of OT ports.
+
+OpenTptPrivateNew.h — This interface contains a definition of the C++ “new” operator that uses Open Transport’s ‘shared client’ memory allocator functions, ie OTAllocSharedClientMem.
+
+OTDebug.h — This interface contains definitions that might be useful when debugging Open Transport code. These definitions are used internally by the debug version of OT, so you should use these definitions if you want your debugging output to be consistent with OT’s.
+
+OTTiming.h — This interface provides the ability to log events with OT’s internal trace logging facility. Unfortunately there is currently no public way of getting this information out of OT’s internal trace logging facility, so it’s unlikely you’ll find this useful.
+
+Libraries
+
+OT has a large number of client side library that can be very confusing when you first start.  Fortunately there is a DTS Q&A that covers linking OT code and explains each of the libraries and why you need them: 
+
+  <http://devworld.apple.com/dev/qa/nw/nw18.html>
+
+Calling OT from Emulated Code
+
+If you are building 68K client code that you intend to run on a PPC machine, you should read the following DTS Q&As:
+
+  <http://devworld.apple.com/dev/qa/nw/nw40.html>
+
+Developing Kernel Software
+
+Development Opportunities
+
+OT allows you to developer the following types of client software:
+
+module — A module is a kernel side library that Open Transport loads as part of a communications stream. The term module will sometimes be used to include both modules and drivers. An example of an OT module is the TCP protocol module.
+
+Modules must be built for one of the following environments:
+
+o 68K ASLM shared library on 68K
+o PPC ASLM shared library on PPC
+o CFM shared library on PPC
+
+driver — A driver is a kernel side library that Open Transport loads as part of a communications stream. Drivers are traditionally loaded at the end of a communications stream and talk directly to hardware (for example, an Ethernet driver), but this is not always the case (for example, OT/PPP which is linked to the OT serial driver).
+
+Drivers must be built for one of the following environments:
+
+o 68K ASLM shared library on 68K
+o PPC ASLM shared library on PPC
+o CFM shared library on PPC
+
+port scanner — A port scanner is a kernel-side shared library that OT calls at startup and when coming out of sleep. Port scanners normally scan a bus looking for attached networking ports and register those ports with OT. For example, OT contains a port scanner for the PCI bus to register all PCI Ethernet cards as OT ports. Very few developers need to create port scanners.
+
+Port scanners must be built for one of the following environments:
+
+o 68K ASLM shared library on 68K
+o PPC ASLM shared library on PPC
+o CFM shared library on PPC where Open Transport version 1.3 or greater is present
+
+STREAMS
+
+Internally, Open Transport is a standard STREAMS implementation that has been ported to the Macintosh. If you are building OT kernel software, you should be familiar with this STREAMS environment. 
+
+The OT documentation does not cover the STREAMS environment. Instead, we recommend you get a unix STREAMS book and read it before working on Open Transport kernel code.
+
+Personally, I recommend "UNIX System V Release 4 Programmer’s Guide: STREAMS”.  The ISBN for this and other STREAMS books is on the OT web site.
+
+Interface Files
+
+The Module SDK contains the following interfaces files which define routines that can be called by kernel software.
+
+OpenTptModule.h — This is the main kernel interface to Open Transport.
+
+mistream.h (also in Client SDK) — This interface contains types and routines related to OT’s STREAMS environment. This file is very important for module developers.
+
+OpenTptCommon.h (also in Client SDK) — This interface contains definitions that are accesible by both client and kernel code.
+
+dlpi.h — This interface defines structures that map on to all the DLPI primitives. Very handy for driver developers.
+
+tihdr.h — This interface defines structures that map on to all the TPI primitives. Very handy for module developers.
+
+OpenTptDevLinks.h — Types and constants related to Ethernet and other ‘link’ modules.
+
+OpenTptPCISupport.h — This interface defines types and constants useful for OT drivers connected via a PCI bus.
+
+strlog.h — This file defines the interface to the OT “log” module. Your module can use the types and routines defined in this module to log to OT’s standard kernel log.  At this stage there is no way you can access this log, so this header file is not a lot of use.  We are trying to change this though.
+
+OTConfig.r — This file contains Rez definitions for some resources that can be provided by OT modules and drivers, specifically the 'otdr' and 'epcf' resources.
+
+modnames.h — This interface contains the definition of the names of all the standard modules that OT uses. It’s not a lot of use.
+
+miioccom.h — This file defines the base ioctl constants used by Open Transport.
+
+cred.h — This interface defines the unix “credentials” structure that defines what permissions a user has. Because OT is running on a single-user machine, this structure is largely redundant. However it may become useful in the future, so your module should deal with it appropriately, as described in the “Open Tpt Module Dev. Note”.
+
+strstat.h — This interface defines the module statistic data structure. This is another one of those weird unix data types that you can ignore.
+
+Libraries
+
+The Module SDK contains the following libraries:
+
+OpenTptModuleLib
+OpenTptModule.o — Provides PPC and 68K access to core kernel routines needed by modules. All modules should link with this library.
+
+OpenTptKernelUtilLib
+OpenTptKernelUtils.o — Provides PPC and 68K access to a bunch of OT kernel utility routines. Your module should link to this library only if it needs one of the kernel utility routines contained therein.
+
+Conclusion
+
+This file brought to you by:
+
+Quinn “The Eskimo!” <DevSupport@apple.com>
+Apple Developer Technical Support
+Networking, Communications, Hardware
+13 Dec 1996
+
+Updated by:
+Rich Kubota <DevSupport@apple.com>
+Apple Developer Technical Support
+Networking, Communications, Hardware
+25 Sep 1997

@@ -1,0 +1,522 @@
+;
+;	File:		DrawSprocket.a
+;
+;	Contains:	Games Sprockets: DrawSprocket interfaces
+;
+;	Version:	Technology:	Draw Sprocket 1.1.2
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1996-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__DRAWSPROCKET__') = 'UNDEFINED' THEN
+__DRAWSPROCKET__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__EVENTS__') = 'UNDEFINED' THEN
+	include 'Events.a'
+	ENDIF
+	IF &TYPE('__QUICKDRAW__') = 'UNDEFINED' THEN
+	include 'Quickdraw.a'
+	ENDIF
+	IF &TYPE('__QDOFFSCREEN__') = 'UNDEFINED' THEN
+	include 'QDOffscreen.a'
+	ENDIF
+	IF &TYPE('__DISPLAYS__') = 'UNDEFINED' THEN
+	include 'Displays.a'
+	ENDIF
+
+	IF TARGET_RT_MAC_CFM THEN
+; 
+;********************************************************************************
+;** error/warning codes
+;********************************************************************************
+;
+
+
+kDSpNotInitializedErr			EQU		-30440
+kDSpSystemSWTooOldErr			EQU		-30441
+kDSpInvalidContextErr			EQU		-30442
+kDSpInvalidAttributesErr		EQU		-30443
+kDSpContextAlreadyReservedErr	EQU		-30444
+kDSpContextNotReservedErr		EQU		-30445
+kDSpContextNotFoundErr			EQU		-30446
+kDSpFrameRateNotReadyErr		EQU		-30447
+kDSpConfirmSwitchWarning		EQU		-30448
+kDSpInternalErr					EQU		-30449
+kDSpStereoContextErr			EQU		-30450
+; 
+;********************************************************************************
+;** constants
+;********************************************************************************
+;
+
+
+; typedef long							DSpDepthMask
+kDSpDepthMask_1					EQU		$01
+kDSpDepthMask_2					EQU		$02
+kDSpDepthMask_4					EQU		$04
+kDSpDepthMask_8					EQU		$08
+kDSpDepthMask_16				EQU		$10
+kDSpDepthMask_32				EQU		$20
+kDSpDepthMask_All				EQU		-1
+
+; typedef long							DSpColorNeeds
+kDSpColorNeeds_DontCare			EQU		0
+kDSpColorNeeds_Request			EQU		1
+kDSpColorNeeds_Require			EQU		2
+
+; typedef long							DSpContextState
+kDSpContextState_Active			EQU		0
+kDSpContextState_Paused			EQU		1
+kDSpContextState_Inactive		EQU		2
+;  kDSpContextOption_QD3DAccel not yet implemented 
+
+; typedef long							DSpContextOption
+															;	kDSpContextOption_QD3DAccel		= 1<<0,
+kDSpContextOption_PageFlip		EQU		$02
+kDSpContextOption_DontSyncVBL	EQU		$04
+kDSpContextOption_Stereoscopic	EQU		$08
+
+; typedef long							DSpAltBufferOption
+kDSpAltBufferOption_RowBytesEqualsWidth EQU $01
+
+; typedef long							DSpBufferKind
+kDSpBufferKind_Normal			EQU		0
+kDSpBufferKind_LeftEye			EQU		0
+kDSpBufferKind_RightEye			EQU		1
+
+; typedef long							DSpBlitMode
+kDSpBlitMode_SrcKey				EQU		$01
+kDSpBlitMode_DstKey				EQU		$02
+kDSpBlitMode_Interpolation		EQU		$04
+; 
+;********************************************************************************
+;** data types
+;********************************************************************************
+;
+
+
+
+
+
+DSpContextAttributes	RECORD 0
+frequency				 ds.l	1				; offset: $0 (0)
+displayWidth			 ds.l	1				; offset: $4 (4)
+displayHeight			 ds.l	1				; offset: $8 (8)
+reserved1				 ds.l	1				; offset: $C (12)
+reserved2				 ds.l	1				; offset: $10 (16)
+colorNeeds				 ds.l	1				; offset: $14 (20)
+colorTable				 ds.l	1				; offset: $18 (24)
+contextOptions			 ds.l	1				; offset: $1C (28)
+backBufferDepthMask		 ds.l	1				; offset: $20 (32)
+displayDepthMask		 ds.l	1				; offset: $24 (36)
+backBufferBestDepth		 ds.l	1				; offset: $28 (40)
+displayBestDepth		 ds.l	1				; offset: $2C (44)
+pageCount				 ds.l	1				; offset: $30 (48)
+filler					 ds.b	3				; offset: $34 (52)
+gameMustConfirmSwitch	 ds.b	1				; offset: $37 (55)
+reserved3				 ds.l	4				; offset: $38 (56)
+sizeof					 EQU *					; size:   $48 (72)
+						ENDR
+; typedef struct DSpContextAttributes *	DSpContextAttributesPtr
+
+DSpAltBufferAttributes	RECORD 0
+width					 ds.l	1				; offset: $0 (0)
+height					 ds.l	1				; offset: $4 (4)
+options					 ds.l	1				; offset: $8 (8)
+reserved				 ds.l	4				; offset: $C (12)
+sizeof					 EQU *					; size:   $1C (28)
+						ENDR
+
+
+DSpBlitInfo				RECORD 0
+completionFlag			 ds.b	1				; offset: $0 (0)
+filler					 ds.b	3				; offset: $1 (1)
+completionProc			 ds.l	1				; offset: $4 (4)
+srcContext				 ds.l	1				; offset: $8 (8)
+srcBuffer				 ds.l	1				; offset: $C (12)
+srcRect					 ds		Rect			; offset: $10 (16)
+srcKey					 ds.l	1				; offset: $18 (24)
+dstContext				 ds.l	1				; offset: $1C (28)
+dstBuffer				 ds.l	1				; offset: $20 (32)
+dstRect					 ds		Rect			; offset: $24 (36)
+dstKey					 ds.l	1				; offset: $2C (44)
+mode					 ds.l	1				; offset: $30 (48)
+reserved				 ds.l	4				; offset: $34 (52)
+sizeof					 EQU *					; size:   $44 (68)
+						ENDR
+; typedef struct DSpBlitInfo *			DSpBlitInfoPtr
+
+; 
+;********************************************************************************
+;** function prototypes
+;********************************************************************************
+;
+
+; 
+;** global operations
+;
+
+;
+; extern OSStatus DSpStartup(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpStartup
+	ENDIF
+
+;
+; extern OSStatus DSpShutdown(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpShutdown
+	ENDIF
+
+;
+; extern OSStatus DSpGetFirstContext(DisplayIDType inDisplayID, DSpContextReference *outContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpGetFirstContext
+	ENDIF
+
+;
+; extern OSStatus DSpGetNextContext(DSpContextReference inCurrentContext, DSpContextReference *outContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpGetNextContext
+	ENDIF
+
+;
+; extern OSStatus DSpFindBestContext(DSpContextAttributesPtr inDesiredAttributes, DSpContextReference *outContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpFindBestContext
+	ENDIF
+
+;
+; extern OSStatus DSpCanUserSelectContext(DSpContextAttributesPtr inDesiredAttributes, Boolean *outUserCanSelectContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpCanUserSelectContext
+	ENDIF
+
+;
+; extern OSStatus DSpUserSelectContext(DSpContextAttributesPtr inDesiredAttributes, DisplayIDType inDialogDisplayLocation, DSpEventProcPtr inEventProc, DSpContextReference *outContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpUserSelectContext
+	ENDIF
+
+;
+; extern OSStatus DSpProcessEvent(EventRecord *inEvent, Boolean *outEventWasProcessed)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpProcessEvent
+	ENDIF
+
+;
+; extern OSStatus DSpSetBlankingColor(const RGBColor *inRGBColor)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpSetBlankingColor
+	ENDIF
+
+;
+; extern OSStatus DSpSetDebugMode(Boolean inDebugMode)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpSetDebugMode
+	ENDIF
+
+;
+; extern OSStatus DSpFindContextFromPoint(Point inGlobalPoint, DSpContextReference *outContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpFindContextFromPoint
+	ENDIF
+
+;
+; extern OSStatus DSpGetMouse(Point *outGlobalPoint)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpGetMouse
+	ENDIF
+
+; 
+;** alternate buffer operations
+;
+
+;
+; extern OSStatus DSpAltBuffer_New(DSpContextReference inContext, Boolean inVRAMBuffer, DSpAltBufferAttributes *inAttributes, DSpAltBufferReference *outAltBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpAltBuffer_New
+	ENDIF
+
+;
+; extern OSStatus DSpAltBuffer_Dispose(DSpAltBufferReference inAltBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpAltBuffer_Dispose
+	ENDIF
+
+;
+; extern OSStatus DSpAltBuffer_InvalRect(DSpAltBufferReference inAltBuffer, const Rect *inInvalidRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpAltBuffer_InvalRect
+	ENDIF
+
+;
+; extern OSStatus DSpAltBuffer_GetCGrafPtr(DSpAltBufferReference inAltBuffer, DSpBufferKind inBufferKind, CGrafPtr *outCGrafPtr, GDHandle *outGDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpAltBuffer_GetCGrafPtr
+	ENDIF
+
+; 
+;** context operations
+;
+
+;  general 
+;
+; extern OSStatus DSpContext_GetAttributes(DSpContextReference inContext, DSpContextAttributesPtr outAttributes)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetAttributes
+	ENDIF
+
+;
+; extern OSStatus DSpContext_Reserve(DSpContextReference inContext, DSpContextAttributesPtr inDesiredAttributes)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_Reserve
+	ENDIF
+
+;
+; extern OSStatus DSpContext_Release(DSpContextReference inContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_Release
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetDisplayID(DSpContextReference inContext, DisplayIDType *outDisplayID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetDisplayID
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GlobalToLocal(DSpContextReference inContext, Point *ioPoint)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GlobalToLocal
+	ENDIF
+
+;
+; extern OSStatus DSpContext_LocalToGlobal(DSpContextReference inContext, Point *ioPoint)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_LocalToGlobal
+	ENDIF
+
+;
+; extern OSStatus DSpContext_SetVBLProc(DSpContextReference inContext, DSpCallbackProcPtr inProcPtr, void *inRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_SetVBLProc
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetFlattenedSize(DSpContextReference inContext, UInt32 *outFlatContextSize)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetFlattenedSize
+	ENDIF
+
+;
+; extern OSStatus DSpContext_Flatten(DSpContextReference inContext, void *outFlatContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_Flatten
+	ENDIF
+
+;
+; extern OSStatus DSpContext_Restore(void *inFlatContext, DSpContextReference *outRestoredContext)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_Restore
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetMonitorFrequency(DSpContextReference inContext, Fixed *outFrequency)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetMonitorFrequency
+	ENDIF
+
+;
+; extern OSStatus DSpContext_SetMaxFrameRate(DSpContextReference inContext, UInt32 inMaxFPS)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_SetMaxFrameRate
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetMaxFrameRate(DSpContextReference inContext, UInt32 *outMaxFPS)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetMaxFrameRate
+	ENDIF
+
+;
+; extern OSStatus DSpContext_SetState(DSpContextReference inContext, DSpContextState inState)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_SetState
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetState(DSpContextReference inContext, DSpContextState *outState)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetState
+	ENDIF
+
+;
+; extern OSStatus DSpContext_IsBusy(DSpContextReference inContext, Boolean *outBusyFlag)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_IsBusy
+	ENDIF
+
+;  dirty rectangles 
+;
+; extern OSStatus DSpContext_SetDirtyRectGridSize(DSpContextReference inContext, UInt32 inCellPixelWidth, UInt32 inCellPixelHeight)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_SetDirtyRectGridSize
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetDirtyRectGridSize(DSpContextReference inContext, UInt32 *outCellPixelWidth, UInt32 *outCellPixelHeight)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetDirtyRectGridSize
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetDirtyRectGridUnits(DSpContextReference inContext, UInt32 *outCellPixelWidth, UInt32 *outCellPixelHeight)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetDirtyRectGridUnits
+	ENDIF
+
+;
+; extern OSStatus DSpContext_InvalBackBufferRect(DSpContextReference inContext, const Rect *inRect)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_InvalBackBufferRect
+	ENDIF
+
+;  underlays 
+;
+; extern OSStatus DSpContext_SetUnderlayAltBuffer(DSpContextReference inContext, DSpAltBufferReference inNewUnderlay)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_SetUnderlayAltBuffer
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetUnderlayAltBuffer(DSpContextReference inContext, DSpAltBufferReference *outUnderlay)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetUnderlayAltBuffer
+	ENDIF
+
+;  gamma 
+;
+; extern OSStatus DSpContext_FadeGammaOut(DSpContextReference inContext, RGBColor *inZeroIntensityColor)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_FadeGammaOut
+	ENDIF
+
+;
+; extern OSStatus DSpContext_FadeGammaIn(DSpContextReference inContext, RGBColor *inZeroIntensityColor)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_FadeGammaIn
+	ENDIF
+
+;
+; extern OSStatus DSpContext_FadeGamma(DSpContextReference inContext, SInt32 inPercentOfOriginalIntensity, RGBColor *inZeroIntensityColor)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_FadeGamma
+	ENDIF
+
+;  buffering 
+;
+; extern OSStatus DSpContext_SwapBuffers(DSpContextReference inContext, DSpCallbackProcPtr inBusyProc, void *inUserRefCon)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_SwapBuffers
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetBackBuffer(DSpContextReference inContext, DSpBufferKind inBufferKind, CGrafPtr *outBackBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetBackBuffer
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetFrontBuffer(DSpContextReference inContext, CGrafPtr *outFrontBuffer)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetFrontBuffer
+	ENDIF
+
+;  clut operations 
+;
+; extern OSStatus DSpContext_SetCLUTEntries(DSpContextReference inContext, const ColorSpec *inEntries, UInt16 inStartingEntry, UInt16 inLastEntry)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_SetCLUTEntries
+	ENDIF
+
+;
+; extern OSStatus DSpContext_GetCLUTEntries(DSpContextReference inContext, ColorSpec *outEntries, UInt16 inStartingEntry, UInt16 inLastEntry)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpContext_GetCLUTEntries
+	ENDIF
+
+;  blit operations 
+;
+; extern OSStatus DSpBlit_Faster(DSpBlitInfoPtr inBlitInfo, Boolean inAsyncFlag)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpBlit_Faster
+	ENDIF
+
+;
+; extern OSStatus DSpBlit_Fastest(DSpBlitInfoPtr inBlitInfo, Boolean inAsyncFlag)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DSpBlit_Fastest
+	ENDIF
+
+	ENDIF	; TARGET_RT_MAC_CFM
+	ENDIF ; __DRAWSPROCKET__ 
+

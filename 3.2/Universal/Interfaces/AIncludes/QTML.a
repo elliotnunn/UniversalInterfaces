@@ -1,0 +1,306 @@
+;
+;	File:		QTML.a
+;
+;	Contains:	QuickTime Cross-platform specific interfaces
+;
+;	Version:	Technology:	QuickTime 3.0
+;				Release:	Universal Interfaces 3.2
+;
+;	Copyright:	© 1997-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		For bug reports, consult the following page on
+;				the World Wide Web:
+;
+;					http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__QTML__') = 'UNDEFINED' THEN
+__QTML__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__MACMEMORY__') = 'UNDEFINED' THEN
+	include 'MacMemory.a'
+	ENDIF
+	IF &TYPE('__MACWINDOWS__') = 'UNDEFINED' THEN
+	include 'MacWindows.a'
+	ENDIF
+	IF &TYPE('__OSUTILS__') = 'UNDEFINED' THEN
+	include 'OSUtils.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+
+;
+; pascal void QTMLYieldCPU(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLYieldCPU
+	ENDIF
+
+;
+; pascal void QTMLYieldCPUTime(long milliSeconds, unsigned long flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLYieldCPUTime
+	ENDIF
+
+	IF ¬ TARGET_OS_MAC THEN
+; typedef long 							QTMLMutex
+
+
+
+; typedef QTMLSyncVar *					QTMLSyncVarPtr
+
+
+kInitializeQTMLNoSoundFlag		EQU		$00000001			; flag for requesting no sound when calling InitializeQTML
+kInitializeQTMLUseGDIFlag		EQU		$00000002			; flag for requesting GDI when calling InitializeQTML
+
+kQTMLHandlePortEvents			EQU		$00000001			; flag for requesting requesting QTML to handle events
+kQTMLNoIdleEvents				EQU		$00000002			; flag for requesting requesting QTML not to send Idle Events
+;
+; pascal OSErr InitializeQTML(long flag)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitializeQTML
+	ENDIF
+
+;
+; pascal void TerminateQTML(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TerminateQTML
+	ENDIF
+
+;
+; pascal GrafPtr CreatePortAssociation(void *theWnd, Ptr storage, long flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION CreatePortAssociation
+	ENDIF
+
+;
+; pascal void DestroyPortAssociation(CGrafPtr cgp)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION DestroyPortAssociation
+	ENDIF
+
+;
+; pascal void QTMLGrabMutex(QTMLMutex mu)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLGrabMutex
+	ENDIF
+
+;
+; pascal void QTMLReturnMutex(QTMLMutex mu)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLReturnMutex
+	ENDIF
+
+;
+; pascal QTMLMutex QTMLCreateMutex(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLCreateMutex
+	ENDIF
+
+;
+; pascal void QTMLDestroyMutex(QTMLMutex mu)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLDestroyMutex
+	ENDIF
+
+;
+; pascal QTMLSyncVarPtr QTMLCreateSyncVar(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLCreateSyncVar
+	ENDIF
+
+;
+; pascal void QTMLDestroySyncVar(QTMLSyncVarPtr p)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLDestroySyncVar
+	ENDIF
+
+;
+; pascal long QTMLTestAndSetSyncVar(QTMLSyncVarPtr sync)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLTestAndSetSyncVar
+	ENDIF
+
+;
+; pascal void QTMLWaitAndSetSyncVar(QTMLSyncVarPtr sync)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLWaitAndSetSyncVar
+	ENDIF
+
+;
+; pascal void QTMLResetSyncVar(QTMLSyncVarPtr sync)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLResetSyncVar
+	ENDIF
+
+;
+; pascal void InitializeQHdr(QHdr *qhdr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION InitializeQHdr
+	ENDIF
+
+;
+; pascal void TerminateQHdr(QHdr *qhdr)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION TerminateQHdr
+	ENDIF
+
+;
+; pascal void QTMLAcquireWindowList(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLAcquireWindowList
+	ENDIF
+
+;
+; pascal void QTMLReleaseWindowList(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLReleaseWindowList
+	ENDIF
+
+
+;   These routines are here to support "interrupt level" code
+;      These are dangerous routines, only use if you know what you are doing.
+
+
+
+;
+; pascal long QTMLRegisterInterruptSafeThread(unsigned long threadID, void *threadInfo)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLRegisterInterruptSafeThread
+	ENDIF
+
+;
+; pascal long QTMLUnregisterInterruptSafeThread(unsigned long threadID)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLUnregisterInterruptSafeThread
+	ENDIF
+
+;
+; pascal long NativeEventToMacEvent(void *nativeEvent, EventRecord *macEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NativeEventToMacEvent
+	ENDIF
+
+	IF TARGET_OS_WIN32 THEN
+;
+; pascal long WinEventToMacEvent(void *winMsg, EventRecord *macEvent)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION WinEventToMacEvent
+	ENDIF
+
+;
+; pascal Boolean IsTaskBarVisible(void )
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION IsTaskBarVisible
+	ENDIF
+
+;
+; pascal void ShowHideTaskBar(Boolean showIt)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION ShowHideTaskBar
+	ENDIF
+
+
+kDDSurfaceLocked				EQU		$00000001
+kDDSurfaceStatic				EQU		$00000002
+;
+; pascal OSErr QTGetDDObject(void **lpDDObject)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTGetDDObject
+	ENDIF
+
+;
+; pascal OSErr QTSetDDObject(void *lpNewDDObject)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSetDDObject
+	ENDIF
+
+;
+; pascal OSErr QTSetDDPrimarySurface(void *lpNewDDSurface, unsigned long flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTSetDDPrimarySurface
+	ENDIF
+
+;
+; pascal OSErr QTMLGetVolumeRootPath(char *fullPath, char *volumeRootPath, unsigned long volumeRootLen)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLGetVolumeRootPath
+	ENDIF
+
+;
+; pascal void QTMLSetWindowWndProc(WindowPtr theWindow, void *windowProc)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLSetWindowWndProc
+	ENDIF
+
+;
+; pascal void *QTMLGetWindowWndProc(WindowPtr theWindow)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLGetWindowWndProc
+	ENDIF
+
+	ENDIF	; TARGET_OS_WIN32
+;
+; pascal OSErr QTMLGetCanonicalPathName(char *inName, char *outName, unsigned long outLen)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION QTMLGetCanonicalPathName
+	ENDIF
+
+
+kFullNativePath					EQU		0
+kFileNameOnly					EQU		$01
+kDirectoryPathOnly				EQU		$02
+;
+; pascal OSErr FSSpecToNativePathName(const FSSpec *inFile, char *outName, unsigned long outLen, long flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FSSpecToNativePathName
+	ENDIF
+
+;
+; pascal OSErr NativePathNameToFSSpec(char *inName, FSSpec *outFile, long flags)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION NativePathNameToFSSpec
+	ENDIF
+
+	ENDIF
+	IF TARGET_OS_MAC THEN
+	ENDIF	; TARGET_OS_MAC
+	ENDIF ; __QTML__ 
+

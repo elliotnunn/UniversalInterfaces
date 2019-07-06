@@ -1,0 +1,44 @@
+==============================================
+Universal Interfaces & Libraries Release Notes 
+==============================================
+
+Version: Universal Interfaces 3.3.2
+Date:    April 27, 2000
+Author:  Nick Kledzik
+
+
+=================
+Important Notice
+=================
+
+This set of headers and libraries supports
+CarbonLib 1.0.2 and QuickTime 4.1 development.
+
+See 3.3 and 3.3.1 Release Notes for information on 
+changes from 3.2 to 3.3.1.
+
+
+==================================================
+Changes since Universal Interfaces 3.3.1
+==================================================
+
+-  Fixes to .k.h files:
+		AVComponents.k.h
+		MediaHandlers.k.h
+		Movies.k.h
+		QTStreamingComponents.k.h
+		QuickTimeComponents.k.h
+		Sound.k.h
+
+-  Fix whitespace in comments.  In 3.3.1 headers all tabs
+   where stripped, but in some cases alignment was not preserved.
+
+-  Fix URLAccess.h to use #define instead of const char* for strings
+
+-  Fix InputSprocket.h to compile with carbon.
+
+-------------------------------------------------------------------------
+Nick Kledzik
+Universal Interfaces 
+Apple Computer, Inc.
+

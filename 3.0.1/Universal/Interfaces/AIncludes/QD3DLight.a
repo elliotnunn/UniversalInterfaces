@@ -1,0 +1,439 @@
+;
+;	File:		QD3DLight.a
+;
+;	Contains:	Generic light routines								 			
+;
+;	Version:	Technology:	Quickdraw 3D 1.5.1
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1995-1997 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__QD3DLIGHT__') = 'UNDEFINED' THEN
+__QD3DLIGHT__ SET 1
+
+	IF &TYPE('__QD3D__') = 'UNDEFINED' THEN
+	include 'QD3D.a'
+	ENDIF
+
+; ******************************************************************************
+; **																			 **
+; **							Enum Definitions								 **
+; **																			 **
+; ****************************************************************************
+
+
+; typedef long							TQ3AttenuationType
+kQ3AttenuationTypeNone			EQU		0
+kQ3AttenuationTypeInverseDistance EQU	1
+kQ3AttenuationTypeInverseDistanceSquared EQU 2
+
+
+; typedef long							TQ3FallOffType
+kQ3FallOffTypeNone				EQU		0
+kQ3FallOffTypeLinear			EQU		1
+kQ3FallOffTypeExponential		EQU		2
+kQ3FallOffTypeCosine			EQU		3
+
+; ******************************************************************************
+; **																			 **
+; **							Data Structure Definitions						 **
+; **																			 **
+; ****************************************************************************
+
+TQ3LightData			RECORD 0
+isOn					 ds.l	1				; offset: $0 (0)
+brightness				 ds		Float32			; offset: $4 (4)
+color					 ds		TQ3ColorRGB		; offset: $8 (8)
+sizeof					 EQU *					; size:   $14 (20)
+						ENDR
+TQ3DirectionalLightData	RECORD 0
+lightData				 ds		TQ3LightData	; offset: $0 (0)
+castsShadows			 ds.l	1				; offset: $14 (20)
+direction				 ds		TQ3Vector3D		; offset: $18 (24)
+sizeof					 EQU *					; size:   $24 (36)
+						ENDR
+TQ3PointLightData		RECORD 0
+lightData				 ds		TQ3LightData	; offset: $0 (0)
+castsShadows			 ds.l	1				; offset: $14 (20)
+attenuation				 ds.l	1				; offset: $18 (24)
+location				 ds		TQ3Point3D		; offset: $1C (28)
+sizeof					 EQU *					; size:   $28 (40)
+						ENDR
+TQ3SpotLightData		RECORD 0
+lightData				 ds		TQ3LightData	; offset: $0 (0)
+castsShadows			 ds.l	1				; offset: $14 (20)
+attenuation				 ds.l	1				; offset: $18 (24)
+location				 ds		TQ3Point3D		; offset: $1C (28)
+direction				 ds		TQ3Vector3D		; offset: $28 (40)
+hotAngle				 ds		Float32			; offset: $34 (52)
+outerAngle				 ds		Float32			; offset: $38 (56)
+fallOff					 ds.l	1				; offset: $3C (60)
+sizeof					 EQU *					; size:   $40 (64)
+						ENDR
+; ******************************************************************************
+; **																			 **
+; **					Light routines (apply to all TQ3LightObjects)		     **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3ObjectType Q3Light_GetType(TQ3LightObject light)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Light_GetType
+	ENDIF
+
+;
+; extern TQ3Status Q3Light_GetState(TQ3LightObject light, TQ3Boolean *isOn)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Light_GetState
+	ENDIF
+
+;
+; extern TQ3Status Q3Light_GetBrightness(TQ3LightObject light, float *brightness)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Light_GetBrightness
+	ENDIF
+
+;
+; extern TQ3Status Q3Light_GetColor(TQ3LightObject light, TQ3ColorRGB *color)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Light_GetColor
+	ENDIF
+
+;
+; extern TQ3Status Q3Light_SetState(TQ3LightObject light, TQ3Boolean isOn)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Light_SetState
+	ENDIF
+
+;
+; extern TQ3Status Q3Light_SetBrightness(TQ3LightObject light, float brightness)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Light_SetBrightness
+	ENDIF
+
+;
+; extern TQ3Status Q3Light_SetColor(TQ3LightObject light, const TQ3ColorRGB *color)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Light_SetColor
+	ENDIF
+
+;
+; extern TQ3Status Q3Light_GetData(TQ3LightObject light, TQ3LightData *lightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Light_GetData
+	ENDIF
+
+;
+; extern TQ3Status Q3Light_SetData(TQ3LightObject light, const TQ3LightData *lightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3Light_SetData
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **							Specific Light Routines					 	 	 **
+; **																			 **
+; ****************************************************************************
+
+; ******************************************************************************
+; **																			 **
+; **							Ambient Light							 	 	 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3LightObject Q3AmbientLight_New(const TQ3LightData *lightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3AmbientLight_New
+	ENDIF
+
+;
+; extern TQ3Status Q3AmbientLight_GetData(TQ3LightObject light, TQ3LightData *lightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3AmbientLight_GetData
+	ENDIF
+
+;
+; extern TQ3Status Q3AmbientLight_SetData(TQ3LightObject light, const TQ3LightData *lightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3AmbientLight_SetData
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **						Directional Light									 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3LightObject Q3DirectionalLight_New(const TQ3DirectionalLightData *directionalLightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3DirectionalLight_New
+	ENDIF
+
+;
+; extern TQ3Status Q3DirectionalLight_GetCastShadowsState(TQ3LightObject light, TQ3Boolean *castsShadows)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3DirectionalLight_GetCastShadowsState
+	ENDIF
+
+;
+; extern TQ3Status Q3DirectionalLight_GetDirection(TQ3LightObject light, TQ3Vector3D *direction)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3DirectionalLight_GetDirection
+	ENDIF
+
+;
+; extern TQ3Status Q3DirectionalLight_SetCastShadowsState(TQ3LightObject light, TQ3Boolean castsShadows)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3DirectionalLight_SetCastShadowsState
+	ENDIF
+
+;
+; extern TQ3Status Q3DirectionalLight_SetDirection(TQ3LightObject light, const TQ3Vector3D *direction)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3DirectionalLight_SetDirection
+	ENDIF
+
+;
+; extern TQ3Status Q3DirectionalLight_GetData(TQ3LightObject light, TQ3DirectionalLightData *directionalLightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3DirectionalLight_GetData
+	ENDIF
+
+;
+; extern TQ3Status Q3DirectionalLight_SetData(TQ3LightObject light, const TQ3DirectionalLightData *directionalLightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3DirectionalLight_SetData
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **						Point Light									 		 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3LightObject Q3PointLight_New(const TQ3PointLightData *pointLightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PointLight_New
+	ENDIF
+
+;
+; extern TQ3Status Q3PointLight_GetCastShadowsState(TQ3LightObject light, TQ3Boolean *castsShadows)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PointLight_GetCastShadowsState
+	ENDIF
+
+;
+; extern TQ3Status Q3PointLight_GetAttenuation(TQ3LightObject light, TQ3AttenuationType *attenuation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PointLight_GetAttenuation
+	ENDIF
+
+;
+; extern TQ3Status Q3PointLight_GetLocation(TQ3LightObject light, TQ3Point3D *location)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PointLight_GetLocation
+	ENDIF
+
+;
+; extern TQ3Status Q3PointLight_GetData(TQ3LightObject light, TQ3PointLightData *pointLightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PointLight_GetData
+	ENDIF
+
+;
+; extern TQ3Status Q3PointLight_SetCastShadowsState(TQ3LightObject light, TQ3Boolean castsShadows)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PointLight_SetCastShadowsState
+	ENDIF
+
+;
+; extern TQ3Status Q3PointLight_SetAttenuation(TQ3LightObject light, TQ3AttenuationType attenuation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PointLight_SetAttenuation
+	ENDIF
+
+;
+; extern TQ3Status Q3PointLight_SetLocation(TQ3LightObject light, const TQ3Point3D *location)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PointLight_SetLocation
+	ENDIF
+
+;
+; extern TQ3Status Q3PointLight_SetData(TQ3LightObject light, const TQ3PointLightData *pointLightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3PointLight_SetData
+	ENDIF
+
+
+; ******************************************************************************
+; **																			 **
+; **						Spot Light									 		 **
+; **																			 **
+; ****************************************************************************
+
+;
+; extern TQ3LightObject Q3SpotLight_New(const TQ3SpotLightData *spotLightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_New
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_GetCastShadowsState(TQ3LightObject light, TQ3Boolean *castsShadows)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_GetCastShadowsState
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_GetAttenuation(TQ3LightObject light, TQ3AttenuationType *attenuation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_GetAttenuation
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_GetLocation(TQ3LightObject light, TQ3Point3D *location)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_GetLocation
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_GetDirection(TQ3LightObject light, TQ3Vector3D *direction)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_GetDirection
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_GetHotAngle(TQ3LightObject light, float *hotAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_GetHotAngle
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_GetOuterAngle(TQ3LightObject light, float *outerAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_GetOuterAngle
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_GetFallOff(TQ3LightObject light, TQ3FallOffType *fallOff)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_GetFallOff
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_GetData(TQ3LightObject light, TQ3SpotLightData *spotLightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_GetData
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_SetCastShadowsState(TQ3LightObject light, TQ3Boolean castsShadows)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_SetCastShadowsState
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_SetAttenuation(TQ3LightObject light, TQ3AttenuationType attenuation)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_SetAttenuation
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_SetLocation(TQ3LightObject light, const TQ3Point3D *location)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_SetLocation
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_SetDirection(TQ3LightObject light, const TQ3Vector3D *direction)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_SetDirection
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_SetHotAngle(TQ3LightObject light, float hotAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_SetHotAngle
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_SetOuterAngle(TQ3LightObject light, float outerAngle)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_SetOuterAngle
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_SetFallOff(TQ3LightObject light, TQ3FallOffType fallOff)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_SetFallOff
+	ENDIF
+
+;
+; extern TQ3Status Q3SpotLight_SetData(TQ3LightObject light, const TQ3SpotLightData *spotLightData)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION Q3SpotLight_SetData
+	ENDIF
+
+
+
+
+	ENDIF ; __QD3DLIGHT__ 
+

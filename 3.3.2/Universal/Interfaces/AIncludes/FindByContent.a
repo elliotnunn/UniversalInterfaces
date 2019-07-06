@@ -1,0 +1,336 @@
+;
+;    File:       FindByContent.a
+;
+;    Contains:   Public search interface for the Find by Content shared library
+;
+;    Version:    Technology: 2.0
+;                Release:    Universal Interfaces 3.3.2
+;
+;    Copyright:  © 1997-2000 by Apple Computer, Inc., all rights reserved.
+;
+;    Bugs?:      For bug reports, consult the following page on
+;                the World Wide Web:
+;
+;                    http://developer.apple.com/bugreporter/
+;
+;
+	IF &TYPE('__FINDBYCONTENT__') = 'UNDEFINED' THEN
+__FINDBYCONTENT__ SET 1
+
+	IF &TYPE('__MACTYPES__') = 'UNDEFINED' THEN
+	include 'MacTypes.a'
+	ENDIF
+	IF &TYPE('__FILES__') = 'UNDEFINED' THEN
+	include 'Files.a'
+	ENDIF
+	IF &TYPE('__MACERRORS__') = 'UNDEFINED' THEN
+	include 'MacErrors.a'
+	ENDIF
+
+
+;   ***************************************************************************
+;   Phase values
+;   These values are passed to the client's callback function to indicate what
+;   the FBC code is doing.
+;   ***************************************************************************
+
+
+
+															; indexing phases
+kFBCphIndexing					EQU		0
+kFBCphFlushing					EQU		1
+kFBCphMerging					EQU		2
+kFBCphMakingIndexAccessor		EQU		3
+kFBCphCompacting				EQU		4
+kFBCphIndexWaiting				EQU		5					; access phases
+kFBCphSearching					EQU		6
+kFBCphMakingAccessAccessor		EQU		7
+kFBCphAccessWaiting				EQU		8					; summarization
+kFBCphSummarizing				EQU		9					; indexing or access
+kFBCphIdle						EQU		10
+kFBCphCanceling					EQU		11
+
+
+
+;   ***************************************************************************
+;   Pointer types
+;   These point to memory allocated by the FBC shared library, and must be deallocated
+;   by calls that are defined below.
+;   ***************************************************************************
+
+
+
+;  A collection of state information for searching
+
+
+;  a FBCWordList is a pointer to an array of pointers to c-strings
+FBCWordListRec			RECORD 0
+words					 ds.l	1				; offset: $0 (0) <-- really an array of length one ;  array of pointers to c-strings
+sizeof					 EQU *					; size:   $4 (4)
+						ENDR
+; typedef struct FBCWordListRec *		FBCWordList
+
+
+;   ***************************************************************************
+;   Callback function type for progress reporting and cancelation during
+;   searching and indexing.  The client's callback function should call
+;   WaitNextEvent; a "sleep" value of 1 is suggested.  If the callback function
+;   wants to cancel the current operation (indexing, search, or doc-terms
+;   retrieval) it should return true.
+;   ***************************************************************************
+
+
+
+
+;   ***************************************************************************
+;   Set the callback function for progress reporting and cancelation during
+;   searching and indexing, and set the amount of heap space to reserve for
+;   the client's use when FBC allocates memory.
+;   ***************************************************************************
+
+
+;
+; extern void FBCSetCallback(FBCCallbackUPP fn, void *data)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCSetCallback
+	ENDIF
+
+;
+; extern void FBCSetHeapReservation(UInt32 bytes)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCSetHeapReservation
+	ENDIF
+
+
+;   ***************************************************************************
+;   Find out whether a volume is indexed, the date & time of its last
+;   completed  update, and its physical size.
+;   ***************************************************************************
+
+
+
+;
+; extern Boolean FBCVolumeIsIndexed(SInt16 theVRefNum)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCVolumeIsIndexed
+	ENDIF
+
+;
+; extern Boolean FBCVolumeIsRemote(SInt16 theVRefNum)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCVolumeIsRemote
+	ENDIF
+
+;
+; extern OSErr FBCVolumeIndexTimeStamp(SInt16 theVRefNum, UInt32 *timeStamp)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCVolumeIndexTimeStamp
+	ENDIF
+
+;
+; extern OSErr FBCVolumeIndexPhysicalSize(SInt16 theVRefNum, UInt32 *size)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCVolumeIndexPhysicalSize
+	ENDIF
+
+
+;   ***************************************************************************
+;   Create & configure a search session
+;   ***************************************************************************
+
+
+
+;
+; extern OSErr FBCCreateSearchSession(FBCSearchSession *searchSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCCreateSearchSession
+	ENDIF
+
+;
+; extern OSErr FBCAddAllVolumesToSession(FBCSearchSession theSession, Boolean includeRemote)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCAddAllVolumesToSession
+	ENDIF
+
+;
+; extern OSErr FBCSetSessionVolumes(FBCSearchSession theSession, const SInt16 vRefNums[], UInt16 numVolumes)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCSetSessionVolumes
+	ENDIF
+
+;
+; extern OSErr FBCAddVolumeToSession(FBCSearchSession theSession, SInt16 vRefNum)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCAddVolumeToSession
+	ENDIF
+
+;
+; extern OSErr FBCRemoveVolumeFromSession(FBCSearchSession theSession, SInt16 vRefNum)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCRemoveVolumeFromSession
+	ENDIF
+
+;
+; extern OSErr FBCGetSessionVolumeCount(FBCSearchSession theSession, UInt16 *count)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCGetSessionVolumeCount
+	ENDIF
+
+;
+; extern OSErr FBCGetSessionVolumes(FBCSearchSession theSession, SInt16 vRefNums[], UInt16 *numVolumes)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCGetSessionVolumes
+	ENDIF
+
+;
+; extern OSErr FBCCloneSearchSession(FBCSearchSession original, FBCSearchSession *clone)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCCloneSearchSession
+	ENDIF
+
+
+;   ***************************************************************************
+;   Execute a search
+;   ***************************************************************************
+
+
+
+;
+; extern OSErr FBCDoQuerySearch(FBCSearchSession theSession, char *queryText, const FSSpec targetDirs[], UInt32 numTargets, UInt32 maxHits, UInt32 maxHitWords)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCDoQuerySearch
+	ENDIF
+
+;
+; extern OSErr FBCDoExampleSearch(FBCSearchSession theSession, const UInt32 *exampleHitNums, UInt32 numExamples, const FSSpec targetDirs[], UInt32 numTargets, UInt32 maxHits, UInt32 maxHitWords)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCDoExampleSearch
+	ENDIF
+
+;
+; extern OSErr FBCBlindExampleSearch(FSSpec examples[], UInt32 numExamples, const FSSpec targetDirs[], UInt32 numTargets, UInt32 maxHits, UInt32 maxHitWords, Boolean allIndexes, Boolean includeRemote, FBCSearchSession *theSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCBlindExampleSearch
+	ENDIF
+
+
+
+;   ***************************************************************************
+;   Get information about hits [wrapper for THitItem C++ API]
+;   ***************************************************************************
+
+
+
+;
+; extern OSErr FBCGetHitCount(FBCSearchSession theSession, UInt32 *count)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCGetHitCount
+	ENDIF
+
+;
+; extern OSErr FBCGetHitDocument(FBCSearchSession theSession, UInt32 hitNumber, FSSpec *theDocument)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCGetHitDocument
+	ENDIF
+
+;
+; extern OSErr FBCGetHitScore(FBCSearchSession theSession, UInt32 hitNumber, float *score)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCGetHitScore
+	ENDIF
+
+;
+; extern OSErr FBCGetMatchedWords(FBCSearchSession theSession, UInt32 hitNumber, UInt32 *wordCount, FBCWordList *list)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCGetMatchedWords
+	ENDIF
+
+;
+; extern OSErr FBCGetTopicWords(FBCSearchSession theSession, UInt32 hitNumber, UInt32 *wordCount, FBCWordList *list)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCGetTopicWords
+	ENDIF
+
+
+
+;   ***************************************************************************
+;   Summarize a buffer of text
+;   ***************************************************************************
+
+
+
+;
+; extern OSErr FBCSummarize(void *inBuf, UInt32 inLength, void *outBuf, UInt32 *outLength, UInt32 *numSentences)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCSummarize
+	ENDIF
+
+
+;   ***************************************************************************
+;   Deallocate hit lists, word arrays, and search sessions
+;   ***************************************************************************
+
+
+
+;
+; extern OSErr FBCReleaseSessionHits(FBCSearchSession theSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCReleaseSessionHits
+	ENDIF
+
+;
+; extern OSErr FBCDestroyWordList(FBCWordList theList, UInt32 wordCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCDestroyWordList
+	ENDIF
+
+;
+; extern OSErr FBCDestroySearchSession(FBCSearchSession theSession)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCDestroySearchSession
+	ENDIF
+
+
+;   ***************************************************************************
+;   Index one or more files and/or folders
+;   ***************************************************************************
+
+
+
+	IF CALL_NOT_IN_CARBON THEN
+;
+; extern OSErr FBCIndexItems(FSSpecArrayPtr theItems, UInt32 itemCount)
+;
+	IF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION FBCIndexItems
+	ENDIF
+
+	ENDIF	; CALL_NOT_IN_CARBON
+	ENDIF ; __FINDBYCONTENT__ 
+

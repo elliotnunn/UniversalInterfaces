@@ -1,0 +1,732 @@
+;
+;	File:		AVComponents.a
+;
+;	Contains:	Standard includes for standard AV panels
+;
+;	Version:	Technology:	System 7.5
+;				Release:	Universal Interfaces 3.0.1
+;
+;	Copyright:	© 1989-1997 by Apple Computer, Inc., all rights reserved
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__AVCOMPONENTS__') = 'UNDEFINED' THEN
+__AVCOMPONENTS__ SET 1
+
+	IF &TYPE('__DIALOGS__') = 'UNDEFINED' THEN
+	include 'Dialogs.a'
+	ENDIF
+	IF &TYPE('__VIDEO__') = 'UNDEFINED' THEN
+	include 'Video.a'
+	ENDIF
+	IF &TYPE('__DISPLAYS__') = 'UNDEFINED' THEN
+	include 'Displays.a'
+	ENDIF
+	IF &TYPE('__COMPONENTS__') = 'UNDEFINED' THEN
+	include 'Components.a'
+	ENDIF
+
+; 
+;	The subtypes listed here are for example only.  The display manager will find _all_ panels
+;  	with the appropriate types.  These panels return class information that is used to devide them
+;  	up into groups to be displayed in the AV Windows (class means "geometry" or "color" or other groupings
+;  	like that.
+;
+
+
+kAVPanelType					EQU		'avpc'				; Panel subtypes			
+kBrightnessPanelSubType			EQU		'brit'
+kContrastPanelSubType			EQU		'cont'
+kBitDepthPanelSubType			EQU		'bitd'
+kAVEngineType					EQU		'avec'				; Engine subtypes				
+kBrightnessEngineSubType		EQU		'brit'
+kContrastEngineSubType			EQU		'cont'				;		kBitDepthEngineSubType		= 'bitd',			// Not used					
+kAVPortType						EQU		'avdp'				;subtypes are defined in each port's public .h file
+;  PortComponent subtypes are up to the port and display manager does not use the subtype
+;	to find port components.  Instead, display manager uses an internal cache to search for portcompoennts.
+;	It turns out to be useful to have a unique subtype so that engines can see if they should apply themselves to
+;	a particular port component.
+;  
+;   PortKinds are the "class" of port.  When a port is registered with display manager (creating a display ID), the
+;	caller of DMNewDisplayIDByPortComponent passes a portKind.  Ports of this type are returned by
+;	DMNewDevicePortList.
+;  
+;   PortKinds are NOT subtypes of components
+;   PortKinds ARE used to register and find port components with Display Manager.  Here are the basic port kinds:
+;  
+;   Video displays are distinct from video out because there are some video out ports that are not actaully displays.
+;	if EZAV is looking to configure displays, it needs to look for kAVVideoDisplayPortKind not kAVVideoOutPortKind.
+; 
+
+
+kAVVideoDisplayPortKind			EQU		'pkdo'				; Video Display (CRT or panel display)				
+kAVVideoOutPortKind				EQU		'pkvo'				; Video out port (camera output).					  
+kAVVideoInPortKind				EQU		'pkvi'				; Video in port (camera input)						
+kAVSoundOutPortKind				EQU		'pkso'				; Sound out port (speaker or speaker jack)			
+kAVSoundInPortKind				EQU		'pksi'				; Sound in port (microphone or microphone jack)	
+kAVDeviceType					EQU		'avdc'				; Device Component subtypes are up to the manufacturor since each device may contain multiple function types (eg telecaster) 
+kAVDisplayDeviceKind			EQU		'dkvo'				; Display device
+															; Device Component subtypes are up to the manufacturor since each device may contain multiple function types (eg telecaster)
+kAVCategoryType					EQU		'avcc'
+kAVSoundInSubType				EQU		'avao'
+kAVSoundOutSubType				EQU		'avai'
+kAVVideoInSubType				EQU		'vdin'
+kAVVideoOutSubType				EQU		'vdou'
+kAVInvalidType					EQU		'badt'				; Some calls return a component type, in case of errors, these types are set to kAVInvalidComponentType 
+
+
+;   Constants for Panel Classes (used to build buttons in AVSetup) 
+;   but is generic to all panels 
+
+
+
+kAVPanelClassDisplayDefault		EQU		'cdsp'
+kAVPanelClassColor				EQU		'cclr'
+kAVPanelClassGeometry			EQU		'cgeo'
+kAVPanelClassSound				EQU		'csnd'
+kAVPanelClassPreferences		EQU		'cprf'
+;  =============================					
+;  Component interface revision levels and history	
+;  =============================					
+
+kAVPanelComponentInterfaceRevOne EQU	1
+kAVEngineComponentInterfaceRevOne EQU	1
+kAVPortComponentInterfaceRevOne	EQU		1
+kAVDeviceComponentInterfaceRevOne EQU	1
+
+
+kBaseAVComponentSelector		EQU		256					; First apple-defined selector for AV components 
+
+;  =============================				
+;  Panel Standard component selectors			
+;  =============================				
+
+kAVPanelFakeRegisterSelect		EQU		-5					; -5	
+kAVPanelSetCustomDataSelect		EQU		0
+kAVPanelGetDitlSelect			EQU		1
+kAVPanelGetTitleSelect			EQU		2
+kAVPanelInstallSelect			EQU		3
+kAVPanelEventSelect				EQU		4
+kAVPanelItemSelect				EQU		5
+kAVPanelRemoveSelect			EQU		6
+kAVPanelValidateInputSelect		EQU		7
+kAVPanelGetSettingsIdentifiersSelect EQU 8
+kAVPanelGetSettingsSelect		EQU		9
+kAVPanelSetSettingsSelect		EQU		10
+kAVPanelSelectorGetFidelitySelect EQU	256
+kAVPanelSelectorTargetDeviceSelect EQU	257
+kAVPanelSelectorGetPanelClassSelect EQU	258
+
+;  =============================				
+;  Engine Standard component selectors			
+;  =============================				
+
+kAVEngineGetEngineFidelitySelect EQU	256
+kAVEngineTargetDeviceSelect		EQU		257
+
+;  =============================					
+;  Video Port Specific calls						
+;  =============================					
+
+kAVPortCheckTimingModeSelect	EQU		0
+kAVPortReserved1Select			EQU		1					; Reserved
+
+;  =============================					
+;  AV Port Specific calls							
+;  =============================					
+
+kAVPortGetAVDeviceFidelitySelect EQU	256					; Port Standard Component selectors 
+kAVPortGetWiggleSelect			EQU		257
+kAVPortSetWiggleSelect			EQU		258
+kAVPortGetNameSelect			EQU		259
+kAVPortGetGraphicInfoSelect		EQU		260
+kAVPortSetActiveSelect			EQU		261
+kAVPortGetActiveSelect			EQU		262
+kAVPortUnsed1Select				EQU		263					; Selector removed as part of API change.  We don't want to mess up the following selectors, so we put in this spacer (ie kPadSelector). 
+kAVPortGetAVIDSelect			EQU		264
+kAVPortSetAVIDSelect			EQU		265
+kAVPortSetDeviceAVIDSelect		EQU		266					; For registrar to set device (instead of hitting global directly) -- should only be called once 
+kAVPortGetDeviceAVIDSelect		EQU		267					; Called by display mgr for generic ports 
+kAVPortGetPowerStateSelect		EQU		268
+kAVPortSetPowerStateSelect		EQU		269
+kAVPortGetMakeAndModelSelect	EQU		270					; Get Make and model information
+
+
+
+;  =============================					
+;  Device Component Standard Component selectors	
+;  =============================					
+
+kAVDeviceGetNameSelect			EQU		256
+kAVDeviceGetGraphicInfoSelect	EQU		257
+kAVDeviceGetPowerStateSelect	EQU		258
+kAVDeviceSetPowerStateSelect	EQU		259
+kAVDeviceGetAVIDSelect			EQU		260
+kAVDeviceSetAVIDSelect			EQU		261
+
+
+
+
+
+
+
+;  =============================				
+;  Engine Standard component selectors			
+;  =============================				
+;
+; pascal ComponentResult AVEngineComponentGetFidelity(ComponentInstance engineComponent, DisplayIDType displayID, DMFidelityType *engineFidelity)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVEngineComponentGetFidelity
+			move.l              #$00080100,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVEngineComponentGetFidelity
+	ENDIF
+
+;
+; pascal ComponentResult AVEngineComponentTargetDevice(ComponentInstance engineComponent, DisplayIDType displayID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVEngineComponentTargetDevice
+			move.l              #$00040101,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVEngineComponentTargetDevice
+	ENDIF
+
+
+;  =============================				
+;  Panel Standard Component calls				
+;  =============================				
+;
+; pascal ComponentResult AVPanelFakeRegister(ComponentInstance ci)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelFakeRegister
+			move.l              #$0000FFFB,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelFakeRegister
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelSetCustomData(ComponentInstance ci, long theCustomData)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelSetCustomData
+			move.l              #$00040000,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelSetCustomData
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelGetDitl(ComponentInstance ci, Handle *ditl)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelGetDitl
+			move.l              #$00040001,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelGetDitl
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelGetTitle(ComponentInstance ci, StringPtr title)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelGetTitle
+			move.l              #$00040002,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelGetTitle
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelInstall(ComponentInstance ci, DialogPtr dialog, short itemOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelInstall
+			move.l              #$00060003,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelInstall
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelEvent(ComponentInstance ci, DialogPtr dialog, short itemOffset, EventRecord *event, short *itemHit, Boolean *handled)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelEvent
+			move.l              #$00120004,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelEvent
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelItem(ComponentInstance ci, DialogPtr dialog, short itemOffset, short itemNum)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelItem
+			move.l              #$00080005,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelItem
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelRemove(ComponentInstance ci, DialogPtr dialog, short itemOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelRemove
+			move.l              #$00060006,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelRemove
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelValidateInput(ComponentInstance ci, Boolean *ok)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelValidateInput
+			move.l              #$00040007,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelValidateInput
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelGetSettingsIdentifiers(ComponentInstance ci, short *theID, OSType *theType)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelGetSettingsIdentifiers
+			move.l              #$00080008,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelGetSettingsIdentifiers
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelGetSettings(ComponentInstance ci, Handle *userDataHand, long flags, DialogPtr theDialog, long itemsOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelGetSettings
+			move.l              #$00100009,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelGetSettings
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelSetSettings(ComponentInstance ci, Handle userDataHand, long flags, DialogPtr theDialog, long itemsOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelSetSettings
+			move.l              #$0010000A,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelSetSettings
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelGetFidelity(ComponentInstance panelComponent, DisplayIDType displayID, DMFidelityType *panelFidelity)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelGetFidelity
+			move.l              #$00080100,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelGetFidelity
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelComponentTargetDevice(ComponentInstance panelComponent, DisplayIDType displayID, DialogPtr theDialog, long itemsOffset)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelComponentTargetDevice
+			move.l              #$000C0101,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelComponentTargetDevice
+	ENDIF
+
+;
+; pascal ComponentResult AVPanelComponentGetPanelClass(ComponentInstance panelComponent, ResType *panelClass, ResType *subClass, Ptr reserved1, Ptr reserved2)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPanelComponentGetPanelClass
+			move.l              #$00100102,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPanelComponentGetPanelClass
+	ENDIF
+
+
+;  =============================				
+;  Port Component Standard Component selectors	
+;  =============================				
+;
+; pascal ComponentResult AVPortGetAVDeviceFidelity(ComponentInstance portComponent, AVIDType deviceAVID, DMFidelityType *portFidelity)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortGetAVDeviceFidelity
+			move.l              #$00080100,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortGetAVDeviceFidelity
+	ENDIF
+
+;
+; pascal ComponentResult AVPortGetWiggle(ComponentInstance portComponent, Boolean *wiggleDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortGetWiggle
+			move.l              #$00040101,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortGetWiggle
+	ENDIF
+
+;
+; pascal ComponentResult AVPortSetWiggle(ComponentInstance portComponent, Boolean wiggleDevice)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortSetWiggle
+			move.l              #$00020102,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortSetWiggle
+	ENDIF
+
+;
+; pascal ComponentResult AVPortGetName(ComponentInstance portComponent, Str255 portName)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortGetName
+			move.l              #$00040103,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortGetName
+	ENDIF
+
+;
+; pascal ComponentResult AVPortGetGraphicInfo(ComponentInstance portComponent, PicHandle *thePict, Handle *theIconSuite, AVLocationPtr theLocation)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortGetGraphicInfo
+			move.l              #$000C0104,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortGetGraphicInfo
+	ENDIF
+
+;
+; pascal ComponentResult AVPortSetActive(ComponentInstance portComponent, Boolean setActive)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortSetActive
+			move.l              #$00020105,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortSetActive
+	ENDIF
+
+;
+; pascal ComponentResult AVPortGetActive(ComponentInstance portComponent, Boolean *isPortActive, Boolean *portCanBeActivated, void *reserved)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortGetActive
+			move.l              #$000C0106,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortGetActive
+	ENDIF
+
+;
+; pascal ComponentResult AVPortGetAVID(ComponentInstance portComponent, AVIDType *avDeviceID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortGetAVID
+			move.l              #$00040108,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortGetAVID
+	ENDIF
+
+;
+; pascal ComponentResult AVPortSetAVID(ComponentInstance portComponent, AVIDType avDeviceID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortSetAVID
+			move.l              #$00040109,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortSetAVID
+	ENDIF
+
+;
+; pascal ComponentResult AVPortSetDeviceAVID(ComponentInstance portComponent, AVIDType avDeviceID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortSetDeviceAVID
+			move.l              #$0004010A,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortSetDeviceAVID
+	ENDIF
+
+;
+; pascal ComponentResult AVPortGetDeviceAVID(ComponentInstance portComponent, AVIDType *avDeviceID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortGetDeviceAVID
+			move.l              #$0004010B,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortGetDeviceAVID
+	ENDIF
+
+;
+; pascal ComponentResult AVPortGetPowerState(ComponentInstance deviceComponent, AVPowerStatePtr getPowerState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortGetPowerState
+			move.l              #$0004010C,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortGetPowerState
+	ENDIF
+
+;
+; pascal ComponentResult AVPortSetPowerState(ComponentInstance deviceComponent, AVPowerStatePtr setPowerState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortSetPowerState
+			move.l              #$0004010D,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortSetPowerState
+	ENDIF
+
+;
+; pascal ComponentResult AVPortGetMakeAndModel(ComponentInstance displayComponent, DisplayIDType theDisplayID, ResType *manufacturer, UInt32 *model, UInt32 *serialNumber)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortGetMakeAndModel
+			move.l              #$0010010E,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortGetMakeAndModel
+	ENDIF
+
+
+;  =============================				
+;  Video Out Port Component Selectors			
+;  =============================				
+;
+; pascal ComponentResult AVPortCheckTimingMode(ComponentInstance displayComponent, DisplayIDType theDisplayID, VDDisplayConnectInfoPtr connectInfo, VDTimingInfoPtr modeTiming, UInt32 reserved)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVPortCheckTimingMode
+			move.l              #$00100000,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVPortCheckTimingMode
+	ENDIF
+
+;  =============================				
+;  AV Device Component Selectors				
+;  =============================				
+;
+; pascal ComponentResult AVDeviceGetName(ComponentInstance portComponent, Str255 portName)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVDeviceGetName
+			move.l              #$00040100,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVDeviceGetName
+	ENDIF
+
+;
+; pascal ComponentResult AVDeviceGetGraphicInfo(ComponentInstance portComponent, PicHandle *thePict, Handle *theIconSuite, AVLocationPtr theLocation)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVDeviceGetGraphicInfo
+			move.l              #$000C0101,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVDeviceGetGraphicInfo
+	ENDIF
+
+;
+; pascal ComponentResult AVDeviceGetPowerState(ComponentInstance deviceComponent, AVPowerStatePtr getPowerState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVDeviceGetPowerState
+			move.l              #$00040102,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVDeviceGetPowerState
+	ENDIF
+
+;
+; pascal ComponentResult AVDeviceSetPowerState(ComponentInstance deviceComponent, AVPowerStatePtr setPowerState)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVDeviceSetPowerState
+			move.l              #$00040103,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVDeviceSetPowerState
+	ENDIF
+
+;
+; pascal ComponentResult AVDeviceGetAVID(ComponentInstance deviceComponent, AVIDType *avDeviceID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVDeviceGetAVID
+			move.l              #$00040104,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVDeviceGetAVID
+	ENDIF
+
+;
+; pascal ComponentResult AVDeviceSetAVID(ComponentInstance deviceComponent, AVIDType avDeviceID)
+;
+	IF TARGET_OS_MAC ** TARGET_CPU_68K ** ¬ TARGET_RT_MAC_CFM THEN
+		Macro
+		_AVDeviceSetAVID
+			move.l              #$00040105,-(sp)
+			moveq           	#0,D0
+			dc.w            	$A82A
+		EndM
+	ELSEIF TARGET_OS_MAC ** TARGET_RT_MAC_CFM THEN
+		IMPORT_CFM_FUNCTION AVDeviceSetAVID
+	ENDIF
+
+
+
+
+	ENDIF ; __AVCOMPONENTS__ 
+

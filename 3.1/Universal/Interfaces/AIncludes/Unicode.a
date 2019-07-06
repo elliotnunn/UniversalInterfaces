@@ -1,0 +1,26 @@
+;
+;	File:		Unicode.a
+;
+;	Contains:	Types, constants, and prototypes for Unicode Converter
+;
+;	Version:	Technology:	Mac OS 8 (Tempo)
+;				Release:	Universal Interfaces 3.1
+;
+;	Copyright:	© 1994-1998 by Apple Computer, Inc., all rights reserved.
+;
+;	Bugs?:		Please include the the file and version information (from above) with
+;				the problem description.  Developers belonging to one of the Apple
+;				developer programs can submit bug reports to:
+;
+;					devsupport@apple.com
+;
+;
+	IF &TYPE('__UNICODE__') = 'UNDEFINED' THEN
+__UNICODE__ SET 1
+
+	IF &TYPE('__UNICODECONVERTER__') = 'UNDEFINED' THEN
+	include 'UnicodeConverter.a'
+	ENDIF
+
+	ENDIF ; __UNICODE__ 
+
